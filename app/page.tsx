@@ -39,8 +39,8 @@ export default function Home() {
         
         {/* Footer */}
         <p className="text-sm text-gray-500 mt-16">
-          Coming soon • Built on a MacBook with ❤️
-        </p>
+  Coming soon • Built with 💪 on macOS
+</p>
         
       </div>
     </div>
