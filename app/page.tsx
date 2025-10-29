@@ -1,48 +1,80 @@
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import Link from "next/link"
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-2xl text-center">
+      
+      <Card className="max-w-2xl w-full p-12 bg-white/80 backdrop-blur-sm shadow-2xl">
         
         {/* Logo/Name */}
-        <h1 className="text-6xl font-bold text-indigo-900 mb-4">
+        <h1 className="text-6xl font-bold text-indigo-900 mb-4 text-center">
           VoiceClara
         </h1>
         
         {/* Tagline */}
-        <p className="text-2xl text-indigo-700 mb-8">
+        <p className="text-2xl text-indigo-700 mb-6 text-center">
           The beautiful way to get honest feedback
         </p>
         
         {/* Description */}
-        <p className="text-lg text-gray-700 mb-12 max-w-xl mx-auto">
+        <p className="text-lg text-gray-700 mb-10 text-center max-w-xl mx-auto">
           We help teams speak truth without fear. 
           Beautiful surveys, AI-powered insights, and real psychological safety.
         </p>
         
-        {/* CTA Button */}
-        <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-4 rounded-lg text-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95">
-          Create Free Feedback Request →
-        </button>
+        {/* CTA Button - SHADCN! */}
+        <div className="flex justify-center mb-10">
+          <Link href="/create">
+  <Button 
+    size="lg" 
+    className="text-lg px-8 py-6 bg-indigo-600 hover:bg-indigo-700"
+  >
+    Create Free Feedback Request →
+  </Button>
+</Link>
+          
+
+        </div>
         
-        {/* Feature Pills */}
-        <div className="flex flex-wrap gap-3 justify-center mt-12">
-          <span className="px-4 py-2 bg-white rounded-full text-sm text-indigo-600 shadow-sm">
+        {/* Feature Badges - SHADCN! */}
+        <div className="flex flex-wrap gap-3 justify-center mb-8">
+          <Badge variant="secondary" className="px-4 py-2 text-sm">
             ✨ Typeform-beautiful UX
-          </span>
-          <span className="px-4 py-2 bg-white rounded-full text-sm text-indigo-600 shadow-sm">
+          </Badge>
+          <Badge variant="secondary" className="px-4 py-2 text-sm">
             🤖 AI-powered insights
-          </span>
-          <span className="px-4 py-2 bg-white rounded-full text-sm text-indigo-600 shadow-sm">
+          </Badge>
+          <Badge variant="secondary" className="px-4 py-2 text-sm">
             🛡️ True anonymity
-          </span>
+          </Badge>
+        </div>
+        
+        {/* Stats Section - NEW! */}
+        <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200">
+          <div className="text-center">
+            <div className="text-3xl font-bold text-indigo-600">3 min</div>
+            <div className="text-sm text-gray-600 mt-1">Setup time</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-indigo-600">100%</div>
+            <div className="text-sm text-gray-600 mt-1">Anonymous</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-indigo-600">AI</div>
+            <div className="text-sm text-gray-600 mt-1">Powered</div>
+          </div>
         </div>
         
         {/* Footer */}
-        <p className="text-sm text-gray-500 mt-16">
-  Coming soon • Built with 💪 on macOS
-</p>
+        <p className="text-sm text-gray-500 mt-10 text-center">
+          Coming soon • Built with 💪 on macOS
+        </p>
         
-      </div>
+      </Card>
+      
     </div>
   );
 }
