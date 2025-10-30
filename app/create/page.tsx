@@ -1,10 +1,11 @@
-"use client"  // ← WAŻNE! Mówi Next.js że to client component
+"use client"
 
-import { useState } from "react"  // ← NOWE!
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
+import { supabase } from "@/lib/supabase"  
 
 
 export default function CreatePage() {
@@ -15,17 +16,44 @@ export default function CreatePage() {
   const [generatedLink, setGeneratedLink] = useState("")  // ← link po wygenerowaniu
   const [isGenerating, setIsGenerating] = useState(false)
 
-  // FUNCTION - generuje unikalny link
-const handleGenerate = () => {
-  setIsGenerating(true)  // ← Start loading
+const handleGenerate = async () => {
+  setIsGenerating(true)
   
-  // Simulate API call (będzie prawdziwe później)
-  setTimeout(() => {
-    const uniqueId = Math.random().toString(36).substring(2, 9)
-    const link = `${window.location.origin}/feedback/${uniqueId}`
+  try {
+    // Generate unique tokens
+    const shareToken = Math.random().toString(36).substring(2, 15)
+    const resultsToken = Math.random().toString(36).substring(2, 15)
+    
+    // Save to database
+    const { data, error } = await supabase
+      .from('feedback_requests')
+      .insert({
+        creator_name: name || null,
+        creator_email: email || null,
+        title: title,
+        share_token: shareToken,
+        results_token: resultsToken
+      })
+      .select()
+      .single()
+    
+    if (error) {
+      console.error('Error saving to database:', error)
+      alert('Error creating request. Please try again.')
+      setIsGenerating(false)
+      return
+    }
+    
+    // Generate link with real token from database
+    const link = `${window.location.origin}/feedback/${data.share_token}`
     setGeneratedLink(link)
-    setIsGenerating(false)  // ← Stop loading
-  }, 1000)  // 1 second delay
+    
+  } catch (error) {
+    console.error('Error:', error)
+    alert('Something went wrong. Please try again.')
+  } finally {
+    setIsGenerating(false)
+  }
 }
 
   return (
