@@ -15,16 +15,15 @@ export default function CreatePage() {
   const [title, setTitle] = useState("")
   const [generatedLink, setGeneratedLink] = useState("")  // ← link po wygenerowaniu
   const [isGenerating, setIsGenerating] = useState(false)
+  const [resultsToken, setResultsToken] = useState("")
 
 const handleGenerate = async () => {
   setIsGenerating(true)
   
   try {
-    // Generate unique tokens
     const shareToken = Math.random().toString(36).substring(2, 15)
-    const resultsToken = Math.random().toString(36).substring(2, 15)
+    const resultsToken = Math.random().toString(36).substring(2, 15)  // ← Already have this
     
-    // Save to database
     const { data, error } = await supabase
       .from('feedback_requests')
       .insert({
@@ -38,19 +37,19 @@ const handleGenerate = async () => {
       .single()
     
     if (error) {
-      console.error('Error saving to database:', error)
-      alert('Error creating request. Please try again.')
+      console.error('Error:', error)
+      alert(`Error: ${error.message}`)
       setIsGenerating(false)
       return
     }
     
-    // Generate link with real token from database
     const link = `${window.location.origin}/feedback/${data.share_token}`
     setGeneratedLink(link)
+    setResultsToken(data.results_token)  // ← ADD THIS LINE!
     
   } catch (error) {
     console.error('Error:', error)
-    alert('Something went wrong. Please try again.')
+    alert('Something went wrong.')
   } finally {
     setIsGenerating(false)
   }
@@ -169,79 +168,110 @@ const handleGenerate = async () => {
             </div>
           ) : (
             // SUCCESS STATE - POKAZUJE LINK!
-            <div className="space-y-6">
-              
-              {/* Success message */}
-              <div className="text-center py-8">
-                <div className="text-6xl mb-4">🎉</div>
-                <h2 className="text-3xl font-bold text-indigo-900 mb-2">
-                  Your link is ready!
-                </h2>
-                <p className="text-gray-600">
-                  Share this link with your team to collect feedback
-                </p>
-              </div>
+<div className="space-y-6">
+  
+  {/* Success message */}
+  <div className="text-center py-8">
+    <div className="text-6xl mb-4">🎉</div>
+    <h2 className="text-3xl font-bold text-indigo-900 mb-2">
+      Your link is ready!
+    </h2>
+    <p className="text-gray-600">
+      Share this link with your team to collect feedback
+    </p>
+  </div>
 
-              {/* Generated link */}
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Your feedback link:
-                </label>
-                <div className="flex gap-2">
-                  <Input 
-                    value={generatedLink}
-                    readOnly
-                    className="font-mono text-sm"
-                  />
-                  <Button
-                    onClick={() => {
-                      navigator.clipboard.writeText(generatedLink)
-                      alert("Link copied to clipboard! 📋")
-                    }}
-                  >
-                    Copy
-                  </Button>
-                </div>
-              </div>
+  {/* Generated link */}
+  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Your feedback link:
+    </label>
+    <div className="flex gap-2">
+      <Input 
+        value={generatedLink}
+        readOnly
+        className="font-mono text-sm"
+      />
+      <Button
+        onClick={() => {
+          navigator.clipboard.writeText(generatedLink)
+          alert("Link copied to clipboard! 📋")
+        }}
+      >
+        Copy
+      </Button>
+    </div>
+  </div>
 
-              {/* Request details */}
-              <div className="bg-indigo-50 p-4 rounded-lg">
-                <h3 className="font-medium text-indigo-900 mb-2">
-                  Request details:
-                </h3>
-                <ul className="space-y-1 text-sm text-indigo-800">
-                  {name && <li>• From: {name}</li>}
-                  {email && <li>• Email: {email}</li>}
-                  <li>• Title: {title}</li>
-                </ul>
-              </div>
+  {/* Results link - NOWE! */}
+  <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
+    <label className="block text-sm font-medium text-indigo-900 mb-2">
+      🔐 Your private results link:
+    </label>
+    <p className="text-sm text-indigo-700 mb-2">
+      Save this link to view responses later. Don't share this one!
+    </p>
+    <div className="flex gap-2">
+      <Input 
+        value={`${window.location.origin}/results/${resultsToken}`}
+        readOnly
+        className="font-mono text-sm bg-white"
+      />
+      <Button
+        variant="outline"
+        onClick={() => {
+          navigator.clipboard.writeText(`${window.location.origin}/results/${resultsToken}`)
+          alert("Results link copied! 🔐")
+        }}
+      >
+        Copy
+      </Button>
+    </div>
+  </div>
 
-              {/* Actions */}
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setGeneratedLink("")}  // ← Reset = nowy request
-                >
-                  Create Another Request
-                </Button>
-                <Link href="/" className="flex-1">
-                  <Button variant="default" className="w-full bg-indigo-600">
-                    Back to Home
-                  </Button>
-                </Link>
-              </div>
+  {/* Request details */}
+  <div className="bg-gray-50 p-4 rounded-lg">
+    <h3 className="font-medium text-gray-900 mb-2">
+      Request details:
+    </h3>
+    <ul className="space-y-1 text-sm text-gray-700">
+      {name && <li>• From: {name}</li>}
+      {email && <li>• Email: {email}</li>}
+      <li>• Title: {title}</li>
+      <li className="text-xs text-gray-500 mt-2">
+        • Request saved to database ✓
+      </li>
+    </ul>
+  </div>
 
-            </div>
-          )}
+  {/* Actions */}
+  <div className="flex gap-3">
+    <Button
+      variant="outline"
+      className="flex-1"
+      onClick={() => {
+        setGeneratedLink("")
+        setResultsToken("")
+      }}
+    >
+      Create Another Request
+    </Button>
+    <Link href={`/results/${resultsToken}`} className="flex-1">
+      <Button className="w-full bg-indigo-600 hover:bg-indigo-700">
+        View Results →
+      </Button>
+    </Link>
+  </div>
 
+</div>
+       )}      
           {/* Footer note */}
-          <div className="mt-8 p-4 bg-indigo-50 rounded-lg">
-            <p className="text-sm text-indigo-900">
-              🛡️ <strong>100% anonymous:</strong> Responses are fully anonymous. 
-              We don't track IPs or any identifying information.
-            </p>
-          </div>
+<div className="mt-8 p-4 bg-indigo-50 rounded-lg">
+  <p className="text-sm text-indigo-900">
+    🛡️ <strong>100% anonymous:</strong> Responses are fully anonymous. 
+    We don&apos;t track IPs or any identifying information.
+  </p>
+</div>
 
         </Card>
       </div>
