@@ -120,3 +120,57 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Sonner toast custom styles */
+[data-sonner-toast] {
+  font-family: var(--font-geist-sans);
+}
+
+[data-sonner-toast][data-type="success"] {
+  background: rgb(240 253 244) !important;
+  border: 1px solid rgb(134 239 172) !important;
+  color: rgb(22 101 52) !important;
+}
+
+[data-sonner-toast][data-type="error"] {
+  background: rgb(254 242 242) !important;
+  border: 1px solid rgb(252 165 165) !important;
+  color: rgb(127 29 29) !important;
+}
+
+button,
+a,
+[role="button"],
+[type="button"],
+[type="submit"] {
+  cursor: pointer !important;
+}
+
+/* Disabled buttons should have default cursor */
+button:disabled,
+a:disabled {
+  cursor: not-allowed !important;
+}
+
+/* Input fields should have text cursor */
+input[type="text"],
+input[type="email"],
+textarea {
+  cursor: text !important;
+}
+
+/* Smooth transitions for interactive elements */
+button,
+a {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Scale effect on hover for buttons */
+button:hover:not(:disabled) {
+  transform: scale(1.02);
+}
+
+/* Subtle shadow on hover */
+.shadow-2xl:hover {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+}

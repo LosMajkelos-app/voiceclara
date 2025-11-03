@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
 import Link from "next/link"
+import { toast } from "sonner"  
 
 export default function FeedbackPage() {
   const params = useParams()
@@ -95,7 +96,7 @@ export default function FeedbackPage() {
 
       if (error) {
         console.error('Error saving:', error)
-        alert('Error submitting feedback. Please try again.')
+        toast.error('Error submitting feedback. Please try again.')
         setSubmitting(false)
         return
       }
@@ -103,7 +104,7 @@ export default function FeedbackPage() {
       setSubmitted(true)
     } catch (err) {
       console.error('Error:', err)
-      alert('Something went wrong.')
+        toast.error('Something went wrong.')
       setSubmitting(false)
     }
   }
