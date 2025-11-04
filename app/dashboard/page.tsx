@@ -1,9 +1,6 @@
-
-
-
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useAuth } from "@/lib/auth-context"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
@@ -26,6 +23,7 @@ export default function DashboardPage() {
   const { user } = useAuth()
   const [requests, setRequests] = useState<FeedbackRequest[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingRequests, setLoadingRequests] = useState(true) 
 
   useEffect(() => {
     console.log('🔵 Dashboard mounted')
@@ -36,43 +34,55 @@ export default function DashboardPage() {
   // If we get here, we're on dashboard page
   console.log('🟢 Dashboard page rendered!')
 
-  useEffect(() => {
-    async function fetchRequests() {
-      if (!user) return
-
-      try {
-        // Fetch user's requests
-        const { data, error } = await supabase
-          .from('feedback_requests')
-          .select(`
-            *,
-            responses:responses(count)
-          `)
-          .eq('creator_email', user.email)
-          .order('created_at', { ascending: false })
-
-        if (error) {
-          console.error('Error fetching requests:', error)
-          setLoading(false)
-          return
-        }
-
-        // Add response count
-        const requestsWithCount = data?.map(req => ({
-          ...req,
-          response_count: req.responses?.[0]?.count || 0
-        })) || []
-
-        setRequests(requestsWithCount)
-        setLoading(false)
-      } catch (err) {
-        console.error('Error:', err)
-        setLoading(false)
-      }
+ useEffect(() => {
+  async function fetchRequests() {
+    if (!user) {
+      console.log('⚠️ No user, skipping fetch')
+      setLoading(false)
+      return
     }
 
+    console.log('🔍 Starting fetch for:', user.email)
+    setLoading(true)
+
+    try {
+      const { data, error } = await supabase
+        .from('feedback_requests')
+        .select('*')
+        .eq('creator_email', user.email)
+        .order('created_at', { ascending: false })
+
+      console.log('📊 Query result:', { data: data?.length, error })
+
+      if (error) {
+        console.error('❌ Supabase error:', error)
+        setRequests([])
+        setLoading(false)
+        return
+      }
+
+      const requestsWithCount = (data || []).map(req => ({
+        ...req,
+        response_count: 0
+      }))
+
+      console.log('✅ Setting requests:', requestsWithCount.length)
+      setRequests(requestsWithCount)
+      setLoading(false)
+
+    } catch (err) {
+      console.error('❌ Catch error:', err)
+      setRequests([])
+      setLoading(false)
+    }
+  }
+
+  if (user?.id) {
     fetchRequests()
-  }, [user])
+  } else {
+    setLoading(false)
+  }
+}, [user?.id])  // ← CHANGED: Only depend on user.id, not whole user object
 
   if (loading) {
     return (
