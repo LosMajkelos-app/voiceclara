@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { Suspense, useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { toast } from "sonner"
 
-export default function SignupPage() {
+function SignupForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   
@@ -18,7 +18,6 @@ export default function SignupPage() {
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
 
-  // Pre-fill email from URL
   useEffect(() => {
     const emailParam = searchParams.get('email')
     if (emailParam) {
@@ -51,7 +50,6 @@ export default function SignupPage() {
       if (data.user && data.session) {
         toast.success("Account created!")
         
-        // Link any guest requests
         try {
           const linkRes = await fetch('/api/link-guest-requests', {
             method: 'POST',
@@ -69,7 +67,6 @@ export default function SignupPage() {
           window.location.href = '/dashboard'
         }, 1000)
       } else if (data.user && !data.session) {
-        // Email confirmation required
         toast.success("Check your email to verify your account!", {
           duration: 5000,
         })
@@ -212,5 +209,17 @@ export default function SignupPage() {
 
       </Card>
     </div>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    }>
+      <SignupForm />
+    </Suspense>
   )
 }
