@@ -1,0 +1,42 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
+
+export async function POST(request: NextRequest) {
+  const cookieStore = cookies()
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+
+  try {
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+
+    if (userError || !user) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+
+    // Link guest requests to user account
+    const { data, error } = await supabase
+      .from('feedback_requests')
+      .update({ 
+        user_id: user.id,
+        creator_email: user.email 
+      })
+      .eq('guest_email', user.email)
+      .is('user_id', null)
+      .select()
+
+    if (error) {
+      console.error('Link error:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      linked: data?.length || 0,
+      message: `Linked ${data?.length || 0} guest requests to your account`
+    })
+  } catch (error: any) {
+    console.error('Link error:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}

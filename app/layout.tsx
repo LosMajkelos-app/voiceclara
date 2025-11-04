@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/navbar";
 import { Toaster } from "sonner";
+import { AuthProvider } from "@/lib/auth-context";  // ← ADD
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -25,9 +26,11 @@ export default function RootLayout({
         className={inter.className}
         suppressHydrationWarning
       >
-        <Navbar />
-        {children}
-        <Toaster position="top-center" richColors />
+        <AuthProvider>  {/* ← WRAP */}
+          <Navbar />
+          {children}
+          <Toaster position="top-center" richColors />
+        </AuthProvider>  {/* ← WRAP */}
       </body>
     </html>
   );

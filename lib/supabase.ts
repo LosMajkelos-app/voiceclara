@@ -10,3 +10,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true,
   },
 })
+
+// Make available globally for debugging (browser only)
+if (typeof window !== 'undefined') {
+  (window as any).supabase = supabase
+}

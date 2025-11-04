@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
@@ -11,17 +11,26 @@ import { toast } from "sonner"
 
 export default function SignupPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+
+  // Pre-fill email from URL
+  useEffect(() => {
+    const emailParam = searchParams.get('email')
+    if (emailParam) {
+      setEmail(decodeURIComponent(emailParam))
+    }
+  }, [searchParams])
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      // Sign up
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -29,6 +38,7 @@ export default function SignupPage() {
           data: {
             full_name: name,
           },
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
         },
       })
 
@@ -38,8 +48,35 @@ export default function SignupPage() {
         return
       }
 
-      toast.success("Account created! Check your email to verify.")
-      router.push("/auth/login")
+      if (data.user && data.session) {
+        toast.success("Account created!")
+        
+        // Link any guest requests
+        try {
+          const linkRes = await fetch('/api/link-guest-requests', {
+            method: 'POST',
+          })
+          const linkData = await linkRes.json()
+          
+          if (linkData.linked > 0) {
+            toast.success(`Found ${linkData.linked} previous request(s)! Added to your dashboard.`)
+          }
+        } catch (err) {
+          console.log('Could not link guest requests:', err)
+        }
+        
+        setTimeout(() => {
+          window.location.href = '/dashboard'
+        }, 1000)
+      } else if (data.user && !data.session) {
+        // Email confirmation required
+        toast.success("Check your email to verify your account!", {
+          duration: 5000,
+        })
+        setTimeout(() => {
+          router.push('/auth/login')
+        }, 2000)
+      }
     } catch (error: any) {
       toast.error("Signup failed. Please try again.")
       setLoading(false)
@@ -51,7 +88,7 @@ export default function SignupPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
         },
       })
 
@@ -67,7 +104,6 @@ export default function SignupPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-8 bg-white/80 backdrop-blur-sm">
         
-        {/* Logo */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-indigo-900 mb-2">
             VoiceClara
@@ -77,7 +113,6 @@ export default function SignupPage() {
           </p>
         </div>
 
-        {/* Google Sign Up */}
         <Button
           onClick={handleGoogleSignup}
           variant="outline"
@@ -104,7 +139,6 @@ export default function SignupPage() {
           Continue with Google
         </Button>
 
-        {/* Divider */}
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-300"></div>
@@ -114,7 +148,6 @@ export default function SignupPage() {
           </div>
         </div>
 
-        {/* Signup Form */}
         <form onSubmit={handleSignup} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -168,7 +201,6 @@ export default function SignupPage() {
           </Button>
         </form>
 
-        {/* Links */}
         <div className="mt-6 text-center text-sm">
           <p className="text-gray-600">
             Already have an account?{" "}
