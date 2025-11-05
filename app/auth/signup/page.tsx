@@ -48,24 +48,42 @@ function SignupForm() {
       }
 
       if (data.user && data.session) {
+        console.log('✅ Account created successfully')
         toast.success("Account created!")
         
         try {
-          const linkRes = await fetch('/api/link-guest-requests', {
-            method: 'POST',
-          })
-          const linkData = await linkRes.json()
+          console.log('🔗 Attempting to link guest requests...')
           
-          if (linkData.linked > 0) {
-            toast.success(`Found ${linkData.linked} previous request(s)! Added to your dashboard.`)
+          const { data: sessionData } = await supabase.auth.getSession()
+          console.log('🔑 Got session:', !!sessionData.session)
+          
+          if (sessionData.session) {
+            const linkRes = await fetch('/api/link-guest-requests', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${sessionData.session.access_token}`,
+                'Content-Type': 'application/json'
+              },
+            })
+            
+            console.log('📡 API response status:', linkRes.status)
+            const linkData = await linkRes.json()
+            console.log('🔗 Link result:', linkData)
+            
+            if (linkData.success && linkData.linked > 0) {
+              toast.success(`Found ${linkData.linked} previous request(s)! Added to your dashboard.`)
+            }
+          } else {
+            console.log('⚠️ No session available for linking')
           }
         } catch (err) {
-          console.log('Could not link guest requests:', err)
+          console.error('❌ Could not link guest requests:', err)
         }
         
         setTimeout(() => {
+          console.log('🔄 Redirecting to dashboard...')
           window.location.href = '/dashboard'
-        }, 1000)
+        }, 1500)
       } else if (data.user && !data.session) {
         toast.success("Check your email to verify your account!", {
           duration: 5000,
