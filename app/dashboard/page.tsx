@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth-context"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { BarChart3, MessageSquare, Plus, LogOut, User } from "lucide-react"
+import { BarChart3, MessageSquare, Plus } from "lucide-react"
 import { toast } from "sonner"
 
 interface FeedbackRequest {
@@ -37,7 +37,6 @@ function DashboardContent() {
   useEffect(() => {
     if (linkedCount) {
       toast.success(`Found ${linkedCount} previous request(s)! Added to your dashboard.`)
-      // Clear the URL parameter
       router.replace('/dashboard')
     }
   }, [linkedCount, router])
@@ -94,41 +93,42 @@ function DashboardContent() {
       setLoading(false)
     }
   }, [user?.id])
-// Add after the user check
-useEffect(() => {
-  async function tryLinkGuest() {
-    if (!user) return
-    
-    try {
-      console.log('🔗 Attempting to link guest requests on dashboard load...')
+
+  // Auto-link guest requests on dashboard load
+  useEffect(() => {
+    async function tryLinkGuest() {
+      if (!user) return
       
-      const { data: sessionData } = await supabase.auth.getSession()
-      
-      if (sessionData.session) {
-        const linkRes = await fetch('/api/link-guest-requests', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${sessionData.session.access_token}`,
-            'Content-Type': 'application/json'
-          },
-        })
+      try {
+        console.log('🔗 Attempting to link guest requests on dashboard load...')
         
-        const linkData = await linkRes.json()
-        console.log('🔗 Link result on dashboard:', linkData)
+        const { data: sessionData } = await supabase.auth.getSession()
         
-        if (linkData.linked > 0) {
-          toast.success(`Found ${linkData.linked} previous request(s)! Refreshing...`)
-          // Refresh requests
-          setTimeout(() => window.location.reload(), 1000)
+        if (sessionData.session) {
+          const linkRes = await fetch('/api/link-guest-requests', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${sessionData.session.access_token}`,
+              'Content-Type': 'application/json'
+            },
+          })
+          
+          const linkData = await linkRes.json()
+          console.log('🔗 Link result on dashboard:', linkData)
+          
+          if (linkData.linked > 0) {
+            toast.success(`Found ${linkData.linked} previous request(s)! Refreshing...`)
+            setTimeout(() => window.location.reload(), 1000)
+          }
         }
+      } catch (err) {
+        console.log('Could not link:', err)
       }
-    } catch (err) {
-      console.log('Could not link:', err)
     }
-  }
-  
-  tryLinkGuest()
-}, [user])
+    
+    tryLinkGuest()
+  }, [user])
+
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
@@ -158,67 +158,6 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <Link href="/">
-              <h1 className="text-2xl font-bold text-indigo-900">VoiceClara</h1>
-            </Link>
-            
-            <div className="flex items-center gap-4">
-              <Link href="/dashboard">
-                <Button variant="ghost">Dashboard</Button>
-              </Link>
-              <Link href="/create">
-                <Button className="bg-indigo-600 hover:bg-indigo-700">
-                  Create Request
-                </Button>
-              </Link>
-              
-              {/* User Menu */}
-              <div className="relative group">
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
-                </Button>
-                
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                  <div className="p-3 border-b border-gray-200">
-                    <p className="text-sm font-medium text-gray-900">
-                      {user.user_metadata?.full_name || 'User'}
-                    </p>
-                    <p className="text-xs text-gray-500">{user.email}</p>
-                  </div>
-                  <div className="p-2">
-                    <button
-                      onClick={() => router.push('/dashboard')}
-                      className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded"
-                    >
-                      Profile
-                    </button>
-                    <button
-                      onClick={() => router.push('/dashboard')}
-                      className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded"
-                    >
-                      My Requests
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded flex items-center gap-2"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Sign Out
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Welcome Section */}
@@ -323,11 +262,17 @@ useEffect(() => {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Link href={`/feedback/${request.share_token}`}>
-                        <Button variant="outline" size="sm">
-                          Share Link
-                        </Button>
-                      </Link>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          const shareLink = `${window.location.origin}/feedback/${request.share_token}`
+                          navigator.clipboard.writeText(shareLink)
+                          toast.success("Link copied! 📋")
+                        }}
+                      >
+                        Copy Link
+                      </Button>
                       <Link href={`/results/${request.results_token}`}>
                         <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
                           View Results
