@@ -8,6 +8,8 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { Plus, BarChart3, Clock } from "lucide-react"
+import { useSearchParams } from 'next/navigation'
+import { toast } from 'sonner'
 
 interface FeedbackRequest {
   id: string
@@ -21,6 +23,16 @@ interface FeedbackRequest {
 
 export default function DashboardPage() {
   const { user } = useAuth()
+
+const searchParams = useSearchParams()
+const linkedCount = searchParams.get('linked')
+
+useEffect(() => {
+  if (linkedCount) {
+    toast.success(`Found ${linkedCount} previous request(s)! Added to your dashboard.`)
+  }
+}, [linkedCount])
+
   const [requests, setRequests] = useState<FeedbackRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingRequests, setLoadingRequests] = useState(true) 
