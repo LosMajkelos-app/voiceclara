@@ -158,6 +158,10 @@ export default function CreatePage() {
     try {
       const filteredQuestions = questions.filter(q => q.trim())
 
+      // Generate unique tokens
+      const shareToken = crypto.randomUUID()
+      const resultsToken = crypto.randomUUID()
+
       const requestData = {
         creator_name: name || "Anonymous",
         creator_email: user ? user.email : null,
@@ -165,7 +169,11 @@ export default function CreatePage() {
         user_id: user ? user.id : null,
         title: title.trim(),
         questions: filteredQuestions,
+        share_token: shareToken,
+        results_token: resultsToken,
       }
+
+      console.log('📤 Creating request:', requestData)
 
       const { data, error } = await supabase
         .from("feedback_requests")
@@ -175,6 +183,7 @@ export default function CreatePage() {
 
       if (error) throw error
 
+      console.log('✅ Request created:', data)
       toast.success("Feedback request created! 🎉")
       
       if (user) {
