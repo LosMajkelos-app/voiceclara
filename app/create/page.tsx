@@ -136,61 +136,87 @@ export default function CreatePage() {
 
   // Handle submit
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  e.preventDefault()
+  
+  if (!title.trim()) {
+    toast.error("Please add a title")
+    return
+  }
+
+  if (questions.filter(q => q.trim()).length === 0) {
+    toast.error("Please add at least one question")
+    return
+  }
+
+  if (!user && !email.trim()) {
+    toast.error("Please provide your email")
+    return
+  }
+
+  setLoading(true)
+
+  try {
+    const filteredQuestions = questions.filter(q => q.trim())
+
+    // Generate unique tokens
+    const shareToken = crypto.randomUUID()
+    const resultsToken = crypto.randomUUID()
+
+    const requestData = {
+      creator_name: name || "Anonymous",
+      creator_email: user ? user.email : null,
+      guest_email: user ? null : email,
+      user_id: user ? user.id : null,
+      title: title.trim(),
+      questions: filteredQuestions,
+      share_token: shareToken,
+      results_token: resultsToken,
+    }
+
+    console.log('📤 Creating request:', requestData)
+
+    const { data, error } = await supabase
+      .from("feedback_requests")
+      .insert([requestData])
+      .select()
+      .single()
+
+    if (error) throw error
+
+    console.log('✅ Request created:', data)
+    console.log('🔍 User exists?', !!user)
+    console.log('🔍 User ID:', user?.id)
     
-    if (!title.trim()) {
-      toast.error("Please add a title")
-      return
-    }
-
-    if (questions.filter(q => q.trim()).length === 0) {
-      toast.error("Please add at least one question")
-      return
-    }
-
-    if (!user && !email.trim()) {
-      toast.error("Please provide your email")
-      return
-    }
-
-    setLoading(true)
-
-    try {
-      const filteredQuestions = questions.filter(q => q.trim())
-
-      // Generate unique tokens
-      const shareToken = crypto.randomUUID()
-      const resultsToken = crypto.randomUUID()
-
-      const requestData = {
-        creator_name: name || "Anonymous",
-        creator_email: user ? user.email : null,
-        guest_email: user ? null : email,
-        user_id: user ? user.id : null,
-        title: title.trim(),
-        questions: filteredQuestions,
-        share_token: shareToken,
-        results_token: resultsToken,
-      }
-
-      console.log('📤 Creating request:', requestData)
-
-      const { data, error } = await supabase
-        .from("feedback_requests")
-        .insert([requestData])
-        .select()
-        .single()
-
-      if (error) throw error
-
-      console.log('✅ Request created:', data)
-      toast.success("Feedback request created! 🎉")
-      
+    toast.success("Feedback request created! 🎉")
+    
+    // Redirect after short delay
+    setTimeout(() => {
       if (user) {
-        router.push('/dashboard')
+        console.log('➡️ Redirecting logged-in user to dashboard')
+        window.location.href = '/dashboard'
       } else {
-        router.push(`/feedback/${data.share_token}`)
+        console.log('➡️ Redirecting guest to feedback page')
+        window.location.href = `/feedback/${data.share_token}`
       }
+    }, 1000)
+
+  } catch (error: any) {
+    console.error("❌ Error creating request:", error)
+    toast.error(error.message || "Failed to create request")
+    setLoading(false)
+  }
+}
+
+// Small delay to show toast
+setTimeout(() => {
+  if (user) {
+    console.log('➡️ Redirecting to dashboard')
+    window.location.href = '/dashboard'
+  } else {
+    console.log('➡️ Redirecting to feedback page')
+    window.location.href = `/feedback/${data.share_token}`
+  }
+}, 1000)
 
     } catch (error: any) {
       console.error("Error creating request:", error)
