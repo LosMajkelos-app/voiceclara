@@ -193,14 +193,14 @@ export default function CreatePage() {
     
     // Redirect after short delay
     setTimeout(() => {
-      if (currentUser) {
-        console.log('➡️ Redirecting logged-in user to dashboard')
-        window.location.href = '/dashboard'
-      } else {
-        console.log('➡️ Redirecting guest to feedback page')
-        window.location.href = `/feedback/${data.share_token}`
-      }
-    }, 1000)
+  if (currentUser) {
+    console.log('➡️ Redirecting logged-in user to dashboard')
+    window.location.href = '/dashboard'
+  } else {
+    console.log('➡️ Redirecting guest to feedback page with created flag')
+    window.location.href = `/feedback/${data.share_token}?created=true`
+  }
+}, 1000)
 
   } catch (error: any) {
     console.error("❌ Error creating request:", error)
