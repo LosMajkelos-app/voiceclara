@@ -136,90 +136,72 @@ export default function CreatePage() {
 
   // Handle submit
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  
-  if (!title.trim()) {
-    toast.error("Please add a title")
-    return
-  }
-
-  if (questions.filter(q => q.trim()).length === 0) {
-    toast.error("Please add at least one question")
-    return
-  }
-
-  if (!user && !email.trim()) {
-    toast.error("Please provide your email")
-    return
-  }
-
-  setLoading(true)
-
-  try {
-    const filteredQuestions = questions.filter(q => q.trim())
-
-    // Generate unique tokens
-    const shareToken = crypto.randomUUID()
-    const resultsToken = crypto.randomUUID()
-
-    const requestData = {
-      creator_name: name || "Anonymous",
-      creator_email: user ? user.email : null,
-      guest_email: user ? null : email,
-      user_id: user ? user.id : null,
-      title: title.trim(),
-      questions: filteredQuestions,
-      share_token: shareToken,
-      results_token: resultsToken,
+    e.preventDefault()
+    
+    if (!title.trim()) {
+      toast.error("Please add a title")
+      return
     }
 
-    console.log('📤 Creating request:', requestData)
+    if (questions.filter(q => q.trim()).length === 0) {
+      toast.error("Please add at least one question")
+      return
+    }
 
-    const { data, error } = await supabase
-      .from("feedback_requests")
-      .insert([requestData])
-      .select()
-      .single()
+    if (!user && !email.trim()) {
+      toast.error("Please provide your email")
+      return
+    }
 
-    if (error) throw error
+    setLoading(true)
 
-    console.log('✅ Request created:', data)
-    console.log('🔍 User exists?', !!user)
-    console.log('🔍 User ID:', user?.id)
-    
-    toast.success("Feedback request created! 🎉")
-    
-    // Redirect after short delay
-    setTimeout(() => {
-      if (user) {
-        console.log('➡️ Redirecting logged-in user to dashboard')
-        window.location.href = '/dashboard'
-      } else {
-        console.log('➡️ Redirecting guest to feedback page')
-        window.location.href = `/feedback/${data.share_token}`
+    try {
+      const filteredQuestions = questions.filter(q => q.trim())
+
+      // Generate unique tokens
+      const shareToken = crypto.randomUUID()
+      const resultsToken = crypto.randomUUID()
+
+      const requestData = {
+        creator_name: name || "Anonymous",
+        creator_email: user ? user.email : null,
+        guest_email: user ? null : email,
+        user_id: user ? user.id : null,
+        title: title.trim(),
+        questions: filteredQuestions,
+        share_token: shareToken,
+        results_token: resultsToken,
       }
-    }, 1000)
 
-  } catch (error: any) {
-    console.error("❌ Error creating request:", error)
-    toast.error(error.message || "Failed to create request")
-    setLoading(false)
-  }
-}
+      console.log('📤 Creating request:', requestData)
 
-// Small delay to show toast
-setTimeout(() => {
-  if (user) {
-    console.log('➡️ Redirecting to dashboard')
-    window.location.href = '/dashboard'
-  } else {
-    console.log('➡️ Redirecting to feedback page')
-    window.location.href = `/feedback/${data.share_token}`
-  }
-}, 1000)
+      const { data, error } = await supabase
+        .from("feedback_requests")
+        .insert([requestData])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      console.log('✅ Request created:', data)
+      console.log('🔍 User exists?', !!user)
+      console.log('🔍 User ID:', user?.id)
+      
+      toast.success("Feedback request created! 🎉")
+      
+      // Redirect after short delay
+      setTimeout(() => {
+        if (user) {
+          console.log('➡️ Redirecting logged-in user to dashboard')
+          window.location.href = '/dashboard'
+        } else {
+          console.log('➡️ Redirecting guest to feedback page')
+          window.location.href = `/feedback/${data.share_token}`
+        }
+      }, 1000)
 
     } catch (error: any) {
-      console.error("Error creating request:", error)
+      console.error("❌ Error creating request:", error)
       toast.error(error.message || "Failed to create request")
       setLoading(false)
     }
