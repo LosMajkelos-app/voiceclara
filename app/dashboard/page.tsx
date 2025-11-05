@@ -94,7 +94,41 @@ function DashboardContent() {
       setLoading(false)
     }
   }, [user?.id])
-
+// Add after the user check
+useEffect(() => {
+  async function tryLinkGuest() {
+    if (!user) return
+    
+    try {
+      console.log('🔗 Attempting to link guest requests on dashboard load...')
+      
+      const { data: sessionData } = await supabase.auth.getSession()
+      
+      if (sessionData.session) {
+        const linkRes = await fetch('/api/link-guest-requests', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${sessionData.session.access_token}`,
+            'Content-Type': 'application/json'
+          },
+        })
+        
+        const linkData = await linkRes.json()
+        console.log('🔗 Link result on dashboard:', linkData)
+        
+        if (linkData.linked > 0) {
+          toast.success(`Found ${linkData.linked} previous request(s)! Refreshing...`)
+          // Refresh requests
+          setTimeout(() => window.location.reload(), 1000)
+        }
+      }
+    } catch (err) {
+      console.log('Could not link:', err)
+    }
+  }
+  
+  tryLinkGuest()
+}, [user])
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
