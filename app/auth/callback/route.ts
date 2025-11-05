@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   const next = requestUrl.searchParams.get('next') || '/dashboard'
 
   if (code) {
-    const cookieStore = await cookies()
+    const cookieStore = cookies()  // Remove await - it's synchronous in route handlers
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
     
     try {
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 
       console.log('✅ Email confirmed, user logged in:', data.user?.email)
 
-      // NOW link guest requests after email confirmation!
+      // Link guest requests after email confirmation
       if (data.user && data.session) {
         try {
           console.log('🔗 Linking guest requests after email confirmation...')
@@ -41,7 +41,6 @@ export async function GET(request: NextRequest) {
           console.log('🔗 Link result:', linkData)
           
           if (linkData.linked > 0) {
-            // Redirect with success message
             return NextResponse.redirect(
               new URL(`${next}?linked=${linkData.linked}`, requestUrl.origin)
             )
@@ -51,7 +50,6 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // Redirect to dashboard
       return NextResponse.redirect(new URL(next, requestUrl.origin))
     } catch (error) {
       console.error('❌ Unexpected error:', error)
@@ -61,7 +59,6 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // No code present, redirect to login
   return NextResponse.redirect(new URL('/auth/login', requestUrl.origin))
 }
 
