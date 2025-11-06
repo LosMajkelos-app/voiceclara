@@ -81,128 +81,133 @@ export default function CreatePage() {
     <FeedbackLayout
       rightPanel={
         <>
-          {/* Tips Section */}
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-2xl font-bold mb-2">💡 Pro Tips</h3>
-              <p className="text-sm opacity-90">Create effective feedback requests</p>
+          {/* Header */}
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Lightbulb className="h-6 w-6" />
+              <h3 className="text-xl font-bold">Pro Tips</h3>
             </div>
+            <p className="text-sm opacity-90">
+              Create effective feedback requests
+            </p>
+          </div>
 
+          {/* Tips Cards - Compact */}
+          <div className="space-y-3 mb-6">
             {/* Tip 1 */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
-              <div className="flex items-center gap-2 mb-2">
-                <Lightbulb className="h-5 w-5" />
-                <p className="font-semibold">Keep it Short</p>
-              </div>
-              <p className="text-sm opacity-90">
-                3-7 questions work best. More questions = lower completion rate.
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+              <p className="font-semibold text-sm mb-1">Keep it Short</p>
+              <p className="text-xs opacity-90">
+                3-7 questions = best completion rate
               </p>
             </div>
 
             {/* Tip 2 */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="h-5 w-5" />
-                <p className="font-semibold">AI-Powered Insights</p>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+              <div className="flex items-center gap-2 mb-1">
+                <Sparkles className="h-4 w-4" />
+                <p className="font-semibold text-sm">AI Insights</p>
               </div>
-              <p className="text-sm opacity-90">
-                With 3+ responses, our AI will analyze sentiment, find themes, and detect blind spots automatically.
+              <p className="text-xs opacity-90">
+                3+ responses unlock sentiment analysis, themes & blind spots
               </p>
             </div>
 
             {/* Tip 3 */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
-              <div className="flex items-center gap-2 mb-2">
-                <Send className="h-5 w-5" />
-                <p className="font-semibold">Easy Sharing</p>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+              <div className="flex items-center gap-2 mb-1">
+                <Send className="h-4 w-4" />
+                <p className="font-semibold text-sm">Easy Sharing</p>
               </div>
-              <p className="text-sm opacity-90">
-                Get a shareable link instantly. Send via email, Slack, or any messenger.
+              <p className="text-xs opacity-90">
+                Get shareable link instantly. Send via email, Slack, Teams
               </p>
             </div>
 
             {/* Tip 4 */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="h-5 w-5" />
-                <p className="font-semibold">Real-Time Dashboard</p>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+              <div className="flex items-center gap-2 mb-1">
+                <TrendingUp className="h-4 w-4" />
+                <p className="font-semibold text-sm">Dashboard</p>
               </div>
-              <p className="text-sm opacity-90">
-                Track responses live, export results, and see AI analysis in your personal dashboard.
+              <p className="text-xs opacity-90">
+                Track responses live, export results, see AI analysis
               </p>
             </div>
           </div>
 
           {/* Bottom Encouragement */}
-          <div className="text-center">
+          <div className="mt-auto text-center pt-6 border-t border-white/20">
             <div className="text-5xl mb-3">🚀</div>
-            <p className="text-lg font-bold">Ready to grow?</p>
-            <p className="text-sm opacity-90">Your feedback journey starts here</p>
+            <p className="text-lg font-bold mb-1">Ready to grow?</p>
+            <p className="text-xs opacity-90">Your feedback journey starts here</p>
           </div>
         </>
       }
     >
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+      {/* LEFT SIDE - Compact Form */}
+      <div className="space-y-5">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Create Feedback Request
           </h1>
-          <p className="text-gray-600">
-            Set up your personalized feedback form in minutes
+          <p className="text-sm text-gray-600">
+            Set up your form in minutes
           </p>
         </div>
 
-        {/* Your Name */}
+        {/* Your Name - Compact */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Your Name (Optional)
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Your Name <span className="text-gray-400">(Optional)</span>
           </label>
           <input
             type="text"
             value={creatorName}
             onChange={(e) => setCreatorName(e.target.value)}
             placeholder="John Doe"
-            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
         </div>
 
-        {/* Your Email */}
+        {/* Your Email - Compact */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Your Email (Optional)
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Your Email <span className="text-gray-400">(Optional)</span>
           </label>
           <input
             type="email"
             value={creatorEmail}
             onChange={(e) => setCreatorEmail(e.target.value)}
             placeholder="john@example.com"
-            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
           <p className="text-xs text-gray-500 mt-1">
             We'll send you a link to view responses
           </p>
         </div>
 
-        {/* Title */}
+        {/* Title - Compact */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Request Title *
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Request Title <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="360 Review - Q1 2025"
-            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
         </div>
 
-        {/* Questions */}
+        {/* Questions - Compact */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
             Questions ({questions.length}/10)
           </label>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {questions.map((q, index) => (
               <div key={index} className="flex gap-2">
                 <input
@@ -210,14 +215,14 @@ export default function CreatePage() {
                   value={q}
                   onChange={(e) => updateQuestion(index, e.target.value)}
                   placeholder={`Question ${index + 1}`}
-                  className="flex-1 p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                  className="flex-1 px-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
                 />
                 {questions.length > 1 && (
                   <button
                     onClick={() => removeQuestion(index)}
-                    className="p-3 text-red-600 hover:bg-red-50 rounded-xl"
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                   >
-                    <X className="h-5 w-5" />
+                    <X className="h-4 w-4" />
                   </button>
                 )}
               </div>
@@ -226,7 +231,7 @@ export default function CreatePage() {
           {questions.length < 10 && (
             <button
               onClick={addQuestion}
-              className="mt-3 flex items-center gap-2 text-indigo-600 hover:text-indigo-700"
+              className="mt-2 flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
             >
               <Plus className="h-4 w-4" />
               Add Question
@@ -238,7 +243,7 @@ export default function CreatePage() {
         <button
           onClick={handleCreate}
           disabled={loading}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 text-sm"
         >
           {loading ? "Creating..." : "Create Feedback Request 🚀"}
         </button>
