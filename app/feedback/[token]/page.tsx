@@ -566,24 +566,185 @@ export default function FeedbackPage() {
           </>
         )}
 
-        {/* If creator, show instruction instead of form */}
-        {isCreator && (
-          <Card className="p-8 bg-white/80 backdrop-blur-sm text-center">
-            <div className="text-6xl mb-4">🔗</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Share Your Feedback Request
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Copy the link above and share it with people you want feedback from
+        {/* If creator, show preview with all questions but disabled */}
+{isCreator && (
+  <>
+    {/* Success Banner */}
+    <Card className="p-6 bg-gradient-to-r from-green-500 to-teal-600 text-white mb-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-2">
+          ✅ This is YOUR Feedback Request!
+        </h2>
+        <p className="mb-4">
+          You can't fill out your own form, but here's what others will see
+        </p>
+      </div>
+    </Card>
+
+    {/* Quick Actions */}
+    <Card className="p-6 bg-white/80 backdrop-blur-sm mb-6">
+      <h3 className="font-bold text-gray-900 mb-4 text-center">Quick Actions</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Button
+          size="lg"
+          className="bg-indigo-600 hover:bg-indigo-700"
+          onClick={() => {
+            const url = window.location.href.split('?')[0]
+            navigator.clipboard.writeText(url)
+            toast.success("Share link copied! 📋")
+          }}
+        >
+          📋 Copy Share Link
+        </Button>
+        <Link href="/dashboard">
+          <Button size="lg" variant="outline" className="w-full">
+            📊 View Dashboard
+          </Button>
+        </Link>
+        <Link href={`/results/${request.results_token}`}>
+          <Button size="lg" variant="outline" className="w-full">
+            👀 View Results
+          </Button>
+        </Link>
+        <Button
+          size="lg"
+          variant="outline"
+          onClick={() => {
+            const subject = encodeURIComponent(`Feedback Request: ${request.title}`)
+            const body = encodeURIComponent(
+              `Hi!\n\nI'd love to get your feedback. Please fill out this quick survey:\n\n${window.location.href.split('?')[0]}\n\nIt takes about 5 minutes and your responses are 100% anonymous.\n\nThank you!`
+            )
+            window.open(`mailto:?subject=${subject}&body=${body}`)
+          }}
+        >
+          ✉️ Email to Friends
+        </Button>
+      </div>
+    </Card>
+
+    {/* Form Preview - All Questions Visible but Disabled */}
+    <Card className="p-8 bg-white/80 backdrop-blur-sm mb-6">
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <AlertCircle className="h-5 w-5 text-blue-600" />
+          <p className="text-sm text-blue-800 font-medium">
+            Preview mode: This is what others will see when filling out your form
+          </p>
+        </div>
+        
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-indigo-900 mb-2">
+            {request.title}
+          </h1>
+          <p className="text-gray-600">
+            From {request.creator_name || "Anonymous"}
+          </p>
+          <div className="flex items-center justify-center gap-2 mt-3">
+            <Shield className="h-4 w-4 text-green-600" />
+            <p className="text-sm text-green-600 font-medium">
+              Responses are 100% anonymous
             </p>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-500 mb-2">Share Link:</p>
-              <code className="text-sm text-indigo-600 break-all">
-                {typeof window !== 'undefined' && window.location.href.split('?')[0]}
-              </code>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-6 opacity-60">
+        {request.questions.map((question, index) => (
+          <div key={index} className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              {index + 1}. {question}
+            </label>
+            <Textarea
+              disabled
+              placeholder="Others will type their answers here..."
+              className="min-h-[120px] bg-gray-50 cursor-not-allowed"
+            />
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-8 pt-6 border-t border-gray-200">
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-lg p-6 mb-6">
+          <div className="flex items-center gap-3">
+            <Sparkles className="h-6 w-6 text-purple-600" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-900">
+                💡 <strong>AI Feedback Coach will be available here</strong>
+              </p>
+              <p className="text-xs text-gray-600 mt-1">
+                Others can get AI suggestions to improve their feedback before submitting
+              </p>
             </div>
-          </Card>
-        )}
+          </div>
+        </div>
+
+        <Button
+          disabled
+          className="w-full bg-gray-400 cursor-not-allowed text-lg py-6"
+        >
+          Submit Feedback (Preview Only)
+        </Button>
+      </div>
+    </Card>
+
+    {/* Share Instructions */}
+    <Card className="p-6 bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200">
+      <h3 className="font-bold text-gray-900 mb-3 text-center">
+        📤 How to Share This Request
+      </h3>
+      <div className="space-y-3 text-sm text-gray-700">
+        <div className="flex items-start gap-3">
+          <span className="text-2xl">1️⃣</span>
+          <div>
+            <strong>Copy the link</strong> using the button above
+          </div>
+        </div>
+        <div className="flex items-start gap-3">
+          <span className="text-2xl">2️⃣</span>
+          <div>
+            <strong>Share via:</strong> Email, Slack, Teams, or any messaging app
+          </div>
+        </div>
+        <div className="flex items-start gap-3">
+          <span className="text-2xl">3️⃣</span>
+          <div>
+            <strong>Track responses</strong> in your Dashboard as they come in
+          </div>
+        </div>
+      </div>
+      
+      <div className="mt-4 p-3 bg-white rounded-lg border border-indigo-200">
+        <p className="text-xs text-gray-500 mb-1">Your Share Link:</p>
+        <code className="text-xs text-indigo-600 break-all">
+          {typeof window !== 'undefined' && window.location.href.split('?')[0]}
+        </code>
+      </div>
+    </Card>
+
+    {/* Tips Section */}
+    <Card className="p-6 bg-white/80 backdrop-blur-sm mt-6">
+      <h3 className="font-bold text-gray-900 mb-3">💡 Pro Tips</h3>
+      <ul className="space-y-2 text-sm text-gray-700">
+        <li className="flex items-start gap-2">
+          <span className="text-green-600">✓</span>
+          <span>Send to 5-10 people for best results</span>
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="text-green-600">✓</span>
+          <span>Remind them responses are completely anonymous</span>
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="text-green-600">✓</span>
+          <span>Need 3+ responses to unlock AI analysis</span>
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="text-green-600">✓</span>
+          <span>Check your dashboard to see who responded (anonymously)</span>
+        </li>
+      </ul>
+    </Card>
+  </>
+)}
 
       </div>
     </div>
