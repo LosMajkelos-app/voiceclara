@@ -125,6 +125,7 @@ export default function FeedbackFormPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Header with Progress */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
@@ -149,9 +150,13 @@ export default function FeedbackFormPage() {
         </div>
       </div>
 
+      {/* Split Layout: Form (75%) + Decoration (25%) */}
       <div className="flex flex-col lg:flex-row max-w-7xl mx-auto min-h-[calc(100vh-100px)]">
+        
+        {/* LEFT: Form (75%) */}
         <div className="w-full lg:w-3/4 p-6 lg:p-12 flex items-center justify-center">
           <div className="w-full max-w-2xl">
+            
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentStep}
@@ -160,6 +165,7 @@ export default function FeedbackFormPage() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
               >
+                {/* Question */}
                 <div className="mb-8">
                   <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
                     {currentQuestion}
@@ -169,6 +175,7 @@ export default function FeedbackFormPage() {
                   </p>
                 </div>
 
+                {/* Textarea */}
                 <Textarea
                   value={answers[currentStep] || ""}
                   onChange={(e) =>
@@ -179,6 +186,7 @@ export default function FeedbackFormPage() {
                   autoFocus
                 />
 
+                {/* AI Tip */}
                 <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg flex items-start gap-3">
                   <Sparkles className="h-5 w-5 text-purple-600 flex-shrink-0 mt-0.5" />
                   <div>
@@ -190,6 +198,7 @@ export default function FeedbackFormPage() {
                   </div>
                 </div>
 
+                {/* Navigation */}
                 <div className="mt-8 flex items-center justify-between">
                   <Button
                     onClick={handleBack}
@@ -222,20 +231,30 @@ export default function FeedbackFormPage() {
                     )}
                   </Button>
                 </div>
+
               </motion.div>
             </AnimatePresence>
+
           </div>
         </div>
 
+        {/* RIGHT: Decorative Panel (25%) */}
         <div className="hidden lg:block w-1/4 bg-gradient-to-br from-indigo-100 to-purple-100 relative overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center text-indigo-600 p-8">
-              <p className="text-6xl mb-4">💭</p>
+              <motion.p 
+                className="text-6xl mb-4"
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                💭
+              </motion.p>
               <p className="text-lg font-medium">Your feedback matters</p>
               <p className="text-sm text-indigo-500 mt-2">Anonymous & Valuable</p>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   )
