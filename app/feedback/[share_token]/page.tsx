@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
-import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react"
+import { ArrowLeft, ArrowRight, Check, Sparkles, Shield } from "lucide-react"
 
 export default function FeedbackFormPage() {
   const params = useParams()
@@ -17,7 +17,7 @@ export default function FeedbackFormPage() {
 
   useEffect(() => {
     async function fetchRequest() {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("feedback_requests")
         .select("*")
         .eq("share_token", shareToken)
@@ -25,19 +25,14 @@ export default function FeedbackFormPage() {
 
       if (data) {
         setRequest(data)
-        // Load from localStorage if exists
         const saved = localStorage.getItem(`feedback_${shareToken}`)
-        if (saved) {
-          setAnswers(JSON.parse(saved))
-        }
+        if (saved) setAnswers(JSON.parse(saved))
       }
       setLoading(false)
     }
-
     fetchRequest()
   }, [shareToken])
 
-  // Auto-save to localStorage
   useEffect(() => {
     if (Object.keys(answers).length > 0) {
       localStorage.setItem(`feedback_${shareToken}`, JSON.stringify(answers))
@@ -53,7 +48,6 @@ export default function FeedbackFormPage() {
       alert("Please write something before continuing")
       return
     }
-
     if (isLastQuestion) {
       handleSubmit()
     } else {
@@ -62,9 +56,7 @@ export default function FeedbackFormPage() {
   }
 
   const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
-    }
+    if (currentStep > 0) setCurrentStep(currentStep - 1)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -98,8 +90,7 @@ export default function FeedbackFormPage() {
         window.location.href = "/feedback/thank-you"
       }
     } catch (error) {
-      console.error(error)
-      alert("Failed to submit feedback")
+      alert("Failed to submit")
     } finally {
       setSubmitting(false)
     }
@@ -110,7 +101,7 @@ export default function FeedbackFormPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading feedback form...</p>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     )
@@ -118,11 +109,8 @@ export default function FeedbackFormPage() {
 
   if (!request) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="text-center">
-          <p className="text-red-600 text-xl mb-4">Feedback request not found</p>
-          <a href="/" className="text-indigo-600 hover:underline">Go home</a>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-red-600">Not found</p>
       </div>
     )
   }
@@ -130,35 +118,18 @@ export default function FeedbackFormPage() {
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50">
       
-      {/* STICKY HEADER */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-lg font-bold text-indigo-900">VoiceClara</h1>
-              <p className="text-sm text-gray-600">Feedback for {request.creator_name}</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <a href="/dashboard" className="text-sm text-gray-600 hover:text-gray-900">
-                Dashboard
-              </a>
-              <a href="/create" className="text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
-                Create Request
-              </a>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* MAIN CONTENT - No Scroll, Full Height */}
+      {/* MAIN CONTENT - No Navbar Duplication */}
       <div className="flex-1 flex overflow-hidden">
         
         {/* LEFT: Form (75%) */}
         <div className="w-full lg:w-3/4 flex items-center justify-center p-6 lg:p-12">
           <div className="w-full max-w-2xl flex flex-col h-full justify-center">
             
-            {/* Question */}
+            {/* "Feedback for X" Header */}
             <div className="mb-6">
+              <p className="text-sm text-indigo-600 font-semibold mb-2">
+                Feedback for {request.creator_name}
+              </p>
               <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
                 {currentQuestion}
               </h2>
@@ -167,22 +138,22 @@ export default function FeedbackFormPage() {
               </p>
             </div>
 
-            {/* Textarea - Auto Height */}
+            {/* WHITE Textarea with Border */}
             <textarea
               value={answers[currentStep] || ""}
               onChange={(e) => setAnswers({ ...answers, [currentStep]: e.target.value })}
               onKeyDown={handleKeyDown}
               placeholder="Write your thoughts here..."
-              className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg resize-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent flex-1 min-h-[200px] max-h-[400px]"
+              className="w-full p-6 bg-white border-2 border-indigo-200 rounded-2xl text-lg resize-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm flex-1 min-h-[200px] max-h-[400px]"
               autoFocus
             />
 
-            {/* Navigation Buttons */}
+            {/* Navigation */}
             <div className="mt-6 flex items-center justify-between">
               <button
                 onClick={handleBack}
                 disabled={currentStep === 0}
-                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back
@@ -191,19 +162,19 @@ export default function FeedbackFormPage() {
               <button
                 onClick={handleNext}
                 disabled={submitting}
-                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-xl transition-all disabled:opacity-50 shadow-lg hover:shadow-xl"
               >
                 {submitting ? (
                   "Submitting..."
                 ) : isLastQuestion ? (
                   <>
                     Submit Feedback
-                    <Check className="h-4 w-4" />
+                    <Check className="h-5 w-5" />
                   </>
                 ) : (
                   <>
                     Next Question
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-5 w-5" />
                   </>
                 )}
               </button>
@@ -212,61 +183,76 @@ export default function FeedbackFormPage() {
           </div>
         </div>
 
-        {/* RIGHT: Progress + AI Tips (25%) */}
-        <div className="hidden lg:flex w-1/4 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-8 flex-col justify-between text-white">
+        {/* RIGHT: Progress + AI Info (25%) */}
+        <div className="hidden lg:flex w-1/4 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-8 flex-col justify-between text-white">
           
           {/* Top: Progress */}
           <div>
             <p className="text-sm font-medium mb-3 opacity-90">
               Question {currentStep + 1} of {request.questions.length}
             </p>
-            <div className="bg-white/20 rounded-full h-3 mb-6">
+            <div className="bg-white/20 rounded-full h-3 mb-6 overflow-hidden">
               <div 
-                className="bg-white h-3 rounded-full transition-all duration-500"
+                className="bg-white h-3 rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <p className="text-2xl font-bold mb-1">{Math.round(progress)}%</p>
+            <p className="text-3xl font-bold mb-1">{Math.round(progress)}%</p>
             <p className="text-sm opacity-90">Complete</p>
           </div>
 
-          {/* Middle: AI Tip */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-            <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="h-5 w-5" />
-              <p className="font-semibold">💡 AI Tip</p>
+          {/* Middle: AI Monitoring */}
+          <div className="space-y-4">
+            {/* AI Tip */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="h-5 w-5" />
+                <p className="font-semibold">💡 AI Tip</p>
+              </div>
+              <p className="text-sm leading-relaxed opacity-90">
+                Be specific about behaviors and actions, not personality traits. 
+                Use examples when possible.
+              </p>
             </div>
-            <p className="text-sm leading-relaxed opacity-90">
-              Be specific about behaviors and actions, not personality traits. 
-              Use examples when possible.
-            </p>
+
+            {/* AI Validation Info */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+              <div className="flex items-center gap-2 mb-3">
+                <Shield className="h-5 w-5" />
+                <p className="font-semibold">🤖 AI Guardian</p>
+              </div>
+              <p className="text-sm leading-relaxed opacity-90">
+                Our AI is monitoring your responses in real-time. 
+                Before submitting, you'll get a chance to review and improve your feedback.
+              </p>
+            </div>
           </div>
 
           {/* Bottom: Encouragement */}
           <div className="text-center">
-            <p className="text-5xl mb-4">💭</p>
-            <p className="text-lg font-semibold mb-2">Your feedback matters</p>
-            <p className="text-sm opacity-90">Anonymous & Valuable</p>
+            <div className="text-6xl mb-4 animate-pulse">💭</div>
+            <p className="text-xl font-bold mb-2">Your feedback matters</p>
+            <p className="text-sm opacity-90">100% Anonymous & Valuable</p>
           </div>
 
         </div>
 
       </div>
 
-      {/* FOOTER */}
-      <footer className="bg-white border-t border-gray-200 py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-600">
+      {/* FOOTER - Visible on All Screens */}
+      <footer className="bg-white border-t border-gray-200 py-4 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-gray-600">
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-indigo-600" />
                 Powered by AI
               </span>
-              <span>•</span>
+              <span className="hidden sm:inline">•</span>
               <span>🔒 100% Anonymous</span>
             </div>
             <div>
-              © 2025 VoiceClara • <a href="/" className="text-indigo-600 hover:underline">voiceclara.com</a>
+              © 2025 <a href="/" className="text-indigo-600 hover:underline font-semibold">VoiceClara</a>
             </div>
           </div>
         </div>
