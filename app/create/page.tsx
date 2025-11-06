@@ -1,27 +1,100 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/lib/auth-context"
 import { FeedbackLayout } from "@/components/feedback-layout"
-import { Sparkles, Lightbulb, TrendingUp, Send, Plus, X } from "lucide-react"
+import { Sparkles, Lightbulb, TrendingUp, Send, Plus, X, ArrowLeft, Wand2 } from "lucide-react"
 
 export default function CreatePage() {
   const router = useRouter()
   const { user } = useAuth()
 
+  // Step 1: Info
+  const [step, setStep] = useState(1)
   const [creatorName, setCreatorName] = useState("")
   const [creatorEmail, setCreatorEmail] = useState("")
+  const [templateType, setTemplateType] = useState<string | null>(null)
+  const [customPrompt, setCustomPrompt] = useState("")
+
+  // Step 2: Questions
   const [title, setTitle] = useState("")
-  const [questions, setQuestions] = useState([
-    "What am I doing well?",
-    "What could I improve?",
-    "What's my biggest blind spot?",
-    "What should I start/stop/continue?",
-    "Any other thoughts?"
-  ])
+  const [questions, setQuestions] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
+
+  const templates = [
+    { id: "360", name: "360 Review", icon: "🔄", questions: ["What am I doing well?", "What could I improve?", "What's my biggest blind spot?", "What should I start/stop/continue?", "Any other thoughts?"] },
+    { id: "manager", name: "Manager Feedback", icon: "👔", questions: ["How effective is my communication?", "Do I provide clear direction?", "How well do I support your growth?", "What could I improve as a manager?"] },
+    { id: "peer", name: "Peer Review", icon: "🤝", questions: ["How well do we collaborate?", "What do I bring to the team?", "Where could I be more helpful?", "Any suggestions for improvement?"] },
+    { id: "project", name: "Project Retrospective", icon: "📊", questions: ["What went well?", "What could be improved?", "What did we learn?", "What should we do differently next time?"] },
+    { id: "custom", name: "AI Generated", icon: "✨", questions: [] }
+  ]
+
+  useEffect(() => {
+    if (user) {
+      setCreatorName(user.user_metadata?.full_name || "")
+      setCreatorEmail(user.email || "")
+    }
+  }, [user])
+
+  const handleTemplateSelect = async (template: typeof templates[0]) => {
+    setTemplateType(template.id)
+    
+    if (template.id === "custom") {
+      // AI will generate later
+      return
+    }
+    
+    setTitle(template.name)
+    setQuestions(template.questions)
+  }
+
+  const generateWithAI = async () => {
+    if (!customPrompt.trim()) {
+      alert("Please describe what feedback you need")
+      return
+    }
+
+    setLoading(true)
+    // TODO: Call OpenAI API to generate questions
+    // For now, use template
+    setTitle("Custom Feedback Request")
+    setQuestions([
+      "What am I doing well?",
+      "What could I improve?",
+      "What's my biggest blind spot?",
+      "Any other thoughts?"
+    ])
+    setTemplateType("custom")
+    setLoading(false)
+  }
+
+  const proceedToQuestions = () => {
+    if (!creatorName.trim()) {
+      alert("Please enter your name")
+      return
+    }
+    if (!creatorEmail.trim()) {
+      alert("Please enter your email")
+      return
+    }
+    if (!templateType) {
+      alert("Please select a template or generate with AI")
+      return
+    }
+    
+    if (templateType === "custom" && !customPrompt.trim()) {
+      alert("Please describe what feedback you need")
+      return
+    }
+
+    if (templateType === "custom") {
+      generateWithAI()
+    }
+
+    setStep(2)
+  }
 
   const addQuestion = () => {
     if (questions.length < 10) {
@@ -60,10 +133,10 @@ export default function CreatePage() {
       .insert({
         title: title.trim(),
         questions: validQuestions,
-        creator_name: creatorName.trim() || "Anonymous",
-        creator_email: creatorEmail.trim() || null,
+        creator_name: creatorName.trim(),
+        creator_email: creatorEmail.trim(),
         user_id: user?.id || null,
-        guest_email: !user && creatorEmail.trim() ? creatorEmail.trim() : null
+        guest_email: !user ? creatorEmail.trim() : null
       })
       .select()
       .single()
@@ -81,28 +154,20 @@ export default function CreatePage() {
     <FeedbackLayout
       rightPanel={
         <>
-          {/* Header */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-3">
               <Lightbulb className="h-6 w-6" />
               <h3 className="text-xl font-bold">Pro Tips</h3>
             </div>
-            <p className="text-sm opacity-90">
-              Create effective feedback requests
-            </p>
+            <p className="text-sm opacity-90">Create effective feedback requests</p>
           </div>
 
-          {/* Tips Cards - Compact */}
           <div className="space-y-3 mb-6">
-            {/* Tip 1 */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
               <p className="font-semibold text-sm mb-1">Keep it Short</p>
-              <p className="text-xs opacity-90">
-                3-7 questions = best completion rate
-              </p>
+              <p className="text-xs opacity-90">3-7 questions = best completion rate</p>
             </div>
 
-            {/* Tip 2 */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
               <div className="flex items-center gap-2 mb-1">
                 <Sparkles className="h-4 w-4" />
@@ -113,7 +178,6 @@ export default function CreatePage() {
               </p>
             </div>
 
-            {/* Tip 3 */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
               <div className="flex items-center gap-2 mb-1">
                 <Send className="h-4 w-4" />
@@ -124,7 +188,6 @@ export default function CreatePage() {
               </p>
             </div>
 
-            {/* Tip 4 */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
               <div className="flex items-center gap-2 mb-1">
                 <TrendingUp className="h-4 w-4" />
@@ -136,7 +199,6 @@ export default function CreatePage() {
             </div>
           </div>
 
-          {/* Bottom Encouragement */}
           <div className="mt-auto text-center pt-6 border-t border-white/20">
             <div className="text-5xl mb-3">🚀</div>
             <p className="text-lg font-bold mb-1">Ready to grow?</p>
@@ -145,109 +207,170 @@ export default function CreatePage() {
         </>
       }
     >
-      {/* LEFT SIDE - Compact Form */}
-      <div className="space-y-5">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Create Feedback Request
-          </h1>
-          <p className="text-sm text-gray-600">
-            Set up your form in minutes
-          </p>
-        </div>
+      {/* Back Button */}
+      <button
+        onClick={() => step === 2 ? setStep(1) : router.push(user ? '/dashboard' : '/')}
+        className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        {step === 2 ? 'Back to Info' : 'Back to Dashboard'}
+      </button>
 
-        {/* Your Name - Compact */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Your Name <span className="text-gray-400">(Optional)</span>
-          </label>
-          <input
-            type="text"
-            value={creatorName}
-            onChange={(e) => setCreatorName(e.target.value)}
-            placeholder="John Doe"
-            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          />
-        </div>
-
-        {/* Your Email - Compact */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Your Email <span className="text-gray-400">(Optional)</span>
-          </label>
-          <input
-            type="email"
-            value={creatorEmail}
-            onChange={(e) => setCreatorEmail(e.target.value)}
-            placeholder="john@example.com"
-            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            We'll send you a link to view responses
-          </p>
-        </div>
-
-        {/* Title - Compact */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Request Title <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="360 Review - Q1 2025"
-            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          />
-        </div>
-
-        {/* Questions - Compact */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Questions ({questions.length}/10)
-          </label>
-          <div className="space-y-2">
-            {questions.map((q, index) => (
-              <div key={index} className="flex gap-2">
-                <input
-                  type="text"
-                  value={q}
-                  onChange={(e) => updateQuestion(index, e.target.value)}
-                  placeholder={`Question ${index + 1}`}
-                  className="flex-1 px-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
-                />
-                {questions.length > 1 && (
-                  <button
-                    onClick={() => removeQuestion(index)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-          {questions.length < 10 && (
-            <button
-              onClick={addQuestion}
-              className="mt-2 flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
-            >
-              <Plus className="h-4 w-4" />
-              Add Question
-            </button>
-          )}
-        </div>
-
-        {/* Create Button */}
-        <button
-          onClick={handleCreate}
-          disabled={loading}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 text-sm"
-        >
-          {loading ? "Creating..." : "Create Feedback Request 🚀"}
-        </button>
+      {/* Fixed Header */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Create Feedback Request
+        </h1>
+        <p className="text-sm text-gray-600">
+          {step === 1 ? 'Step 1: Your Information' : 'Step 2: Customize Questions'}
+        </p>
       </div>
+
+      {/* STEP 1: Info & Template */}
+      {step === 1 && (
+        <div className="space-y-5">
+          {/* Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Your Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={creatorName}
+              onChange={(e) => setCreatorName(e.target.value)}
+              placeholder="John Doe"
+              className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Your Email <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="email"
+              value={creatorEmail}
+              onChange={(e) => setCreatorEmail(e.target.value)}
+              placeholder="john@example.com"
+              className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+            <p className="text-xs text-gray-500 mt-1">We'll send you a link to view responses</p>
+          </div>
+
+          {/* Template Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Choose Template <span className="text-red-500">*</span>
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              {templates.map((template) => (
+                <button
+                  key={template.id}
+                  onClick={() => handleTemplateSelect(template)}
+                  className={`p-4 border-2 rounded-lg text-left transition-all ${
+                    templateType === template.id
+                      ? 'border-indigo-500 bg-indigo-50'
+                      : 'border-gray-200 bg-white hover:border-indigo-300'
+                  }`}
+                >
+                  <div className="text-2xl mb-2">{template.icon}</div>
+                  <p className="font-semibold text-sm">{template.name}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Custom AI Prompt */}
+          {templateType === "custom" && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Describe what feedback you need
+              </label>
+              <textarea
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+                placeholder="E.g., I need feedback on my presentation skills and how I handle client meetings"
+                className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 min-h-[100px]"
+              />
+            </div>
+          )}
+
+          {/* Next Button */}
+          <button
+            onClick={proceedToQuestions}
+            disabled={loading}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+          >
+            {loading ? "Generating..." : "Continue to Questions →"}
+          </button>
+        </div>
+      )}
+
+      {/* STEP 2: Questions */}
+      {step === 2 && (
+        <div className="space-y-5 max-h-[60vh] overflow-y-auto pr-2">
+          {/* Title */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Request Title <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="360 Review - Q1 2025"
+              className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          {/* Questions */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Questions ({questions.length}/10)
+            </label>
+            <div className="space-y-2">
+              {questions.map((q, index) => (
+                <div key={index} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={q}
+                    onChange={(e) => updateQuestion(index, e.target.value)}
+                    placeholder={`Question ${index + 1}`}
+                    className="flex-1 px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                  />
+                  {questions.length > 1 && (
+                    <button
+                      onClick={() => removeQuestion(index)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            {questions.length < 10 && (
+              <button
+                onClick={addQuestion}
+                className="mt-2 flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+              >
+                <Plus className="h-4 w-4" />
+                Add Question
+              </button>
+            )}
+          </div>
+
+          {/* Create Button */}
+          <button
+            onClick={handleCreate}
+            disabled={loading}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 sticky bottom-0"
+          >
+            {loading ? "Creating..." : "Create Feedback Request 🚀"}
+          </button>
+        </div>
+      )}
     </FeedbackLayout>
   )
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
-import { ArrowLeft, ArrowRight, Check, Sparkles, Shield, Activity } from "lucide-react"
+import { ArrowLeft, ArrowRight, Check, Sparkles, Shield, Activity, Edit } from "lucide-react"
 import { FeedbackLayout } from "@/components/feedback-layout"
 
 export default function FeedbackFormPage() {
@@ -15,6 +15,9 @@ export default function FeedbackFormPage() {
   const [currentStep, setCurrentStep] = useState(0)
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [submitting, setSubmitting] = useState(false)
+  const [showReview, setShowReview] = useState(false)
+  const [aiScore, setAiScore] = useState<any>(null)
+  const [analyzingAI, setAnalyzingAI] = useState(false)
 
   useEffect(() => {
     async function fetchRequest() {
@@ -41,23 +44,60 @@ export default function FeedbackFormPage() {
   }, [answers, shareToken])
 
   const currentQuestion = request?.questions[currentStep]
-  const progress = request ? ((currentStep + 1) / request.questions.length) * 100 : 0
-  const isLastQuestion = request && currentStep === request.questions.length - 1
+  const totalQuestions = request?.questions?.length || 0
+  const isLastQuestion = currentStep === totalQuestions - 1
 
   const handleNext = () => {
     if (!answers[currentStep]?.trim()) {
       alert("Please write something before continuing")
       return
     }
+
     if (isLastQuestion) {
-      handleSubmit()
+      // Show AI Review instead of submitting directly
+      setShowReview(true)
+      analyzeWithAI()
     } else {
       setCurrentStep(currentStep + 1)
     }
   }
 
   const handleBack = () => {
-    if (currentStep > 0) setCurrentStep(currentStep - 1)
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1)
+    }
+  }
+
+  const analyzeWithAI = async () => {
+    setAnalyzingAI(true)
+    
+    // Simulate AI analysis (replace with real OpenAI call)
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    
+    const formattedAnswers = request.questions.map((q: string, i: number) => ({
+      question: q,
+      answer: answers[i] || ""
+    }))
+
+    // Mock AI scoring
+    const mockScore = {
+      overall: 85,
+      specificity: 90,
+      constructiveness: 80,
+      clarity: 85,
+      suggestions: [
+        "Great specificity! You provided concrete examples.",
+        "Consider adding more actionable suggestions in question 2.",
+        "Your feedback is balanced between positive and constructive."
+      ],
+      improved_answers: formattedAnswers.map((a: any, i: number) => ({
+        ...a,
+        improved: answers[i] // In real version, AI would enhance these
+      }))
+    }
+
+    setAiScore(mockScore)
+    setAnalyzingAI(false)
   }
 
   const handleSubmit = async () => {
@@ -81,6 +121,9 @@ export default function FeedbackFormPage() {
       localStorage.removeItem(`feedback_${shareToken}`)
       alert("Feedback submitted! 🎉")
       window.location.href = "/feedback/thank-you"
+    } else {
+      console.error("Submit error:", error)
+      alert("Failed to submit. Error: " + error.message)
     }
     setSubmitting(false)
   }
@@ -98,68 +141,167 @@ export default function FeedbackFormPage() {
 
   if (!request) return null
 
+  // AI Review Screen
+  if (showReview) {
+    return (
+      <FeedbackLayout
+        rightPanel={
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-xl font-bold mb-2">🤖 AI Analysis</h3>
+              <p className="text-sm opacity-90">Your feedback quality score</p>
+            </div>
+
+            {analyzingAI ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                <p className="text-sm">Analyzing your feedback...</p>
+              </div>
+            ) : aiScore && (
+              <>
+                {/* Overall Score */}
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 text-center">
+                  <div className="text-6xl font-bold mb-2">{aiScore.overall}</div>
+                  <p className="text-sm opacity-90">Overall Quality Score</p>
+                  <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <p className="font-semibold">{aiScore.specificity}</p>
+                      <p className="opacity-75">Specificity</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold">{aiScore.constructiveness}</p>
+                      <p className="opacity-75">Constructive</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold">{aiScore.clarity}</p>
+                      <p className="opacity-75">Clarity</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Suggestions */}
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+                  <p className="font-semibold text-sm mb-3">💡 AI Suggestions</p>
+                  <ul className="space-y-2 text-xs">
+                    {aiScore.suggestions.map((s: string, i: number) => (
+                      <li key={i} className="opacity-90">• {s}</li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            )}
+          </div>
+        }
+      >
+        <div className="space-y-6">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Review Your Feedback
+            </h1>
+            <p className="text-sm text-gray-600">
+              AI has analyzed your responses. Review and submit!
+            </p>
+          </div>
+
+          {analyzingAI ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">AI is analyzing your feedback...</p>
+            </div>
+          ) : (
+            <>
+              {/* All Answers Review */}
+              <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2">
+                {request.questions.map((q: string, i: number) => (
+                  <div key={i} className="bg-white border-2 border-gray-200 rounded-xl p-4">
+                    <p className="font-semibold text-sm text-gray-900 mb-2">
+                      {i + 1}. {q}
+                    </p>
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                      {answers[i]}
+                    </p>
+                    <button
+                      onClick={() => {
+                        setShowReview(false)
+                        setCurrentStep(i)
+                      }}
+                      className="mt-2 text-xs text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                    >
+                      <Edit className="h-3 w-3" />
+                      Edit
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowReview(false)}
+                  className="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold py-3 rounded-xl transition-all"
+                >
+                  ← Go Back
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+                >
+                  {submitting ? "Submitting..." : "Submit Feedback 🚀"}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </FeedbackLayout>
+    )
+  }
+
+  // Regular Question Flow
   return (
     <FeedbackLayout
       rightPanel={
         <>
-          {/* Top: Progress */}
-          <div>
-            <p className="text-sm font-medium mb-3 opacity-90">
-              Question {currentStep + 1} of {request.questions.length}
+          {/* AI Monitoring - Always Visible */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="relative">
+                <Activity className="h-5 w-5 animate-pulse" />
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
+              </div>
+              <p className="font-semibold">🤖 AI is Listening</p>
+            </div>
+            <p className="text-sm leading-relaxed opacity-90">
+              Our AI monitors your responses in real-time. After the last question, 
+              you'll get a quality score and suggestions before submitting.
             </p>
-            <div className="bg-white/20 rounded-full h-3 mb-6 overflow-hidden">
-              <div 
-                className="bg-white h-3 rounded-full transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <p className="text-3xl font-bold mb-1">{Math.round(progress)}%</p>
-            <p className="text-sm opacity-90">Complete</p>
           </div>
 
-          {/* Middle: AI Info */}
-          <div className="space-y-4">
-            {/* AI Tip */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="h-5 w-5" />
-                <p className="font-semibold">💡 AI Tip</p>
-              </div>
-              <p className="text-sm leading-relaxed opacity-90">
-                Be specific about behaviors and actions, not personality traits. 
-                Use examples when possible.
-              </p>
+          {/* AI Tip */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="h-5 w-5" />
+              <p className="font-semibold">💡 AI Tip</p>
             </div>
-
-            {/* AI Guardian with Animation */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="relative">
-                  <Activity className="h-5 w-5 animate-pulse" />
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
-                </div>
-                <p className="font-semibold">🤖 AI Guardian</p>
-              </div>
-              <p className="text-sm leading-relaxed opacity-90">
-                Our AI is monitoring your responses in real-time. 
-                Before submitting, you'll review and improve your feedback.
-              </p>
-            </div>
-
-            {/* Anonymous Guarantee */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
-              <div className="flex items-center gap-2 mb-3">
-                <Shield className="h-5 w-5" />
-                <p className="font-semibold">🔒 Privacy First</p>
-              </div>
-              <p className="text-sm leading-relaxed opacity-90">
-                Your identity is completely protected. No tracking, no data collection.
-              </p>
-            </div>
+            <p className="text-sm leading-relaxed opacity-90">
+              Be specific about behaviors and actions, not personality traits. 
+              Use examples when possible.
+            </p>
           </div>
 
-          {/* Bottom: Encouragement */}
-          <div className="text-center">
+          {/* Privacy */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+            <div className="flex items-center gap-2 mb-3">
+              <Shield className="h-5 w-5" />
+              <p className="font-semibold">🔒 Privacy First</p>
+            </div>
+            <p className="text-sm leading-relaxed opacity-90">
+              Your identity is completely protected. No tracking, no data collection.
+            </p>
+          </div>
+
+          {/* Bottom Encouragement */}
+          <div className="mt-auto text-center pt-6 border-t border-white/20">
             <div className="text-6xl mb-4">💭</div>
             <p className="text-xl font-bold mb-2">Your feedback matters</p>
             <p className="text-sm opacity-90">100% Anonymous & Valuable</p>
@@ -167,25 +309,25 @@ export default function FeedbackFormPage() {
         </>
       }
     >
-      {/* Progress Bar ABOVE "Feedback for X" */}
+      {/* Progress Bar (Only Left Side) */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <p className="text-sm text-gray-600">
-            Question {currentStep + 1} of {request.questions.length}
+            Question {currentStep + 1} of {totalQuestions}
           </p>
           <p className="text-sm font-semibold text-indigo-600">
-            {Math.round(progress)}%
+            {Math.round(((currentStep + 1) / totalQuestions) * 100)}%
           </p>
         </div>
         <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
           <div 
             className="bg-indigo-600 h-2 rounded-full transition-all duration-500"
-            style={{ width: `${progress}%` }}
+            style={{ width: `${((currentStep + 1) / totalQuestions) * 100}%` }}
           />
         </div>
       </div>
 
-      {/* "Feedback for X" Header */}
+      {/* Feedback for X */}
       <div className="mb-6">
         <p className="text-sm text-indigo-600 font-semibold mb-2">
           Feedback for {request.creator_name}
@@ -223,8 +365,8 @@ export default function FeedbackFormPage() {
           disabled={submitting}
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl"
         >
-          {submitting ? "Submitting..." : isLastQuestion ? (
-            <>Submit Feedback <Check className="h-5 w-5" /></>
+          {isLastQuestion ? (
+            <>Review with AI <Sparkles className="h-5 w-5" /></>
           ) : (
             <>Next Question <ArrowRight className="h-5 w-5" /></>
           )}
