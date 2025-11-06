@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import Link from "next/link"
+import { Sparkles, Loader2, CheckCircle, AlertCircle, TrendingUp, Shield } from "lucide-react"
 
 interface FeedbackRequest {
   id: string
@@ -23,6 +24,27 @@ interface FeedbackRequest {
   created_at: string
 }
 
+interface AISuggestion {
+  question_index: number
+  quality_score: number
+  what_works: string
+  improvement: string
+  improved_version: string
+  flags: string[]
+  tone: string
+}
+
+interface AIAnalysis {
+  overall_score: number
+  overall_feedback: string
+  balance: {
+    positive_count: number
+    critical_count: number
+    suggestion?: string
+  }
+  suggestions: AISuggestion[]
+}
+
 export default function FeedbackPage() {
   const params = useParams()
   const router = useRouter()
@@ -34,6 +56,11 @@ export default function FeedbackPage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [isCreator, setIsCreator] = useState(false)
+  
+  // AI Coach state
+  const [aiAnalyzing, setAiAnalyzing] = useState(false)
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null)
+  const [showAiResults, setShowAiResults] = useState(false)
 
   useEffect(() => {
     async function fetchRequest() {
@@ -73,6 +100,71 @@ export default function FeedbackPage() {
 
     fetchRequest()
   }, [token, user, router])
+
+  const handleAIAnalysis = async () => {
+    if (!request) return
+
+    // Check if user has answered at least one question
+    const answeredCount = Object.values(answers).filter(a => a.trim()).length
+    if (answeredCount === 0) {
+      toast.error("Please answer at least one question first!")
+      return
+    }
+
+    setAiAnalyzing(true)
+    setShowAiResults(false)
+
+    try {
+      const response = await fetch('/api/ai-coach', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          questions: request.questions,
+          answers: request.questions.map((_, i) => answers[i] || '')
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to analyze feedback')
+      }
+
+      console.log('✅ AI analysis complete:', data.analysis)
+      
+      setAiAnalysis(data.analysis)
+      setShowAiResults(true)
+      toast.success("AI Coach analyzed your feedback! 🤖")
+
+    } catch (error: any) {
+      console.error('❌ AI analysis error:', error)
+      toast.error(error.message || "Failed to analyze feedback")
+    } finally {
+      setAiAnalyzing(false)
+    }
+  }
+
+  const applyImprovedVersion = (index: number, improvedText: string) => {
+    setAnswers({ ...answers, [index]: improvedText })
+    toast.success("Applied AI suggestion!")
+  }
+
+  const applyAllImprovements = () => {
+    if (!aiAnalysis) return
+
+    const newAnswers = { ...answers }
+    aiAnalysis.suggestions.forEach(suggestion => {
+      if (suggestion.improved_version) {
+        newAnswers[suggestion.question_index] = suggestion.improved_version
+      }
+    })
+    
+    setAnswers(newAnswers)
+    setShowAiResults(false)
+    toast.success("Applied all AI suggestions! 🎉")
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -118,6 +210,23 @@ export default function FeedbackPage() {
     }
   }
 
+  // Get flag icon and message
+  const getFlagDisplay = (flags: string[]) => {
+    if (flags.includes('harsh_tone')) {
+      return { icon: '⚠️', text: 'Tone could be softer', color: 'text-orange-600' }
+    }
+    if (flags.includes('too_short')) {
+      return { icon: '📏', text: 'Could use more detail', color: 'text-blue-600' }
+    }
+    if (flags.includes('too_vague')) {
+      return { icon: '🎯', text: 'Could be more specific', color: 'text-purple-600' }
+    }
+    if (flags.includes('identifies_user')) {
+      return { icon: '🔒', text: 'May reveal identity', color: 'text-red-600' }
+    }
+    return null
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
@@ -132,6 +241,8 @@ export default function FeedbackPage() {
   if (!request) {
     return null
   }
+
+  const answeredCount = Object.values(answers).filter(a => a.trim()).length
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
@@ -198,6 +309,21 @@ export default function FeedbackPage() {
         {/* Feedback Form - Only show if NOT creator */}
         {!isCreator && (
           <>
+            {/* AI Coach Banner - Sticky */}
+            <div className="sticky top-0 z-10 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-lg p-4 mb-6 shadow-sm">
+              <div className="flex items-center gap-3">
+                <Sparkles className="h-6 w-6 text-purple-600 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">
+                    💡 <strong>AI Feedback Coach available!</strong>
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Get instant suggestions to make your feedback more helpful and constructive
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <Card className="p-8 bg-white/80 backdrop-blur-sm mb-6">
               <div className="text-center mb-8">
                 <h1 className="text-3xl font-bold text-indigo-900 mb-2">
@@ -206,28 +332,192 @@ export default function FeedbackPage() {
                 <p className="text-gray-600">
                   From {request.creator_name || "Anonymous"}
                 </p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Your responses are anonymous
-                </p>
+                <div className="flex items-center justify-center gap-2 mt-3">
+                  <Shield className="h-4 w-4 text-green-600" />
+                  <p className="text-sm text-green-600 font-medium">
+                    Your responses are 100% anonymous
+                  </p>
+                </div>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 {request.questions.map((question, index) => (
-                  <div key={index}>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div key={index} className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">
                       {index + 1}. {question}
                     </label>
                     <Textarea
                       value={answers[index] || ""}
                       onChange={(e) => setAnswers({ ...answers, [index]: e.target.value })}
                       placeholder="Type your answer here..."
-                      className="min-h-[100px]"
+                      className="min-h-[120px]"
                       required
                     />
+                    
+                    {/* Show AI suggestion for this question if available */}
+                    {showAiResults && aiAnalysis && aiAnalysis.suggestions.find(s => s.question_index === index) && (
+                      <Card className="p-4 bg-purple-50 border-purple-200">
+                        {(() => {
+                          const suggestion = aiAnalysis.suggestions.find(s => s.question_index === index)!
+                          const flagDisplay = getFlagDisplay(suggestion.flags)
+                          
+                          return (
+                            <div className="space-y-3">
+                              {/* Quality Score */}
+                              <div className="flex items-center gap-2">
+                                <TrendingUp className="h-4 w-4 text-purple-600" />
+                                <span className="text-sm font-medium text-purple-900">
+                                  Quality Score: {suggestion.quality_score}/10
+                                </span>
+                                {flagDisplay && (
+                                  <span className={`text-xs ${flagDisplay.color} ml-2`}>
+                                    {flagDisplay.icon} {flagDisplay.text}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* What Works */}
+                              {suggestion.what_works && (
+                                <div className="text-sm">
+                                  <span className="font-medium text-green-700">✓ What works:</span>
+                                  <span className="text-gray-700 ml-2">{suggestion.what_works}</span>
+                                </div>
+                              )}
+
+                              {/* Improvement Suggestion */}
+                              {suggestion.improvement && (
+                                <div className="text-sm">
+                                  <span className="font-medium text-purple-700">💡 Suggestion:</span>
+                                  <span className="text-gray-700 ml-2">{suggestion.improvement}</span>
+                                </div>
+                              )}
+
+                              {/* Improved Version */}
+                              {suggestion.improved_version && suggestion.improved_version !== answers[index] && (
+                                <div className="space-y-2">
+                                  <p className="text-sm font-medium text-gray-900">AI-Improved Version:</p>
+                                  <div className="bg-white p-3 rounded border border-purple-200 text-sm text-gray-700">
+                                    {suggestion.improved_version}
+                                  </div>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => applyImprovedVersion(index, suggestion.improved_version)}
+                                    className="w-full"
+                                  >
+                                    ✓ Use This Version
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })()}
+                      </Card>
+                    )}
                   </div>
                 ))}
 
-                <div className="pt-6">
+                {/* Progress Indicator */}
+                <div className="text-center text-sm text-gray-600">
+                  Progress: {answeredCount}/{request.questions.length} questions answered
+                </div>
+
+                {/* AI Coach Section */}
+                {!showAiResults && (
+                  <Card className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200">
+                    <div className="text-center space-y-4">
+                      <div className="flex justify-center">
+                        <div className="p-3 bg-purple-100 rounded-full">
+                          <Sparkles className="h-8 w-8 text-purple-600" />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">
+                          Get AI-Powered Suggestions
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-4">
+                          Our AI Coach will analyze your feedback and provide suggestions to make it more helpful, 
+                          specific, and constructive. It checks for tone, balance, and anonymity.
+                        </p>
+                        
+                        {answeredCount > 0 && (
+                          <div className="flex items-center justify-center gap-2 text-sm text-purple-700 mb-4">
+                            <CheckCircle className="h-4 w-4" />
+                            <span>Ready to analyze {answeredCount} answer{answeredCount > 1 ? 's' : ''}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <Button
+                        type="button"
+                        size="lg"
+                        onClick={handleAIAnalysis}
+                        disabled={aiAnalyzing || answeredCount === 0}
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                      >
+                        {aiAnalyzing ? (
+                          <>
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            AI Coach Analyzing...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="mr-2 h-5 w-5" />
+                            Get AI Suggestions
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </Card>
+                )}
+
+                {/* AI Results Summary */}
+                {showAiResults && aiAnalysis && (
+                  <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="h-6 w-6 text-green-600" />
+                        <div>
+                          <h3 className="font-bold text-gray-900">
+                            Overall Score: {aiAnalysis.overall_score}/10
+                          </h3>
+                          <p className="text-sm text-gray-600">{aiAnalysis.overall_feedback}</p>
+                        </div>
+                      </div>
+
+                      {/* Balance Feedback */}
+                      {aiAnalysis.balance.suggestion && (
+                        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                          <p className="text-sm text-yellow-800">
+                            <strong>⚖️ Balance:</strong> {aiAnalysis.balance.suggestion}
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="flex gap-3">
+                        <Button
+                          type="button"
+                          onClick={applyAllImprovements}
+                          className="flex-1 bg-green-600 hover:bg-green-700"
+                        >
+                          ✓ Apply All AI Suggestions
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setShowAiResults(false)}
+                        >
+                          Dismiss
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                )}
+
+                {/* Submit Button */}
+                <div className="pt-6 border-t border-gray-200">
                   <Button
                     type="submit"
                     className="w-full bg-indigo-600 hover:bg-indigo-700 text-lg py-6"
