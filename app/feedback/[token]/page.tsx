@@ -428,7 +428,9 @@ export default function FeedbackPage() {
                   <Card className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200">
                     <div className="text-center space-y-4">
                       <div className="flex justify-center">
-                        <div className="p-3 bg-purple-100 rounded-full">
+                        <div className={`p-3 bg-purple-100 rounded-full transition-transform ${
+                          aiAnalyzing ? 'scale-110 animate-pulse' : ''
+                        }`}>
                           <Sparkles className="h-8 w-8 text-purple-600" />
                         </div>
                       </div>
@@ -442,7 +444,7 @@ export default function FeedbackPage() {
                           specific, and constructive. It checks for tone, balance, and anonymity.
                         </p>
                         
-                        {answeredCount > 0 && (
+                        {answeredCount > 0 && !aiAnalyzing && (
                           <div className="flex items-center justify-center gap-2 text-sm text-purple-700 mb-4">
                             <CheckCircle className="h-4 w-4" />
                             <span>Ready to analyze {answeredCount} answer{answeredCount > 1 ? 's' : ''}</span>
@@ -455,12 +457,14 @@ export default function FeedbackPage() {
                         size="lg"
                         onClick={handleAIAnalysis}
                         disabled={aiAnalyzing || answeredCount === 0}
-                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                        className={`bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all ${
+                          aiAnalyzing ? 'scale-105' : ''
+                        }`}
                       >
                         {aiAnalyzing ? (
                           <>
                             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                            AI Coach Analyzing...
+                            <span className="animate-pulse">AI Coach Analyzing...</span>
                           </>
                         ) : (
                           <>
@@ -469,6 +473,33 @@ export default function FeedbackPage() {
                           </>
                         )}
                       </Button>
+
+                      {/* Enhanced Loading State */}
+                      {aiAnalyzing && (
+                        <div className="mt-6 space-y-3">
+                          <div className="flex items-center justify-center gap-2">
+                            <div className="h-2 w-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                            <div className="h-2 w-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                            <div className="h-2 w-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                          </div>
+                          <div className="space-y-2">
+                            <p className="text-sm text-purple-700 font-medium animate-pulse">
+                              🤖 AI Coach is working...
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              Analyzing tone, balance, specificity, and anonymity
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              This usually takes 10-15 seconds
+                            </p>
+                          </div>
+                          
+                          {/* Progress bar */}
+                          <div className="w-full bg-purple-100 rounded-full h-2 overflow-hidden">
+                            <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full animate-progress"></div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </Card>
                 )}
