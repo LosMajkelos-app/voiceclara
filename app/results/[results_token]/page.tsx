@@ -41,6 +41,8 @@ export default function ResultsPage() {
 
   useEffect(() => {
     async function fetchData() {
+      console.log('🔍 Results token from URL:', token)
+    console.log('👤 Current user:', user?.id)
       try {
         // Fetch request
         const { data: requestData, error: requestError } = await supabase
@@ -49,9 +51,11 @@ export default function ResultsPage() {
           .eq("results_token", token)
           .single()
 
+          console.log('📊 Query result:', { requestData, requestError })
+
         if (requestError || !requestData) {
           toast.error("Results not found")
-          router.push("/")
+        //  router.push("/")
           return
         }
 
