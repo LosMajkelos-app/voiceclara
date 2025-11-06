@@ -5,20 +5,18 @@ import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/lib/auth-context"
 import { FeedbackLayout } from "@/components/feedback-layout"
-import { Sparkles, Lightbulb, TrendingUp, Send, Plus, X, ArrowLeft, Wand2 } from "lucide-react"
+import { Sparkles, Lightbulb, TrendingUp, Send, Plus, X, ArrowLeft } from "lucide-react"
 
 export default function CreatePage() {
   const router = useRouter()
   const { user } = useAuth()
 
-  // Step 1: Info
   const [step, setStep] = useState(1)
   const [creatorName, setCreatorName] = useState("")
   const [creatorEmail, setCreatorEmail] = useState("")
   const [templateType, setTemplateType] = useState<string | null>(null)
   const [customPrompt, setCustomPrompt] = useState("")
 
-  // Step 2: Questions
   const [title, setTitle] = useState("")
   const [questions, setQuestions] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
@@ -38,36 +36,13 @@ export default function CreatePage() {
     }
   }, [user])
 
-  const handleTemplateSelect = async (template: typeof templates[0]) => {
+  const handleTemplateSelect = (template: typeof templates[0]) => {
     setTemplateType(template.id)
     
-    if (template.id === "custom") {
-      // AI will generate later
-      return
+    if (template.id !== "custom") {
+      setTitle(template.name)
+      setQuestions(template.questions)
     }
-    
-    setTitle(template.name)
-    setQuestions(template.questions)
-  }
-
-  const generateWithAI = async () => {
-    if (!customPrompt.trim()) {
-      alert("Please describe what feedback you need")
-      return
-    }
-
-    setLoading(true)
-    // TODO: Call OpenAI API to generate questions
-    // For now, use template
-    setTitle("Custom Feedback Request")
-    setQuestions([
-      "What am I doing well?",
-      "What could I improve?",
-      "What's my biggest blind spot?",
-      "Any other thoughts?"
-    ])
-    setTemplateType("custom")
-    setLoading(false)
   }
 
   const proceedToQuestions = () => {
@@ -75,22 +50,29 @@ export default function CreatePage() {
       alert("Please enter your name")
       return
     }
-    if (!creatorEmail.trim()) {
-      alert("Please enter your email")
+    if (!creatorEmail.trim() || !creatorEmail.includes('@')) {
+      alert("Please enter a valid email")
       return
     }
     if (!templateType) {
-      alert("Please select a template or generate with AI")
+      alert("Please select a template")
       return
     }
-    
+
     if (templateType === "custom" && !customPrompt.trim()) {
       alert("Please describe what feedback you need")
       return
     }
 
     if (templateType === "custom") {
-      generateWithAI()
+      // AI generation (mock for now)
+      setTitle("Custom Feedback Request")
+      setQuestions([
+        "What am I doing well?",
+        "What could I improve?",
+        "What's my biggest blind spot?",
+        "Any other thoughts?"
+      ])
     }
 
     setStep(2)
@@ -128,26 +110,39 @@ export default function CreatePage() {
 
     setLoading(true)
 
-    const { data, error } = await supabase
-      .from("feedback_requests")
-      .insert({
+    try {
+      const insertData = {
         title: title.trim(),
         questions: validQuestions,
         creator_name: creatorName.trim(),
         creator_email: creatorEmail.trim(),
         user_id: user?.id || null,
-        guest_email: !user ? creatorEmail.trim() : null
-      })
-      .select()
-      .single()
+        guest_email: !user ? creatorEmail.trim() : null,
+        share_token: crypto.randomUUID(),
+        results_token: crypto.randomUUID()
+      }
 
-    if (error || !data) {
+      console.log('Inserting:', insertData)
+
+      const { data, error } = await supabase
+        .from("feedback_requests")
+        .insert(insertData)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Supabase error:', error)
+        alert("Failed to create: " + error.message)
+        setLoading(false)
+        return
+      }
+
+      router.push(`/feedback/${data.share_token}?created=true`)
+    } catch (err) {
+      console.error('Catch error:', err)
       alert("Failed to create request")
       setLoading(false)
-      return
     }
-
-    router.push(`/feedback/${data.share_token}?created=true`)
   }
 
   return (
@@ -207,13 +202,19 @@ export default function CreatePage() {
         </>
       }
     >
-      {/* Back Button */}
+      {/* Back Button - Conditional */}
       <button
-        onClick={() => step === 2 ? setStep(1) : router.push(user ? '/dashboard' : '/')}
+        onClick={() => {
+          if (step === 2) {
+            setStep(1)
+          } else {
+            router.push(user ? '/dashboard' : '/')
+          }
+        }}
         className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4 transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
-        {step === 2 ? 'Back to Info' : 'Back to Dashboard'}
+        {step === 2 ? 'Back to Info' : user ? 'Back to Dashboard' : 'Back to Homepage'}
       </button>
 
       {/* Fixed Header */}
@@ -226,10 +227,9 @@ export default function CreatePage() {
         </p>
       </div>
 
-      {/* STEP 1: Info & Template */}
+      {/* STEP 1 */}
       {step === 1 && (
         <div className="space-y-5">
-          {/* Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Your Name <span className="text-red-500">*</span>
@@ -243,7 +243,6 @@ export default function CreatePage() {
             />
           </div>
 
-          {/* Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Your Email <span className="text-red-500">*</span>
@@ -258,7 +257,6 @@ export default function CreatePage() {
             <p className="text-xs text-gray-500 mt-1">We'll send you a link to view responses</p>
           </div>
 
-          {/* Template Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Choose Template <span className="text-red-500">*</span>
@@ -281,7 +279,6 @@ export default function CreatePage() {
             </div>
           </div>
 
-          {/* Custom AI Prompt */}
           {templateType === "custom" && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -290,13 +287,12 @@ export default function CreatePage() {
               <textarea
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
-                placeholder="E.g., I need feedback on my presentation skills and how I handle client meetings"
+                placeholder="E.g., I need feedback on my presentation skills"
                 className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 min-h-[100px]"
               />
             </div>
           )}
 
-          {/* Next Button */}
           <button
             onClick={proceedToQuestions}
             disabled={loading}
@@ -307,10 +303,9 @@ export default function CreatePage() {
         </div>
       )}
 
-      {/* STEP 2: Questions */}
+      {/* STEP 2 */}
       {step === 2 && (
         <div className="space-y-5 max-h-[60vh] overflow-y-auto pr-2">
-          {/* Title */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Request Title <span className="text-red-500">*</span>
@@ -324,7 +319,6 @@ export default function CreatePage() {
             />
           </div>
 
-          {/* Questions */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Questions ({questions.length}/10)
@@ -361,7 +355,6 @@ export default function CreatePage() {
             )}
           </div>
 
-          {/* Create Button */}
           <button
             onClick={handleCreate}
             disabled={loading}
