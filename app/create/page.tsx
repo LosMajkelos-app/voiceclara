@@ -1,441 +1,248 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth-context"
 import { supabase } from "@/lib/supabase"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
-import { toast } from "sonner"
-import { Sparkles, Loader2 } from "lucide-react"
-import { FEEDBACK_TEMPLATES, FeedbackTemplate } from "@/lib/templates"
+import { useAuth } from "@/lib/auth-context"
+import { FeedbackLayout } from "@/components/feedback-layout"
+import { Sparkles, Lightbulb, TrendingUp, Send, Plus, X } from "lucide-react"
 
 export default function CreatePage() {
   const router = useRouter()
-  const { user, loading: authLoading } = useAuth()
-  
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
+  const { user } = useAuth()
+
+  const [creatorName, setCreatorName] = useState("")
+  const [creatorEmail, setCreatorEmail] = useState("")
   const [title, setTitle] = useState("")
-  const [questions, setQuestions] = useState<string[]>([
+  const [questions, setQuestions] = useState([
     "What am I doing well?",
     "What could I improve?",
     "What's my biggest blind spot?",
-    "What should I start doing?",
+    "What should I start/stop/continue?",
     "Any other thoughts?"
   ])
   const [loading, setLoading] = useState(false)
-  
-  // AI Generation state
-  const [aiPrompt, setAiPrompt] = useState("")
-  const [aiLoading, setAiLoading] = useState(false)
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
 
-  // Prefill user data if logged in
-  useEffect(() => {
-    if (user) {
-      setName(user.user_metadata?.full_name || "")
-      setEmail(user.email || "")
-    }
-  }, [user])
-
-  // Handle template selection
-  const handleTemplateSelect = (template: FeedbackTemplate) => {
-    setSelectedTemplate(template.id)
-    setQuestions([...template.questions])
-    setTitle(`${template.name} - ${new Date().toLocaleDateString()}`)
-    toast.success(`Loaded ${template.name} template!`)
-    
-    // Scroll to questions
-    setTimeout(() => {
-      document.getElementById('questions-section')?.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      })
-    }, 100)
-  }
-
-  // Handle AI generation
-  const handleAIGenerate = async () => {
-    if (!aiPrompt.trim()) {
-      toast.error("Please describe what feedback you need")
-      return
-    }
-
-    if (aiPrompt.length > 500) {
-      toast.error("Prompt is too long (max 500 characters)")
-      return
-    }
-
-    setAiLoading(true)
-    setSelectedTemplate('ai-generated')
-
-    try {
-      const response = await fetch('/api/generate-questions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt: aiPrompt }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate questions')
-      }
-
-      console.log('✅ AI generated questions:', data.questions)
-      
-      setQuestions(data.questions)
-      setTitle(`Feedback Request - ${new Date().toLocaleDateString()}`)
-      toast.success("AI generated 5 custom questions! 🎉")
-      
-      // Scroll to questions
-      setTimeout(() => {
-        document.getElementById('questions-section')?.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'start'
-        })
-      }, 100)
-
-    } catch (error: any) {
-      console.error('❌ AI generation error:', error)
-      toast.error(error.message || "Failed to generate questions")
-    } finally {
-      setAiLoading(false)
-    }
-  }
-
-  // Update question
-  const updateQuestion = (index: number, value: string) => {
-    const newQuestions = [...questions]
-    newQuestions[index] = value
-    setQuestions(newQuestions)
-  }
-
-  // Add question
   const addQuestion = () => {
-    if (questions.length >= 10) {
-      toast.error("Maximum 10 questions allowed")
-      return
+    if (questions.length < 10) {
+      setQuestions([...questions, ""])
     }
-    setQuestions([...questions, ""])
   }
 
-  // Remove question
   const removeQuestion = (index: number) => {
-    if (questions.length <= 1) {
-      toast.error("Must have at least 1 question")
-      return
+    if (questions.length > 1) {
+      setQuestions(questions.filter((_, i) => i !== index))
     }
-    setQuestions(questions.filter((_, i) => i !== index))
   }
 
-  // Handle submit
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+  const updateQuestion = (index: number, value: string) => {
+    const updated = [...questions]
+    updated[index] = value
+    setQuestions(updated)
+  }
+
+  const handleCreate = async () => {
     if (!title.trim()) {
-      toast.error("Please add a title")
+      alert("Please enter a title")
       return
     }
 
-    if (questions.filter(q => q.trim()).length === 0) {
-      toast.error("Please add at least one question")
-      return
-    }
-
-    // Check user at submit time
-    const { data: { user: currentUser } } = await supabase.auth.getUser()
-    
-    if (!currentUser && !email.trim()) {
-      toast.error("Please provide your email")
+    const validQuestions = questions.filter(q => q.trim())
+    if (validQuestions.length === 0) {
+      alert("Please add at least one question")
       return
     }
 
     setLoading(true)
 
-    try {
-      const filteredQuestions = questions.filter(q => q.trim())
-
-      // Generate unique tokens
-      const shareToken = crypto.randomUUID()
-      const resultsToken = crypto.randomUUID()
-
-      const requestData = {
-        creator_name: name || "Anonymous",
-        creator_email: currentUser ? currentUser.email : null,
-        guest_email: currentUser ? null : email,
-        user_id: currentUser ? currentUser.id : null,
+    const { data, error } = await supabase
+      .from("feedback_requests")
+      .insert({
         title: title.trim(),
-        questions: filteredQuestions,
-        share_token: shareToken,
-        results_token: resultsToken,
-      }
+        questions: validQuestions,
+        creator_name: creatorName.trim() || "Anonymous",
+        creator_email: creatorEmail.trim() || null,
+        user_id: user?.id || null,
+        guest_email: !user && creatorEmail.trim() ? creatorEmail.trim() : null
+      })
+      .select()
+      .single()
 
-      console.log('📤 Creating request:', requestData)
-
-      const { data, error } = await supabase
-        .from("feedback_requests")
-        .insert([requestData])
-        .select()
-        .single()
-
-      if (error) throw error
-
-      console.log('✅ Request created:', data)
-      console.log('🔍 User at creation:', currentUser)
-      
-      toast.success("Feedback request created! 🎉")
-      
-      // Redirect after short delay
-      setTimeout(() => {
-        if (currentUser) {
-          console.log('➡️ Redirecting logged-in user to dashboard')
-          window.location.href = '/dashboard'
-        } else {
-          console.log('➡️ Redirecting guest to feedback page with created flag')
-          window.location.href = `/feedback/${data.share_token}?created=true`
-        }
-      }, 1000)
-
-    } catch (error: any) {
-      console.error("❌ Error creating request:", error)
-      toast.error(error.message || "Failed to create request")
+    if (error || !data) {
+      alert("Failed to create request")
       setLoading(false)
+      return
     }
-  }
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <Card className="p-8 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </Card>
-      </div>
-    )
+    router.push(`/feedback/${data.share_token}?created=true`)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-indigo-900 mb-3">
+    <FeedbackLayout
+      rightPanel={
+        <>
+          {/* Tips Section */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-2xl font-bold mb-2">💡 Pro Tips</h3>
+              <p className="text-sm opacity-90">Create effective feedback requests</p>
+            </div>
+
+            {/* Tip 1 */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Lightbulb className="h-5 w-5" />
+                <p className="font-semibold">Keep it Short</p>
+              </div>
+              <p className="text-sm opacity-90">
+                3-7 questions work best. More questions = lower completion rate.
+              </p>
+            </div>
+
+            {/* Tip 2 */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="h-5 w-5" />
+                <p className="font-semibold">AI-Powered Insights</p>
+              </div>
+              <p className="text-sm opacity-90">
+                With 3+ responses, our AI will analyze sentiment, find themes, and detect blind spots automatically.
+              </p>
+            </div>
+
+            {/* Tip 3 */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Send className="h-5 w-5" />
+                <p className="font-semibold">Easy Sharing</p>
+              </div>
+              <p className="text-sm opacity-90">
+                Get a shareable link instantly. Send via email, Slack, or any messenger.
+              </p>
+            </div>
+
+            {/* Tip 4 */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="h-5 w-5" />
+                <p className="font-semibold">Real-Time Dashboard</p>
+              </div>
+              <p className="text-sm opacity-90">
+                Track responses live, export results, and see AI analysis in your personal dashboard.
+              </p>
+            </div>
+          </div>
+
+          {/* Bottom Encouragement */}
+          <div className="text-center">
+            <div className="text-5xl mb-3">🚀</div>
+            <p className="text-lg font-bold">Ready to grow?</p>
+            <p className="text-sm opacity-90">Your feedback journey starts here</p>
+          </div>
+        </>
+      }
+    >
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
             Create Feedback Request
           </h1>
-          <p className="text-gray-600 text-lg">
-            Choose a template or let AI generate questions for you
+          <p className="text-gray-600">
+            Set up your personalized feedback form in minutes
           </p>
         </div>
 
-        {/* Template Selector */}
-        <Card className="p-6 bg-white/80 backdrop-blur-sm mb-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">
-            📚 Choose a Template
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {FEEDBACK_TEMPLATES.map((template) => (
-              <button
-                key={template.id}
-                onClick={() => handleTemplateSelect(template)}
-                className={`text-left p-4 rounded-lg border-2 transition-all hover:shadow-md ${
-                  selectedTemplate === template.id
-                    ? 'border-indigo-500 bg-indigo-50'
-                    : 'border-gray-200 hover:border-indigo-300'
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <span className="text-3xl">{template.icon}</span>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 mb-1">
-                      {template.name}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {template.description}
-                    </p>
-                    <span className="inline-block mt-2 text-xs text-indigo-600 font-medium">
-                      {template.questions.length} questions
-                    </span>
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </Card>
+        {/* Your Name */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Your Name (Optional)
+          </label>
+          <input
+            type="text"
+            value={creatorName}
+            onChange={(e) => setCreatorName(e.target.value)}
+            placeholder="John Doe"
+            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
 
-        {/* AI Generation Box */}
-        <Card className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 mb-8">
-          <div className="flex items-start gap-3 mb-4">
-            <Sparkles className="h-6 w-6 text-purple-600 mt-1" />
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-gray-900 mb-2">
-                ✨ AI-Powered Question Generator
-              </h2>
-              <p className="text-gray-600 mb-4">
-                Describe what feedback you need and AI will create perfect questions for you
-              </p>
-              
-              <Textarea
-                value={aiPrompt}
-                onChange={(e) => setAiPrompt(e.target.value)}
-                placeholder="E.g., 'I want feedback on my presentation skills' or 'Help me get feedback on my code review comments'"
-                className="mb-4 min-h-[100px]"
-                maxLength={500}
-                disabled={aiLoading}
-              />
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">
-                  {aiPrompt.length}/500 characters
-                </span>
-                <Button
-                  onClick={handleAIGenerate}
-                  disabled={aiLoading || !aiPrompt.trim()}
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                >
-                  {aiLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Generate Questions with AI
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </Card>
+        {/* Your Email */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Your Email (Optional)
+          </label>
+          <input
+            type="email"
+            value={creatorEmail}
+            onChange={(e) => setCreatorEmail(e.target.value)}
+            placeholder="john@example.com"
+            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            We'll send you a link to view responses
+          </p>
+        </div>
 
-        {/* Main Form */}
-        <Card className="p-8 bg-white/80 backdrop-blur-sm" id="questions-section">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            
-            {/* Creator Info */}
-            {!user && (
-              <div className="space-y-4 pb-6 border-b border-gray-200">
-                <h3 className="font-semibold text-gray-900">Your Information</h3>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Your Name (Optional)
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder="John Doe"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                </div>
+        {/* Title */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Request Title *
+          </label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="360 Review - Q1 2025"
+            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Your Email
-                  </label>
-                  <Input
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    We'll send you a link to view responses
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Title */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Request Title
-              </label>
-              <Input
-                type="text"
-                placeholder="E.g., Q4 Leadership Feedback"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-            </div>
-
-            {/* Questions */}
-            <div>
-              <div className="flex justify-between items-center mb-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Questions ({questions.length}/10)
-                </label>
-                {selectedTemplate && (
-                  <span className="text-sm text-indigo-600">
-                    {selectedTemplate === 'ai-generated' ? '🤖 AI Generated' : `📚 ${FEEDBACK_TEMPLATES.find(t => t.id === selectedTemplate)?.name}`}
-                  </span>
+        {/* Questions */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Questions ({questions.length}/10)
+          </label>
+          <div className="space-y-3">
+            {questions.map((q, index) => (
+              <div key={index} className="flex gap-2">
+                <input
+                  type="text"
+                  value={q}
+                  onChange={(e) => updateQuestion(index, e.target.value)}
+                  placeholder={`Question ${index + 1}`}
+                  className="flex-1 p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                />
+                {questions.length > 1 && (
+                  <button
+                    onClick={() => removeQuestion(index)}
+                    className="p-3 text-red-600 hover:bg-red-50 rounded-xl"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
                 )}
               </div>
+            ))}
+          </div>
+          {questions.length < 10 && (
+            <button
+              onClick={addQuestion}
+              className="mt-3 flex items-center gap-2 text-indigo-600 hover:text-indigo-700"
+            >
+              <Plus className="h-4 w-4" />
+              Add Question
+            </button>
+          )}
+        </div>
 
-              <div className="space-y-3">
-                {questions.map((question, index) => (
-                  <div key={index} className="flex gap-2">
-                    <div className="flex-1">
-                      <Textarea
-                        value={question}
-                        onChange={(e) => updateQuestion(index, e.target.value)}
-                        placeholder={`Question ${index + 1}`}
-                        className="min-h-[60px]"
-                      />
-                    </div>
-                    {questions.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={() => removeQuestion(index)}
-                        className="shrink-0"
-                      >
-                        ✕
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {questions.length < 10 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={addQuestion}
-                  className="w-full mt-3"
-                >
-                  + Add Question
-                </Button>
-              )}
-            </div>
-
-            {/* Submit */}
-            <div className="pt-6 border-t border-gray-200">
-              <Button
-                type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-lg py-6"
-                disabled={loading}
-              >
-                {loading ? "Creating..." : "Create Feedback Request →"}
-              </Button>
-            </div>
-
-          </form>
-        </Card>
-
+        {/* Create Button */}
+        <button
+          onClick={handleCreate}
+          disabled={loading}
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+        >
+          {loading ? "Creating..." : "Create Feedback Request 🚀"}
+        </button>
       </div>
-    </div>
+    </FeedbackLayout>
   )
 }
