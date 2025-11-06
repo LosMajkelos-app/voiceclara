@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { CheckCircle, Home } from "lucide-react"
 import Link from "next/link"
+import { useEffect, useState } from "react"
+import { useParams, useRouter } from "next/navigation"
 
 export default function ThankYouPage() {
   return (
