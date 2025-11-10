@@ -38,6 +38,8 @@ export default function ResultsPage() {
   const [request, setRequest] = useState<FeedbackRequest | null>(null)
   const [responses, setResponses] = useState<Response[]>([])
   const [loading, setLoading] = useState(true)
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null)
+  const [analyzingAI, setAnalyzingAI] = useState(false)
 
   useEffect(() => {
     async function fetchData() {
@@ -103,6 +105,35 @@ export default function ResultsPage() {
     const shareUrl = `${window.location.origin}/feedback/${request.share_token}`
     navigator.clipboard.writeText(shareUrl)
     toast.success("Share link copied! 📋")
+  }
+
+  const handleAIAnalysis = async () => {
+    if (!request) return
+
+    setAnalyzingAI(true)
+    toast.info("AI is analyzing your feedback... ⏳")
+
+    try {
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feedbackRequestId: request.id })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setAiAnalysis(data)
+        toast.success("AI Analysis complete! ✨")
+      } else {
+        toast.error("Analysis failed: " + (data.error || "Unknown error"))
+      }
+    } catch (error) {
+      console.error('AI analysis error:', error)
+      toast.error("Failed to analyze feedback")
+    } finally {
+      setAnalyzingAI(false)
+    }
   }
 
   if (loading) {
@@ -232,26 +263,138 @@ export default function ResultsPage() {
         )}
 
         {responses.length >= 3 && (
-          <Card className="p-6 bg-gradient-to-r from-green-500 to-teal-600 text-white mb-6">
-            <div className="flex items-center gap-3">
-              <CheckCircle className="h-8 w-8 flex-shrink-0" />
-              <div className="flex-1">
-                <h3 className="font-bold mb-1">
-                  ✅ AI Analysis Available!
-                </h3>
-                <p className="text-sm">
-                  You have enough responses for AI-powered insights
-                </p>
+          <>
+            <Card className="p-6 bg-gradient-to-r from-green-500 to-teal-600 text-white mb-6">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="h-8 w-8 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="font-bold mb-1">
+                    ✅ AI Analysis Available!
+                  </h3>
+                  <p className="text-sm">
+                    You have enough responses for AI-powered insights
+                  </p>
+                </div>
+                <Button
+                  className="bg-white text-green-600 hover:bg-gray-100"
+                  onClick={handleAIAnalysis}
+                  disabled={analyzingAI}
+                >
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  {analyzingAI ? "Analyzing..." : "Analyze with AI"}
+                </Button>
               </div>
-              <Button 
-                className="bg-white text-green-600 hover:bg-gray-100"
-                onClick={() => toast.info("AI Analysis feature coming soon! 🚀")}
-              >
-                <Sparkles className="mr-2 h-4 w-4" />
-                Analyze with AI
-              </Button>
-            </div>
-          </Card>
+            </Card>
+
+            {/* AI Analysis Results */}
+            {aiAnalysis && (
+              <div className="mb-6 space-y-4">
+                {/* Summary */}
+                <Card className="p-6 bg-white/80 backdrop-blur-sm">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Sparkles className="h-6 w-6 text-purple-600" />
+                    <h3 className="text-xl font-bold text-gray-900">AI Executive Summary</h3>
+                  </div>
+                  <div className="prose prose-sm max-w-none">
+                    <p className="text-gray-700 whitespace-pre-wrap mb-4">
+                      {aiAnalysis.summary?.summary}
+                    </p>
+
+                    {aiAnalysis.summary?.strengths && (
+                      <div className="mb-4">
+                        <h4 className="font-semibold text-green-700 mb-2">💪 Key Strengths:</h4>
+                        <ul className="list-disc pl-5 space-y-1">
+                          {aiAnalysis.summary.strengths.map((strength: string, i: number) => (
+                            <li key={i} className="text-gray-700">{strength}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {aiAnalysis.summary?.growthAreas && (
+                      <div className="mb-4">
+                        <h4 className="font-semibold text-orange-700 mb-2">🌱 Growth Areas:</h4>
+                        <ul className="list-disc pl-5 space-y-1">
+                          {aiAnalysis.summary.growthAreas.map((area: string, i: number) => (
+                            <li key={i} className="text-gray-700">{area}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {aiAnalysis.summary?.recommendations && (
+                      <div>
+                        <h4 className="font-semibold text-indigo-700 mb-2">🎯 Recommendations:</h4>
+                        <ul className="list-disc pl-5 space-y-1">
+                          {aiAnalysis.summary.recommendations.map((rec: string, i: number) => (
+                            <li key={i} className="text-gray-700">{rec}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+
+                {/* Sentiment */}
+                {aiAnalysis.sentiment && (
+                  <Card className="p-6 bg-white/80 backdrop-blur-sm">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3">😊 Overall Sentiment</h3>
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-2xl">
+                            {aiAnalysis.sentiment.sentiment === 'positive' && '😊'}
+                            {aiAnalysis.sentiment.sentiment === 'constructive' && '💡'}
+                            {aiAnalysis.sentiment.sentiment === 'neutral' && '😐'}
+                            {aiAnalysis.sentiment.sentiment === 'concerned' && '😟'}
+                          </span>
+                          <span className="font-semibold text-lg capitalize">
+                            {aiAnalysis.sentiment.sentiment}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600">{aiAnalysis.sentiment.explanation}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-3xl font-bold text-indigo-600">
+                          {aiAnalysis.sentiment.confidence}%
+                        </p>
+                        <p className="text-xs text-gray-500">Confidence</p>
+                      </div>
+                    </div>
+                  </Card>
+                )}
+
+                {/* Themes */}
+                {aiAnalysis.themes && aiAnalysis.themes.length > 0 && (
+                  <Card className="p-6 bg-white/80 backdrop-blur-sm">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">🔍 Key Themes</h3>
+                    <div className="space-y-4">
+                      {aiAnalysis.themes.map((theme: any, i: number) => (
+                        <div key={i} className="border-l-4 border-indigo-400 pl-4 py-2">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-semibold text-gray-900">{theme.name}</h4>
+                            <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded-full font-medium">
+                              {theme.count} mentions
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2">{theme.description}</p>
+                          {theme.quotes && theme.quotes.length > 0 && (
+                            <div className="mt-2 space-y-1">
+                              {theme.quotes.map((quote: string, qi: number) => (
+                                <p key={qi} className="text-xs text-gray-500 italic pl-3 border-l-2 border-gray-200">
+                                  "{quote}"
+                                </p>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                )}
+              </div>
+            )}
+          </>
         )}
 
         {/* Empty State */}
