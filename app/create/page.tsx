@@ -137,7 +137,7 @@ export default function CreatePage() {
         return
       }
 
-      router.push(`/feedback/${data.share_token}?created=true`)
+      router.push(`/results/${data.results_token}?created=true`)
     } catch (err) {
       console.error('Catch error:', err)
       alert("Failed to create request")

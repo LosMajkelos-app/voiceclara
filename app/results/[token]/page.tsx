@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
@@ -32,8 +32,10 @@ interface Response {
 export default function ResultsPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user } = useAuth()
   const token = params.token as string
+  const isNewlyCreated = searchParams.get('created') === 'true'
 
   const [request, setRequest] = useState<FeedbackRequest | null>(null)
   const [responses, setResponses] = useState<Response[]>([])
@@ -158,7 +160,7 @@ export default function ResultsPage() {
         {/* Back Button */}
         <Link href="/dashboard" className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 mb-6">
           <ArrowLeft className="h-4 w-4" />
-          <span>← Back to Dashboard</span>
+          <span>Back to Dashboard</span>
         </Link>
 
         {/* Header */}
@@ -227,6 +229,37 @@ export default function ResultsPage() {
             </div>
           </div>
         </Card>
+
+        {/* Success Banner for Newly Created Request */}
+        {isNewlyCreated && (
+          <Card className="p-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white mb-6">
+            <div className="flex items-center gap-4">
+              <div className="text-4xl">🎉</div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold mb-1">
+                  Feedback Request Created Successfully!
+                </h3>
+                <p className="text-sm opacity-90 mb-3">
+                  Share the link below to start collecting honest, anonymous feedback.
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={copyShareLink}
+                    className="bg-white text-green-600 hover:bg-gray-100"
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy Share Link
+                  </Button>
+                  <Link href="/dashboard">
+                    <Button variant="outline" className="bg-white/10 border-white/30 hover:bg-white/20 text-white">
+                      Go to Dashboard
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
 
         {/* AI Analysis Unlock Message */}
         {responses.length < 3 && (

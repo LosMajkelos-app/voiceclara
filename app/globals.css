@@ -155,8 +155,16 @@ a:disabled {
 /* Input fields should have text cursor */
 input[type="text"],
 input[type="email"],
+input[type="password"],
 textarea {
   cursor: text !important;
+}
+
+/* Hide placeholder on focus for better UX */
+input:focus::placeholder,
+textarea:focus::placeholder {
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
 /* Smooth transitions for interactive elements */
