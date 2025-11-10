@@ -45,7 +45,7 @@ export default function CreatePage() {
     }
   }
 
-  const proceedToQuestions = () => {
+  const proceedToQuestions = async () => {
     if (!creatorName.trim()) {
       alert("Please enter your name")
       return
@@ -65,14 +65,34 @@ export default function CreatePage() {
     }
 
     if (templateType === "custom") {
-      // AI generation (mock for now)
-      setTitle("Custom Feedback Request")
-      setQuestions([
-        "What am I doing well?",
-        "What could I improve?",
-        "What's my biggest blind spot?",
-        "Any other thoughts?"
-      ])
+      // Real AI generation
+      setLoading(true)
+
+      try {
+        const response = await fetch('/api/generate-questions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: customPrompt })
+        })
+
+        const data = await response.json()
+
+        if (response.ok && data.questions) {
+          setTitle("AI-Generated Feedback Request")
+          setQuestions(data.questions)
+        } else {
+          alert("AI generation failed: " + (data.error || "Unknown error"))
+          setLoading(false)
+          return
+        }
+      } catch (error) {
+        console.error('AI generation error:', error)
+        alert("Failed to generate questions. Please try again.")
+        setLoading(false)
+        return
+      }
+
+      setLoading(false)
     }
 
     setStep(2)

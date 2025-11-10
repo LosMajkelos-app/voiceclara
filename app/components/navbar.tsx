@@ -33,12 +33,18 @@ export default function Navbar() {
                   <Link href="/dashboard">
                     <Button variant="ghost">Dashboard</Button>
                   </Link>
+                  <Link href="/pricing">
+                    <Button variant="ghost">Pricing</Button>
+                  </Link>
+                  <Link href="/contact">
+                    <Button variant="ghost">Contact</Button>
+                  </Link>
                   <Link href="/create">
                     <Button variant="default" className="bg-indigo-600 hover:bg-indigo-700">
                       Create Request
                     </Button>
                   </Link>
-                  
+
                   {/* User dropdown */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -67,6 +73,12 @@ export default function Navbar() {
                 </>
               ) : (
                 <>
+                  <Link href="/pricing">
+                    <Button variant="ghost">Pricing</Button>
+                  </Link>
+                  <Link href="/contact">
+                    <Button variant="ghost">Contact</Button>
+                  </Link>
                   <Link href="/auth/login">
                     <Button variant="ghost">Sign In</Button>
                   </Link>
