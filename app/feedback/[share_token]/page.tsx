@@ -48,19 +48,19 @@ export default function FeedbackFormPage() {
   const isLastQuestion = currentStep === totalQuestions - 1
 
   const handleNext = () => {
-    if (!answers[currentStep]?.trim()) {
-      alert("Please write something before continuing")
-      return
-    }
-
-    if (isLastQuestion) {
-      // Show AI Review instead of submitting directly
-      setShowReview(true)
-      analyzeWithAI()
-    } else {
-      setCurrentStep(currentStep + 1)
-    }
+  if (!answers[currentStep]?.trim()) {
+    alert("Please write something before continuing")
+    return
   }
+
+  if (isLastQuestion) {
+    // Show choice: Review with AI or Skip
+    setShowReview(true)
+    // Don't auto-analyze yet
+  } else {
+    setCurrentStep(currentStep + 1)
+  }
+}
 
   const handleBack = () => {
     if (currentStep > 0) {
@@ -68,50 +68,46 @@ export default function FeedbackFormPage() {
     }
   }
 
-  const analyzeWithAI = async () => {
+ const analyzeWithAI = async () => {
   setAnalyzingAI(true)
   
   try {
-    // REAL OpenAI API Call
     const formattedAnswers = request.questions.map((q: string, i: number) => ({
       question: q,
       answer: answers[i] || ""
     }))
 
+    // REAL API Call
     const response = await fetch('/api/analyze-feedback', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ answers: formattedAnswers })
     })
 
+    if (!response.ok) {
+      throw new Error('AI analysis failed')
+    }
+
     const aiResult = await response.json()
 
-    setAiScore(aiResult)
+    // Validate scores (ensure they're numbers 0-100)
+    const validatedScore = {
+      overall: Math.min(100, Math.max(0, aiResult.overall || 50)),
+      specificity: Math.min(100, Math.max(0, aiResult.specificity || 50)),
+      constructiveness: Math.min(100, Math.max(0, aiResult.constructiveness || 50)),
+      clarity: Math.min(100, Math.max(0, aiResult.clarity || 50)),
+      suggestions: aiResult.suggestions || ["No suggestions available"],
+      per_answer_feedback: aiResult.per_answer_feedback || []
+    }
+
+    setAiScore(validatedScore)
   } catch (error) {
     console.error('AI analysis error:', error)
-    // Fallback to mock if API fails
-    const mockScore = {
-      overall: Math.floor(Math.random() * 30) + 60, // 60-90
-      specificity: Math.floor(Math.random() * 30) + 60,
-      constructiveness: Math.floor(Math.random() * 30) + 60,
-      clarity: Math.floor(Math.random() * 30) + 60,
-      suggestions: [
-        "Try to be more specific in your responses",
-        "Consider adding concrete examples",
-        "Balance positive and constructive feedback"
-      ],
-      per_answer_feedback: request.questions.map((q: string, i: number) => ({
-        question: q,
-        original: answers[i],
-        score: Math.floor(Math.random() * 30) + 60,
-        feedback: "This answer could be more specific. Try adding concrete examples.",
-        improved: answers[i] + " (improved version would go here)"
-      }))
-    }
-    setAiScore(mockScore)
+    alert("AI analysis temporarily unavailable. You can still submit your feedback!")
+    setShowReview(false)
+  } finally {
+    setAnalyzingAI(false)
   }
-  
-  setAnalyzingAI(false)
 }
 
   const handleSubmit = async () => {
@@ -173,25 +169,30 @@ export default function FeedbackFormPage() {
               </div>
             ) : aiScore && (
               <>
-                {/* Overall Score */}
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 text-center">
-                  <div className="text-6xl font-bold mb-2">{aiScore.overall}</div>
-                  <p className="text-sm opacity-90">Overall Quality Score</p>
-                  <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
-                    <div>
-                      <p className="font-semibold">{aiScore.specificity}</p>
-                      <p className="opacity-75">Specificity</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold">{aiScore.constructiveness}</p>
-                      <p className="opacity-75">Constructive</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold">{aiScore.clarity}</p>
-                      <p className="opacity-75">Clarity</p>
-                    </div>
-                  </div>
-                </div>
+                {/* Overall Score - Show out of 100 */}
+<div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 text-center">
+  <div className="text-6xl font-bold mb-2">{aiScore.overall}</div>
+  <p className="text-lg font-semibold mb-1">/ 100</p>
+  <p className="text-sm opacity-90">Overall Quality Score</p>
+  
+  <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
+    <div>
+      <p className="text-2xl font-bold">{aiScore.specificity}</p>
+      <p className="text-xs opacity-75">/100</p>
+      <p className="opacity-75">Specificity</p>
+    </div>
+    <div>
+      <p className="text-2xl font-bold">{aiScore.constructiveness}</p>
+      <p className="text-xs opacity-75">/100</p>
+      <p className="opacity-75">Constructive</p>
+    </div>
+    <div>
+      <p className="text-2xl font-bold">{aiScore.clarity}</p>
+      <p className="text-xs opacity-75">/100</p>
+      <p className="opacity-75">Clarity</p>
+    </div>
+  </div>
+</div>
 
                 {/* Suggestions */}
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
@@ -385,6 +386,53 @@ export default function FeedbackFormPage() {
             <>Next Question <ArrowRight className="h-5 w-5" /></>
           )}
         </button>
+        {/* Navigation - Last Question */}
+<div className="flex items-center justify-between">
+  <button
+    onClick={handleBack}
+    disabled={currentStep === 0}
+    className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-30 transition-all"
+  >
+    <ArrowLeft className="h-4 w-4" />
+    Back
+  </button>
+
+  <div className="flex gap-3">
+    {isLastQuestion ? (
+      <>
+        {/* Skip AI - Direct Submit */}
+        <button
+          onClick={handleSubmit}
+          disabled={submitting}
+          className="flex items-center gap-2 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold px-6 py-3 rounded-xl transition-all"
+        >
+          Submit Without Review
+          <Check className="h-5 w-5" />
+        </button>
+
+        {/* Review with AI */}
+        <button
+          onClick={() => {
+            setShowReview(true)
+            analyzeWithAI()
+          }}
+          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl"
+        >
+          Review with AI
+          <Sparkles className="h-5 w-5" />
+        </button>
+      </>
+    ) : (
+      <button
+        onClick={handleNext}
+        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl"
+      >
+        Next Question
+        <ArrowRight className="h-5 w-5" />
+      </button>
+    )}
+  </div>
+</div>
       </div>
     </FeedbackLayout>
   )
