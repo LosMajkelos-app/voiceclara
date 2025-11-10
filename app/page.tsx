@@ -16,11 +16,11 @@ export default function HomePage() {
         {/* Hero Section */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
-              <Sparkles className="h-4 w-4" />
-              AI-Powered Feedback Platform
+            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-full text-base font-bold mb-6 shadow-lg animate-pulse">
+              <Check className="h-5 w-5" />
+              Free. Always. No Credit Card.
             </div>
-            
+
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
               The Beautiful Way to Get
               <br />
@@ -48,8 +48,8 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <p className="text-sm text-gray-500 mt-4">
-              Free forever • No credit card • 2 min setup
+            <p className="text-sm text-gray-600 mt-4 font-medium">
+              ⚡ 2 minute setup • 🔒 100% anonymous • 🤖 AI-powered
             </p>
           </div>
 

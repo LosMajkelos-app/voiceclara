@@ -1,10 +1,14 @@
-"use client"
-
 import Link from "next/link"
+import type { Metadata } from "next"
 import Navbar from "@/app/components/navbar"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Check, Sparkles, Zap, Building2 } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: "Pricing",
+  description: "Choose the perfect plan for your feedback needs. Free forever plan available. Unlock AI-powered insights with Pro and Business plans starting at $29/month.",
+}
 
 export default function PricingPage() {
   const plans = [
