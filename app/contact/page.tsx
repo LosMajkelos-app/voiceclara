@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/app/components/navbar"
@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card"
 import { Mail, MessageSquare, Phone, MapPin, Send } from "lucide-react"
 import { toast } from "sonner"
 
-export default function ContactPage() {
+function ContactForm() {
   const searchParams = useSearchParams()
   const subjectParam = searchParams.get('subject')
 
@@ -67,10 +67,8 @@ export default function ContactPage() {
   }
 
   return (
-    <>
-      <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
 
           {/* Header */}
           <div className="text-center mb-12">
@@ -322,6 +320,24 @@ export default function ContactPage() {
         </footer>
 
       </div>
+    </div>
+  )
+}
+
+export default function ContactPage() {
+  return (
+    <>
+      <Navbar />
+      <Suspense fallback={
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      }>
+        <ContactForm />
+      </Suspense>
     </>
   )
 }
