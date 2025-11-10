@@ -320,7 +320,6 @@ function ContactForm() {
         </footer>
 
       </div>
-    </div>
   )
 }
 
