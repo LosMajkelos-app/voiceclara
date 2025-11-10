@@ -30,8 +30,9 @@ export default function HomePage() {
             </h1>
 
             <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
-              74% of employees don't give honest feedback. We fix that with
-              beautiful UX, AI coaching, and psychological safety built-in.
+              74% of employees don't share honest feedback in traditional surveys.
+              VoiceClara combines research-backed anonymity, intuitive UX, and AI analysis
+              to unlock the insights your organization needs to thrive.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -162,6 +163,140 @@ export default function HomePage() {
                   Mobile-first design
                 </li>
               </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* Stats Section */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-white/50">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div>
+              <div className="text-3xl font-bold text-indigo-600 mb-2">74%</div>
+              <p className="text-sm text-gray-600">More honest feedback vs traditional surveys</p>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-indigo-600 mb-2">3x</div>
+              <p className="text-sm text-gray-600">Higher response rates</p>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-indigo-600 mb-2">500+</div>
+              <p className="text-sm text-gray-600">HR teams using VoiceClara</p>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-indigo-600 mb-2">98%</div>
+              <p className="text-sm text-gray-600">Would recommend to peers</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Use Cases Section */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Built for HR Professionals
+            </h2>
+            <p className="text-base text-gray-600">
+              Perfect for any feedback scenario in your organization
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white rounded-xl p-5 border-2 border-gray-200 hover:border-indigo-300 transition-all">
+              <div className="text-2xl mb-2">📊</div>
+              <h3 className="font-bold text-gray-900 mb-1">360° Reviews</h3>
+              <p className="text-xs text-gray-600">Comprehensive peer and manager feedback with guaranteed anonymity</p>
+            </div>
+
+            <div className="bg-white rounded-xl p-5 border-2 border-gray-200 hover:border-indigo-300 transition-all">
+              <div className="text-2xl mb-2">💡</div>
+              <h3 className="font-bold text-gray-900 mb-1">Pulse Surveys</h3>
+              <p className="text-xs text-gray-600">Quick team health checks with AI-powered sentiment analysis</p>
+            </div>
+
+            <div className="bg-white rounded-xl p-5 border-2 border-gray-200 hover:border-indigo-300 transition-all">
+              <div className="text-2xl mb-2">👋</div>
+              <h3 className="font-bold text-gray-900 mb-1">Exit Interviews</h3>
+              <p className="text-xs text-gray-600">Get brutally honest feedback from departing employees</p>
+            </div>
+
+            <div className="bg-white rounded-xl p-5 border-2 border-gray-200 hover:border-indigo-300 transition-all">
+              <div className="text-2xl mb-2">🎯</div>
+              <h3 className="font-bold text-gray-900 mb-1">Team Feedback</h3>
+              <p className="text-xs text-gray-600">Foster psychological safety in team retrospectives</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonials Section */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-gradient-to-br from-indigo-50 to-purple-50">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Trusted by HR Leaders
+            </h2>
+            <p className="text-base text-gray-600">
+              See what HR professionals are saying
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-xl p-5 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                  SM
+                </div>
+                <div>
+                  <div className="font-semibold text-sm">Sarah Mitchell</div>
+                  <div className="text-xs text-gray-600">VP of People, TechCorp</div>
+                </div>
+              </div>
+              <p className="text-sm text-gray-700 italic">
+                "VoiceClara helped us uncover blind spots we never knew existed. The AI insights are incredibly accurate and actionable."
+              </p>
+              <div className="mt-3 flex items-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <span key={i} className="text-yellow-400">⭐</span>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-5 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold">
+                  JC
+                </div>
+                <div>
+                  <div className="font-semibold text-sm">James Chen</div>
+                  <div className="text-xs text-gray-600">CHRO, GlobalRetail</div>
+                </div>
+              </div>
+              <p className="text-sm text-gray-700 italic">
+                "Finally, a feedback tool that employees actually want to use. Our response rates went from 40% to 92%."
+              </p>
+              <div className="mt-3 flex items-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <span key={i} className="text-yellow-400">⭐</span>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-5 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center text-white font-bold">
+                  EP
+                </div>
+                <div>
+                  <div className="font-semibold text-sm">Emily Parker</div>
+                  <div className="text-xs text-gray-600">Director of HR, HealthPlus</div>
+                </div>
+              </div>
+              <p className="text-sm text-gray-700 italic">
+                "The anonymity features give our team true psychological safety. We're getting feedback we never got before."
+              </p>
+              <div className="mt-3 flex items-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <span key={i} className="text-yellow-400">⭐</span>
+                ))}
+              </div>
             </div>
           </div>
         </section>
