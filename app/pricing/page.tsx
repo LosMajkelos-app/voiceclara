@@ -83,28 +83,28 @@ export default function PricingPage() {
     <>
       <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
           {/* Header */}
-          <div className="text-center mb-16">
-            <h1 className="text-5xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-900 mb-3">
               Simple, Transparent Pricing
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Choose the plan that's right for you. Always honest feedback, always transparent pricing.
             </p>
-            <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium">
               <Check className="h-4 w-4" />
               No credit card required • Cancel anytime
             </div>
           </div>
 
           {/* Pricing Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             {plans.map((plan) => (
               <Card
                 key={plan.name}
-                className={`relative p-8 ${
+                className={`relative p-6 ${
                   plan.popular
                     ? 'border-4 border-purple-500 shadow-2xl scale-105'
                     : 'border-2 border-gray-200'
@@ -120,21 +120,21 @@ export default function PricingPage() {
                 )}
 
                 {/* Icon */}
-                <div className={`inline-flex p-3 rounded-lg ${plan.bgColor} mb-4`}>
-                  <plan.icon className={`h-8 w-8 ${plan.iconColor}`} />
+                <div className={`inline-flex p-3 rounded-lg ${plan.bgColor} mb-3`}>
+                  <plan.icon className={`h-7 w-7 ${plan.iconColor}`} />
                 </div>
 
                 {/* Plan Name */}
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
                   {plan.name}
                 </h3>
-                <p className="text-gray-600 text-sm mb-6">
+                <p className="text-gray-600 text-sm mb-4">
                   {plan.description}
                 </p>
 
                 {/* Price */}
-                <div className="mb-6">
-                  <span className="text-5xl font-bold text-gray-900">
+                <div className="mb-4">
+                  <span className="text-4xl font-bold text-gray-900">
                     {plan.price}
                   </span>
                   <span className="text-gray-600 ml-2">{plan.period}</span>
@@ -143,7 +143,7 @@ export default function PricingPage() {
                 {/* CTA Button */}
                 <Link href={plan.ctaLink}>
                   <Button
-                    className={`w-full mb-6 ${
+                    className={`w-full mb-4 ${
                       plan.popular
                         ? 'bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white'
                         : 'bg-indigo-600 hover:bg-indigo-700 text-white'
@@ -168,11 +168,11 @@ export default function PricingPage() {
 
           {/* FAQ Section */}
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
+            <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">
               Frequently Asked Questions
             </h2>
-            <div className="space-y-6">
-              <Card className="p-6">
+            <div className="space-y-4">
+              <Card className="p-5">
                 <h3 className="font-semibold text-gray-900 mb-2">
                   Can I change plans later?
                 </h3>
@@ -182,7 +182,7 @@ export default function PricingPage() {
                 </p>
               </Card>
 
-              <Card className="p-6">
+              <Card className="p-5">
                 <h3 className="font-semibold text-gray-900 mb-2">
                   Is my data secure?
                 </h3>
@@ -192,7 +192,7 @@ export default function PricingPage() {
                 </p>
               </Card>
 
-              <Card className="p-6">
+              <Card className="p-5">
                 <h3 className="font-semibold text-gray-900 mb-2">
                   Do you offer discounts for non-profits?
                 </h3>
@@ -202,7 +202,7 @@ export default function PricingPage() {
                 </p>
               </Card>
 
-              <Card className="p-6">
+              <Card className="p-5">
                 <h3 className="font-semibold text-gray-900 mb-2">
                   What payment methods do you accept?
                 </h3>
@@ -214,12 +214,12 @@ export default function PricingPage() {
           </div>
 
           {/* CTA Section */}
-          <div className="mt-16 text-center">
-            <Card className="p-12 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
-              <h2 className="text-3xl font-bold mb-4">
+          <div className="mt-12 text-center">
+            <Card className="p-8 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+              <h2 className="text-2xl font-bold mb-3">
                 Still have questions?
               </h2>
-              <p className="text-lg mb-6 opacity-90">
+              <p className="text-base mb-4 opacity-90">
                 Our team is here to help you find the perfect plan
               </p>
               <div className="flex gap-4 justify-center">

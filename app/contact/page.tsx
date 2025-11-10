@@ -68,23 +68,23 @@ function ContactForm() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-10">
+            <h1 className="text-4xl font-bold text-gray-900 mb-3">
               Get in Touch
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             {/* Contact Info Cards */}
-            <div className="space-y-6">
-              <Card className="p-6 bg-white/80 backdrop-blur-sm">
+            <div className="space-y-4">
+              <Card className="p-5 bg-white/80 backdrop-blur-sm">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="p-3 bg-indigo-100 rounded-lg">
                     <Mail className="h-6 w-6 text-indigo-600" />
@@ -102,7 +102,7 @@ function ContactForm() {
                 </a>
               </Card>
 
-              <Card className="p-6 bg-white/80 backdrop-blur-sm">
+              <Card className="p-5 bg-white/80 backdrop-blur-sm">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="p-3 bg-purple-100 rounded-lg">
                     <MessageSquare className="h-6 w-6 text-purple-600" />
@@ -117,7 +117,7 @@ function ContactForm() {
                 </button>
               </Card>
 
-              <Card className="p-6 bg-white/80 backdrop-blur-sm">
+              <Card className="p-5 bg-white/80 backdrop-blur-sm">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="p-3 bg-green-100 rounded-lg">
                     <Phone className="h-6 w-6 text-green-600" />
@@ -130,7 +130,7 @@ function ContactForm() {
                 <p className="text-green-600 font-medium">+1 (555) 123-4567</p>
               </Card>
 
-              <Card className="p-6 bg-white/80 backdrop-blur-sm">
+              <Card className="p-5 bg-white/80 backdrop-blur-sm">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="p-3 bg-orange-100 rounded-lg">
                     <MapPin className="h-6 w-6 text-orange-600" />
@@ -149,12 +149,12 @@ function ContactForm() {
             </div>
 
             {/* Contact Form */}
-            <Card className="lg:col-span-2 p-8 bg-white/80 backdrop-blur-sm">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <Card className="lg:col-span-2 p-6 bg-white/80 backdrop-blur-sm">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
                 Send us a Message
               </h2>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -166,7 +166,7 @@ function ContactForm() {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="John Doe"
-                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    className="w-full px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                     required
                   />
                 </div>
@@ -182,7 +182,7 @@ function ContactForm() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="john@example.com"
-                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    className="w-full px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                     required
                   />
                 </div>
@@ -196,7 +196,7 @@ function ContactForm() {
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all cursor-pointer"
+                    className="w-full px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all cursor-pointer"
                     required
                   >
                     {subjects.map((subject) => (
@@ -217,8 +217,8 @@ function ContactForm() {
                     value={formData.message}
                     onChange={handleChange}
                     placeholder="Tell us more about your inquiry..."
-                    rows={6}
-                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"
+                    rows={5}
+                    className="w-full px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"
                     required
                   />
                 </div>
@@ -251,12 +251,12 @@ function ContactForm() {
           </div>
 
           {/* FAQ Section */}
-          <div className="mt-16">
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">
               Quick Answers
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="p-6 bg-white/80 backdrop-blur-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="p-5 bg-white/80 backdrop-blur-sm">
                 <h3 className="font-semibold text-gray-900 mb-2">
                   What's your response time?
                 </h3>
@@ -266,7 +266,7 @@ function ContactForm() {
                 </p>
               </Card>
 
-              <Card className="p-6 bg-white/80 backdrop-blur-sm">
+              <Card className="p-5 bg-white/80 backdrop-blur-sm">
                 <h3 className="font-semibold text-gray-900 mb-2">
                   Do you offer demos?
                 </h3>
@@ -276,7 +276,7 @@ function ContactForm() {
                 </p>
               </Card>
 
-              <Card className="p-6 bg-white/80 backdrop-blur-sm">
+              <Card className="p-5 bg-white/80 backdrop-blur-sm">
                 <h3 className="font-semibold text-gray-900 mb-2">
                   Need technical support?
                 </h3>
@@ -289,7 +289,7 @@ function ContactForm() {
                 </p>
               </Card>
 
-              <Card className="p-6 bg-white/80 backdrop-blur-sm">
+              <Card className="p-5 bg-white/80 backdrop-blur-sm">
                 <h3 className="font-semibold text-gray-900 mb-2">
                   Looking to partner?
                 </h3>

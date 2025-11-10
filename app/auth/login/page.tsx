@@ -104,8 +104,8 @@ export default function LoginPage() {
       </Link>
 
       <div className="max-w-md mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
             Sign In
           </h1>
           <p className="text-gray-600">
@@ -113,12 +113,12 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           {/* Google Login */}
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 rounded-xl border-2 border-gray-200 shadow-sm hover:shadow-md transition-all disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 font-semibold py-2.5 rounded-xl border-2 border-gray-200 shadow-sm hover:shadow-md transition-all disabled:opacity-50"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -172,7 +172,7 @@ export default function LoginPage() {
           <button
             onClick={handleLogin}
             disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
