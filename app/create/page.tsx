@@ -45,38 +45,57 @@ export default function CreatePage() {
     }
   }
 
-  const proceedToQuestions = () => {
-    if (!creatorName.trim()) {
-      alert("Please enter your name")
-      return
-    }
-    if (!creatorEmail.trim() || !creatorEmail.includes('@')) {
-      alert("Please enter a valid email")
-      return
-    }
-    if (!templateType) {
-      alert("Please select a template")
-      return
-    }
+  const proceedToQuestions = async () => {
+  if (!creatorName.trim()) {
+    alert("Please enter your name")
+    return
+  }
+  if (!creatorEmail.trim() || !creatorEmail.includes('@')) {
+    alert("Please enter a valid email")
+    return
+  }
+  if (!templateType) {
+    alert("Please select a template")
+    return
+  }
 
-    if (templateType === "custom" && !customPrompt.trim()) {
+  // AI Generation
+  if (templateType === "custom") {
+    if (!customPrompt.trim()) {
       alert("Please describe what feedback you need")
       return
     }
 
-    if (templateType === "custom") {
-      // AI generation (mock for now)
-      setTitle("Custom Feedback Request")
-      setQuestions([
-        "What am I doing well?",
-        "What could I improve?",
-        "What's my biggest blind spot?",
-        "Any other thoughts?"
-      ])
-    }
+    setLoading(true)
 
-    setStep(2)
+    try {
+      // Call AI API
+      const response = await fetch('/api/generate-questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: customPrompt })
+      })
+
+      const result = await response.json()
+
+      if (result.error) {
+        alert(result.error)
+        setLoading(false)
+        return
+      }
+
+      setTitle(result.title || "AI Generated Feedback Request")
+      setQuestions(result.questions || [])
+      setLoading(false)
+    } catch (error) {
+      alert("Failed to generate questions with AI")
+      setLoading(false)
+      return
+    }
   }
+
+  setStep(2)
+}
 
   const addQuestion = () => {
     if (questions.length < 10) {
