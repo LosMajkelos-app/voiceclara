@@ -126,9 +126,20 @@ export default function ResultsPage() {
 
       if (response.ok) {
         setAiAnalysis(data)
-        toast.success("AI Analysis complete! ✨")
+
+        // Show warning if some responses were filtered
+        if (data.warning) {
+          toast.warning(data.warning, { duration: 6000 })
+        } else {
+          toast.success("AI Analysis complete! ✨")
+        }
       } else {
-        toast.error("Analysis failed: " + (data.error || "Unknown error"))
+        // Handle errors with detailed messages
+        if (data.warning) {
+          toast.error(data.warning, { duration: 8000 })
+        } else {
+          toast.error("Analysis failed: " + (data.error || "Unknown error"))
+        }
       }
     } catch (error) {
       console.error('AI analysis error:', error)
@@ -369,6 +380,35 @@ export default function ResultsPage() {
             {/* AI Analysis Results */}
             {aiAnalysis && (
               <div className="mb-6 space-y-4">
+                {/* Quality Metrics Warning */}
+                {aiAnalysis.quality && aiAnalysis.quality.filteredResponses > 0 && (
+                  <Card className="p-4 bg-yellow-50 border-2 border-yellow-300">
+                    <div className="flex items-start gap-3">
+                      <div className="text-2xl">⚠️</div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-yellow-900 mb-1">Response Quality Notice</h4>
+                        <p className="text-sm text-yellow-800 mb-2">
+                          {aiAnalysis.quality.filteredResponses} of {aiAnalysis.quality.totalResponses} response(s) were filtered as test/spam responses (e.g., "asdasd", "test", very short answers).
+                        </p>
+                        <div className="flex items-center gap-4 text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-green-700">✓ Valid:</span>
+                            <span className="text-gray-700">{aiAnalysis.quality.validResponses}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-red-700">✗ Filtered:</span>
+                            <span className="text-gray-700">{aiAnalysis.quality.filteredResponses}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-indigo-700">Avg Quality:</span>
+                            <span className="text-gray-700">{aiAnalysis.quality.averageQuality}/100</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                )}
+
                 {/* Summary */}
                 <Card className="p-6 bg-white/80 backdrop-blur-sm">
                   <div className="flex items-center gap-3 mb-4">
