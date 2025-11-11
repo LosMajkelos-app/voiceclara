@@ -89,25 +89,29 @@ export default function CreateAuthPage() {
         </div>
 
         <Card className="p-6 bg-white/90 backdrop-blur-sm shadow-xl">
-          <div className="space-y-4">
+          <div className="space-y-3">
             {/* Sign In Button */}
             <Link href="/auth/login">
-              <button className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-all">
-                <LogIn className="h-5 w-5" />
-                Sign In to Existing Account
+              <button className="w-full group relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all">
+                <div className="flex items-center justify-center gap-2">
+                  <LogIn className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                  Sign In to Existing Account
+                </div>
               </button>
             </Link>
 
             {/* Create Account Button */}
             <Link href="/auth/signup">
-              <button className="w-full flex items-center justify-center gap-2 bg-white border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-semibold py-2.5 rounded-xl transition-all">
-                <UserPlus className="h-5 w-5" />
-                Create New Account
+              <button className="w-full group bg-white border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-700 font-semibold py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg">
+                <div className="flex items-center justify-center gap-2">
+                  <UserPlus className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                  Create New Account
+                </div>
               </button>
             </Link>
 
             {/* Divider */}
-            <div className="relative my-4">
+            <div className="relative my-5">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t-2 border-gray-200"></div>
               </div>
@@ -118,33 +122,47 @@ export default function CreateAuthPage() {
 
             {/* Guest Button */}
             <Link href="/create">
-              <button className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 border-2 border-gray-300 text-gray-700 font-semibold py-2.5 rounded-xl transition-all">
-                <Users className="h-5 w-5" />
-                Continue as Guest
+              <button className="w-full group bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold py-3.5 rounded-xl transition-all shadow-sm hover:shadow-md">
+                <div className="flex items-center justify-center gap-2">
+                  <Users className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                  Continue as Guest
+                </div>
               </button>
             </Link>
           </div>
 
           {/* Info Banner */}
-          <div className="mt-4 p-3 bg-blue-50 border-2 border-blue-200 rounded-lg">
-            <div className="flex gap-2">
-              <Shield className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div className="mt-5 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-indigo-200 rounded-xl">
+            <div className="flex gap-3">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <Shield className="h-4 w-4 text-indigo-600" />
+                </div>
+              </div>
               <div>
-                <p className="text-sm font-semibold text-blue-900 mb-1">
-                  Account Benefits
+                <p className="text-sm font-bold text-indigo-900 mb-2">
+                  ✨ Account Benefits
                 </p>
-                <ul className="text-xs text-blue-800 space-y-0.5">
-                  <li>✓ Save and track all your requests</li>
-                  <li>✓ Access AI-powered insights</li>
-                  <li>✓ View response history</li>
-                  <li>✓ Free forever</li>
+                <ul className="text-xs text-indigo-800 space-y-1">
+                  <li className="flex items-center gap-1.5">
+                    <span className="text-green-600">✓</span> Save and track all your requests
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span className="text-green-600">✓</span> Access AI-powered insights
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span className="text-green-600">✓</span> View response history
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span className="text-green-600">✓</span> Free forever
+                  </li>
                 </ul>
               </div>
             </div>
           </div>
 
-          <p className="text-xs text-gray-500 text-center mt-3">
-            Guest users can create requests but won't have access to dashboard features
+          <p className="text-xs text-gray-500 text-center mt-4">
+            💡 Guest users can create requests but won't have access to dashboard features
           </p>
         </Card>
       </div>
