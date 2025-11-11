@@ -53,13 +53,31 @@ export default function FeedbackFormPage() {
       return
     }
 
-    if (isLastQuestion) {
-      // Show AI Review instead of submitting directly
-      setShowReview(true)
-      analyzeWithAI()
-    } else {
+    if (!isLastQuestion) {
       setCurrentStep(currentStep + 1)
     }
+    // On last question, do nothing - show submit buttons instead
+  }
+
+  const handleReviewWithAI = () => {
+    if (!answers[currentStep]?.trim()) {
+      alert("Please answer the current question first")
+      return
+    }
+    setShowReview(true)
+    analyzeWithAI()
+  }
+
+  const handleDirectSubmit = async () => {
+    if (!answers[currentStep]?.trim()) {
+      alert("Please answer the current question first")
+      return
+    }
+
+    const confirmed = confirm("Submit feedback without AI review?")
+    if (!confirmed) return
+
+    await handleSubmit()
   }
 
   const handleBack = () => {
@@ -374,17 +392,34 @@ export default function FeedbackFormPage() {
           Back
         </button>
 
-        <button
-          onClick={handleNext}
-          disabled={submitting}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl"
-        >
-          {isLastQuestion ? (
-            <>Review with AI <Sparkles className="h-5 w-5" /></>
-          ) : (
-            <>Next Question <ArrowRight className="h-5 w-5" /></>
-          )}
-        </button>
+        {isLastQuestion ? (
+          <div className="flex gap-3">
+            <button
+              onClick={handleDirectSubmit}
+              disabled={submitting}
+              className="flex items-center gap-2 bg-white border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-semibold px-6 py-3 rounded-xl transition-all"
+            >
+              <Check className="h-5 w-5" />
+              Submit Now
+            </button>
+            <button
+              onClick={handleReviewWithAI}
+              disabled={submitting}
+              className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl"
+            >
+              <Sparkles className="h-5 w-5" />
+              Review with AI
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handleNext}
+            disabled={submitting}
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl"
+          >
+            Next Question <ArrowRight className="h-5 w-5" />
+          </button>
+        )}
       </div>
     </FeedbackLayout>
   )
