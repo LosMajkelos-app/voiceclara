@@ -261,6 +261,53 @@ export default function ResultsPage() {
           </Card>
         )}
 
+        {/* Guest Login Banner */}
+        {!user && (
+          <Card className="p-6 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 mb-6">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0">
+                <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <Sparkles className="h-5 w-5 text-indigo-600" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-indigo-900 mb-1">
+                  💡 Save This Request to Your Dashboard
+                </h3>
+                <p className="text-sm text-indigo-800 mb-3">
+                  Create an account to track responses, get AI insights, and manage all your feedback requests in one place. It's free forever!
+                </p>
+                <ul className="text-xs text-indigo-700 space-y-1.5 mb-4">
+                  <li className="flex items-center gap-1.5">
+                    <span className="text-green-600 font-bold">✓</span> Access your requests anytime
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span className="text-green-600 font-bold">✓</span> Get AI-powered insights and themes
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span className="text-green-600 font-bold">✓</span> Track response history over time
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span className="text-green-600 font-bold">✓</span> 100% free, no credit card required
+                  </li>
+                </ul>
+                <div className="flex gap-2">
+                  <Link href="/auth/signup">
+                    <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white">
+                      Create Free Account
+                    </Button>
+                  </Link>
+                  <Link href="/auth/login">
+                    <Button variant="outline" className="border-indigo-600 text-indigo-600 hover:bg-indigo-50">
+                      Sign In
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
+
         {/* AI Analysis Unlock Message */}
         {responses.length < 3 && (
           <Card className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 mb-6">
