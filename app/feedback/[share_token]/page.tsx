@@ -266,6 +266,16 @@ export default function FeedbackFormPage() {
                 ))}
               </div>
 
+              {/* Final Anonymity Reminder */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4 mb-4">
+                <div className="flex items-center gap-3">
+                  <Shield className="h-5 w-5 text-green-600 flex-shrink-0" />
+                  <p className="text-sm text-green-800">
+                    <strong className="font-bold">One last reminder:</strong> Your feedback is 100% anonymous. No one will ever know it came from you.
+                  </p>
+                </div>
+              </div>
+
               {/* Submit Buttons */}
               <div className="flex gap-3">
                 <button
@@ -321,15 +331,30 @@ export default function FeedbackFormPage() {
             </p>
           </div>
 
-          {/* Privacy */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+          {/* Privacy - Enhanced */}
+          <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-sm rounded-xl p-5 border-2 border-green-400/50">
             <div className="flex items-center gap-2 mb-3">
-              <Shield className="h-5 w-5" />
-              <p className="font-semibold">🔒 Privacy First</p>
+              <Shield className="h-5 w-5 text-green-100" />
+              <p className="font-semibold text-green-50">🔒 100% Anonymous</p>
             </div>
-            <p className="text-sm leading-relaxed opacity-90">
-              Your identity is completely protected. No tracking, no data collection.
-            </p>
+            <ul className="text-xs leading-relaxed space-y-1.5 opacity-95">
+              <li className="flex items-start gap-2">
+                <span className="text-green-200">✓</span>
+                <span>No email address collected</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-green-200">✓</span>
+                <span>No IP address logged</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-green-200">✓</span>
+                <span>No cookies or tracking</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-green-200">✓</span>
+                <span>Your identity stays hidden forever</span>
+              </li>
+            </ul>
           </div>
 
           {/* Bottom Encouragement */}
@@ -341,6 +366,27 @@ export default function FeedbackFormPage() {
         </>
       }
     >
+      {/* Anonymity Banner - Shown on first question */}
+      {currentStep === 0 && (
+        <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                <Shield className="h-5 w-5 text-green-600" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-green-900 mb-1">
+                🔒 Your Anonymity is Protected
+              </h3>
+              <p className="text-sm text-green-800 leading-relaxed">
+                Be honest and direct. Your identity is completely hidden—no email, no IP address, no tracking. The recipient will never know who you are.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Progress Bar (Only Left Side) */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
@@ -352,7 +398,7 @@ export default function FeedbackFormPage() {
           </p>
         </div>
         <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
-          <div 
+          <div
             className="bg-indigo-600 h-2 rounded-full transition-all duration-500"
             style={{ width: `${((currentStep + 1) / totalQuestions) * 100}%` }}
           />
@@ -377,9 +423,15 @@ export default function FeedbackFormPage() {
         value={answers[currentStep] || ""}
         onChange={(e) => setAnswers({ ...answers, [currentStep]: e.target.value })}
         placeholder="Write your thoughts here..."
-        className="w-full p-6 bg-white border-2 border-indigo-200 rounded-2xl text-lg resize-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm min-h-[250px] mb-6"
+        className="w-full p-6 bg-white border-2 border-indigo-200 rounded-2xl text-lg resize-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm min-h-[250px] mb-2"
         autoFocus
       />
+
+      {/* Anonymity Reminder */}
+      <div className="flex items-center gap-2 text-xs text-gray-500 mb-6">
+        <Shield className="h-3.5 w-3.5 text-green-600" />
+        <span>Your response is completely anonymous</span>
+      </div>
 
       {/* Navigation */}
       <div className="flex items-center justify-between">
