@@ -375,6 +375,42 @@ export default function CreatePage() {
             )}
           </div>
 
+          {/* Guest Login Banner */}
+          {!user && (
+            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0">
+                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                    <Sparkles className="h-4 w-4 text-indigo-600" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-indigo-900 mb-1">
+                    💡 Create an account to unlock more features
+                  </p>
+                  <p className="text-xs text-indigo-700 mb-3">
+                    Save this request to your dashboard, get AI insights, and track responses over time. It's free forever!
+                  </p>
+                  <div className="flex gap-2">
+                    <a
+                      href="/auth/signup"
+                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 underline"
+                    >
+                      Create Account
+                    </a>
+                    <span className="text-xs text-gray-400">•</span>
+                    <a
+                      href="/auth/login"
+                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 underline"
+                    >
+                      Sign In
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <button
             onClick={handleCreate}
             disabled={loading}
