@@ -1,12 +1,10 @@
 "use client"
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
 import { Home, Plus, Users, Zap, FileText, BarChart3, User, LogOut } from "lucide-react"
 import { supabase } from "@/lib/supabase"
-import { useRouter } from "next/navigation"
 import LanguageSwitcher from "./language-switcher"
 import { useTranslations } from "next-intl"
+import { Link, useRouter, usePathname } from '@/lib/i18n-navigation'
 
 interface DashboardSidebarProps {
   user: any
