@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { toast } from "sonner"
 import Link from "next/link"
-import { Sparkles, ArrowLeft, Copy, CheckCircle, Calendar, MessageSquare, Search, Filter, Download, Eye, X, ChevronLeft, ChevronRight, Home, Settings, Share2, FileText, TrendingUp } from "lucide-react"
+import { Sparkles, ArrowLeft, Copy, CheckCircle, Calendar, MessageSquare, Search, Filter, Download, Eye, X, ChevronLeft, ChevronRight, Share2, Mail } from "lucide-react"
+import DashboardSidebar from "@/app/components/dashboard-sidebar"
+import AccountSettingsModal from "@/app/components/account-settings-modal"
 
 interface FeedbackRequest {
   id: string
@@ -49,6 +51,7 @@ export default function ResultsPage() {
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest")
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedResponse, setSelectedResponse] = useState<Response | null>(null)
+  const [showAccountSettings, setShowAccountSettings] = useState(false)
   const itemsPerPage = 10
 
   useEffect(() => {
@@ -257,58 +260,11 @@ export default function ResultsPage() {
 
   return (
     <div className="min-h-screen flex bg-gray-50">
-      {/* Left Sidebar - Technical Menu */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-56 bg-white border-r border-gray-200">
-        <div className="flex-1 flex flex-col pt-4 pb-4 overflow-y-auto">
-          <nav className="mt-3 flex-1 px-3 space-y-1">
-            <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">
-              <Home className="h-4 w-4" />
-              Dashboard
-            </Link>
-            <button
-              onClick={copyShareLink}
-              className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
-            >
-              <Share2 className="h-4 w-4" />
-              Copy Share Link
-            </button>
-            {responses.length > 0 && (
-              <button
-                onClick={exportToCSV}
-                className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
-              >
-                <Download className="h-4 w-4" />
-                Export CSV
-              </button>
-            )}
-            {responses.length >= 3 && (
-              <button
-                onClick={handleAIAnalysis}
-                disabled={analyzingAI}
-                className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg disabled:opacity-50"
-              >
-                <Sparkles className="h-4 w-4" />
-                {analyzingAI ? "Analyzing..." : "AI Analysis"}
-              </button>
-            )}
-
-            {/* Quick Stats */}
-            <div className="pt-4 mt-4 border-t border-gray-200">
-              <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Quick Stats</p>
-              <div className="space-y-2">
-                <div className="px-3 py-2 bg-gray-50 rounded-lg">
-                  <p className="text-xs text-gray-600">Responses</p>
-                  <p className="text-lg font-bold text-gray-900">{responses.length}</p>
-                </div>
-                <div className="px-3 py-2 bg-gray-50 rounded-lg">
-                  <p className="text-xs text-gray-600">Questions</p>
-                  <p className="text-lg font-bold text-gray-900">{request.questions.length}</p>
-                </div>
-              </div>
-            </div>
-          </nav>
-        </div>
-      </aside>
+      {/* Unified Sidebar */}
+      <DashboardSidebar
+        user={user}
+        onAccountSettingsClick={() => setShowAccountSettings(true)}
+      />
 
       {/* Main Content - Flex Container for Center + Right */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -335,8 +291,30 @@ export default function ResultsPage() {
                   className="flex items-center gap-1.5"
                 >
                   <Copy className="h-4 w-4" />
-                  <span className="hidden sm:inline text-xs">Copy Link</span>
+                  <span className="hidden sm:inline text-xs">Copy link to share</span>
+                  <span className="sm:hidden text-xs">Copy</span>
                 </Button>
+                <Button
+                  disabled
+                  variant="outline"
+                  size="sm"
+                  className="hidden md:flex items-center gap-1.5 opacity-50 cursor-not-allowed"
+                  title="Coming soon"
+                >
+                  <Mail className="h-4 w-4" />
+                  <span className="text-xs">Share via email</span>
+                </Button>
+                {responses.length > 0 && (
+                  <Button
+                    onClick={exportToCSV}
+                    variant="outline"
+                    size="sm"
+                    className="hidden md:flex items-center gap-1.5"
+                  >
+                    <Download className="h-4 w-4" />
+                    <span className="text-xs">Export</span>
+                  </Button>
+                )}
                 {responses.length >= 3 && (
                   <Button
                     onClick={handleAIAnalysis}
@@ -771,6 +749,23 @@ export default function ResultsPage() {
             </div>
           </div>
         </main>
+
+        {/* Footer */}
+        <footer className="bg-white border-t border-gray-200 py-3">
+          <div className="px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-600">
+              <div className="flex items-center gap-3">
+                <span>🤖 Powered by AI</span>
+                <span className="hidden sm:inline">•</span>
+                <span>🔒 100% Anonymous</span>
+              </div>
+              <div className="text-center sm:text-right">
+                <div>© 2025 <a href="/" className="text-indigo-600 hover:underline font-semibold">VoiceClara</a></div>
+                <div className="mt-1">For questions: <a href="mailto:info@voiceclara.com" className="text-indigo-600 hover:underline">info@voiceclara.com</a></div>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
 
       {/* Response Detail Modal */}
@@ -819,6 +814,14 @@ export default function ResultsPage() {
             </div>
           </Card>
         </div>
+      )}
+
+      {/* Account Settings Modal */}
+      {showAccountSettings && user && (
+        <AccountSettingsModal
+          user={user}
+          onClose={() => setShowAccountSettings(false)}
+        />
       )}
     </div>
   )
