@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
-import { Link, useRouter } from "@/lib/i18n-navigation"
+import { Link, useRouter } from "next/link"
 import { useAuth } from "@/lib/auth-context"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"

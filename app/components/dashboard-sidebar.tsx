@@ -4,7 +4,7 @@ import { Home, Plus, Users, Zap, FileText, BarChart3, User, LogOut } from "lucid
 import { supabase } from "@/lib/supabase"
 import LanguageSwitcher from "./language-switcher"
 import { useTranslations } from "next-intl"
-import { Link, useRouter, usePathname } from '@/lib/i18n-navigation'
+import { Link, useRouter, usePathname } from "next/link"
 
 interface DashboardSidebarProps {
   user: any
