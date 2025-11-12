@@ -191,10 +191,25 @@ export default function FeedbackFormPage() {
               </div>
             ) : aiScore && (
               <>
-                {/* Overall Score */}
+                {/* Overall Score with Quality Label */}
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 text-center">
                   <div className="text-6xl font-bold mb-2">{aiScore.overall}</div>
-                  <p className="text-sm opacity-90">Overall Quality Score</p>
+                  {aiScore.qualityLabel && (
+                    <div className="mb-2">
+                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${
+                        aiScore.overall >= 86 ? 'bg-green-500' :
+                        aiScore.overall >= 76 ? 'bg-blue-500' :
+                        aiScore.overall >= 61 ? 'bg-indigo-500' :
+                        aiScore.overall >= 41 ? 'bg-yellow-500' :
+                        'bg-red-500'
+                      }`}>
+                        {aiScore.qualityLabel}
+                      </span>
+                    </div>
+                  )}
+                  <p className="text-xs opacity-90 mb-4">
+                    {aiScore.qualityDescription || "Overall Quality Score"}
+                  </p>
                   <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
                     <div>
                       <p className="font-semibold">{aiScore.specificity}</p>
@@ -211,15 +226,17 @@ export default function FeedbackFormPage() {
                   </div>
                 </div>
 
-                {/* Suggestions */}
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
-                  <p className="font-semibold text-sm mb-3">💡 AI Suggestions</p>
-                  <ul className="space-y-2 text-xs">
-                    {aiScore.suggestions.map((s: string, i: number) => (
-                      <li key={i} className="opacity-90">• {s}</li>
-                    ))}
-                  </ul>
-                </div>
+                {/* General Suggestions */}
+                {aiScore.suggestions && aiScore.suggestions.length > 0 && (
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+                    <p className="font-semibold text-sm mb-3">💡 General Suggestions</p>
+                    <ul className="space-y-2 text-xs">
+                      {aiScore.suggestions.map((s: string, i: number) => (
+                        <li key={i} className="opacity-90">• {s}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -242,28 +259,69 @@ export default function FeedbackFormPage() {
             </div>
           ) : (
             <>
-              {/* All Answers Review */}
+              {/* All Answers Review with AI Feedback */}
               <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2">
-                {request.questions.map((q: string, i: number) => (
-                  <div key={i} className="bg-white border-2 border-gray-200 rounded-xl p-4">
-                    <p className="font-semibold text-sm text-gray-900 mb-2">
-                      {i + 1}. {q}
-                    </p>
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                      {answers[i]}
-                    </p>
-                    <button
-                      onClick={() => {
-                        setShowReview(false)
-                        setCurrentStep(i)
-                      }}
-                      className="mt-2 text-xs text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
-                    >
-                      <Edit className="h-3 w-3" />
-                      Edit
-                    </button>
-                  </div>
-                ))}
+                {request.questions.map((q: string, i: number) => {
+                  const perAnswerFeedback = aiScore?.per_answer_feedback?.[i]
+                  return (
+                    <div key={i} className="bg-white border-2 border-gray-200 rounded-xl p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <p className="font-semibold text-sm text-gray-900">
+                          {i + 1}. {q}
+                        </p>
+                        {perAnswerFeedback && (
+                          <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-bold ${
+                            perAnswerFeedback.score >= 80 ? 'bg-green-100 text-green-700' :
+                            perAnswerFeedback.score >= 60 ? 'bg-blue-100 text-blue-700' :
+                            perAnswerFeedback.score >= 40 ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-red-100 text-red-700'
+                          }`}>
+                            {perAnswerFeedback.score}/100
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap mb-3">
+                        {answers[i]}
+                      </p>
+
+                      {/* AI Feedback for this answer */}
+                      {perAnswerFeedback && (
+                        <div className="mt-3 pt-3 border-t border-gray-200 bg-indigo-50 -mx-4 -mb-4 px-4 py-3 rounded-b-xl">
+                          <p className="text-xs font-semibold text-indigo-900 mb-1.5 flex items-center gap-1">
+                            <Sparkles className="h-3 w-3" />
+                            AI Feedback
+                          </p>
+                          <p className="text-xs text-indigo-800 mb-2">
+                            {perAnswerFeedback.feedback}
+                          </p>
+                          {perAnswerFeedback.tips && perAnswerFeedback.tips.length > 0 && (
+                            <div className="mt-2">
+                              <p className="text-xs font-semibold text-indigo-900 mb-1">Tips:</p>
+                              <ul className="space-y-1">
+                                {perAnswerFeedback.tips.map((tip: string, tipIndex: number) => (
+                                  <li key={tipIndex} className="text-xs text-indigo-700">
+                                    • {tip}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      <button
+                        onClick={() => {
+                          setShowReview(false)
+                          setCurrentStep(i)
+                        }}
+                        className="mt-2 text-xs text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                      >
+                        <Edit className="h-3 w-3" />
+                        Edit Answer
+                      </button>
+                    </div>
+                  )
+                })}
               </div>
 
               {/* Final Anonymity Reminder */}
