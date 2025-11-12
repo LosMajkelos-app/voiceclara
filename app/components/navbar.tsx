@@ -30,15 +30,9 @@ export default function Navbar() {
             <>
               {user ? (
                 <>
-                  <Link href="/dashboard">
-                    <Button variant="ghost" size="sm">Dashboard</Button>
-                  </Link>
-                  <Link href="/pricing">
-                    <Button variant="ghost" size="sm">Pricing</Button>
-                  </Link>
-                  <Link href="/contact">
-                    <Button variant="ghost" size="sm">Contact</Button>
-                  </Link>
+                  <Button variant="ghost" size="sm" disabled className="opacity-50 cursor-default">Dashboard</Button>
+                  <Button variant="ghost" size="sm" disabled className="opacity-50 cursor-default">Pricing</Button>
+                  <Button variant="ghost" size="sm" disabled className="opacity-50 cursor-default">Contact</Button>
                   <Link href="/create">
                     <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
                       Create Request

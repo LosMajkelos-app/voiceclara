@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { toast } from "sonner"
 import Link from "next/link"
-import { Sparkles, ArrowLeft, Copy, CheckCircle, Calendar, MessageSquare, Search, Filter, Download, Eye, X, ChevronLeft, ChevronRight, Home, Settings, Share2, FileText, TrendingUp } from "lucide-react"
+import { Sparkles, ArrowLeft, Copy, CheckCircle, Calendar, MessageSquare, Search, Filter, Download, Eye, X, ChevronLeft, ChevronRight, Share2, Mail } from "lucide-react"
+import DashboardSidebar from "@/app/components/dashboard-sidebar"
+import AccountSettingsModal from "@/app/components/account-settings-modal"
 
 interface FeedbackRequest {
   id: string
@@ -42,6 +44,8 @@ export default function ResultsPage() {
   const [loading, setLoading] = useState(true)
   const [aiAnalysis, setAiAnalysis] = useState<any>(null)
   const [analyzingAI, setAnalyzingAI] = useState(false)
+  const [aiAnalysisResponseCount, setAiAnalysisResponseCount] = useState<number>(0)
+  const [loadingCachedAnalysis, setLoadingCachedAnalysis] = useState(true)
 
   // Table filters and pagination
   const [searchQuery, setSearchQuery] = useState("")
@@ -49,6 +53,7 @@ export default function ResultsPage() {
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest")
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedResponse, setSelectedResponse] = useState<Response | null>(null)
+  const [showAccountSettings, setShowAccountSettings] = useState(false)
   const itemsPerPage = 10
 
   useEffect(() => {
@@ -99,6 +104,19 @@ export default function ResultsPage() {
           setResponses(responsesData || [])
         }
 
+        // Load cached AI analysis if available
+        const { data: cachedAnalysis, error: analysisError } = await supabase
+          .from("ai_analysis")
+          .select("*")
+          .eq("feedback_request_id", requestData.id)
+          .single()
+
+        if (!analysisError && cachedAnalysis) {
+          setAiAnalysis(cachedAnalysis)
+          setAiAnalysisResponseCount(cachedAnalysis.response_count_at_analysis || 0)
+        }
+        setLoadingCachedAnalysis(false)
+
         setLoading(false)
       } catch (error) {
         console.error("Error:", error)
@@ -120,6 +138,12 @@ export default function ResultsPage() {
   const handleAIAnalysis = async () => {
     if (!request) return
 
+    // Check if there are new responses since last analysis
+    if (aiAnalysis && responses.length === aiAnalysisResponseCount) {
+      toast.info("No new responses since last analysis. Analysis is up to date.")
+      return
+    }
+
     setAnalyzingAI(true)
     toast.info("AI is analyzing your feedback... ⏳")
 
@@ -134,6 +158,7 @@ export default function ResultsPage() {
 
       if (response.ok) {
         setAiAnalysis(data)
+        setAiAnalysisResponseCount(responses.length)
 
         // Show warning if some responses were filtered
         if (data.warning) {
@@ -257,58 +282,11 @@ export default function ResultsPage() {
 
   return (
     <div className="min-h-screen flex bg-gray-50">
-      {/* Left Sidebar - Technical Menu */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-56 bg-white border-r border-gray-200">
-        <div className="flex-1 flex flex-col pt-4 pb-4 overflow-y-auto">
-          <nav className="mt-3 flex-1 px-3 space-y-1">
-            <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">
-              <Home className="h-4 w-4" />
-              Dashboard
-            </Link>
-            <button
-              onClick={copyShareLink}
-              className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
-            >
-              <Share2 className="h-4 w-4" />
-              Copy Share Link
-            </button>
-            {responses.length > 0 && (
-              <button
-                onClick={exportToCSV}
-                className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
-              >
-                <Download className="h-4 w-4" />
-                Export CSV
-              </button>
-            )}
-            {responses.length >= 3 && (
-              <button
-                onClick={handleAIAnalysis}
-                disabled={analyzingAI}
-                className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg disabled:opacity-50"
-              >
-                <Sparkles className="h-4 w-4" />
-                {analyzingAI ? "Analyzing..." : "AI Analysis"}
-              </button>
-            )}
-
-            {/* Quick Stats */}
-            <div className="pt-4 mt-4 border-t border-gray-200">
-              <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Quick Stats</p>
-              <div className="space-y-2">
-                <div className="px-3 py-2 bg-gray-50 rounded-lg">
-                  <p className="text-xs text-gray-600">Responses</p>
-                  <p className="text-lg font-bold text-gray-900">{responses.length}</p>
-                </div>
-                <div className="px-3 py-2 bg-gray-50 rounded-lg">
-                  <p className="text-xs text-gray-600">Questions</p>
-                  <p className="text-lg font-bold text-gray-900">{request.questions.length}</p>
-                </div>
-              </div>
-            </div>
-          </nav>
-        </div>
-      </aside>
+      {/* Unified Sidebar */}
+      <DashboardSidebar
+        user={user}
+        onAccountSettingsClick={() => setShowAccountSettings(true)}
+      />
 
       {/* Main Content - Flex Container for Center + Right */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -335,8 +313,30 @@ export default function ResultsPage() {
                   className="flex items-center gap-1.5"
                 >
                   <Copy className="h-4 w-4" />
-                  <span className="hidden sm:inline text-xs">Copy Link</span>
+                  <span className="hidden sm:inline text-xs">Copy link to share</span>
+                  <span className="sm:hidden text-xs">Copy</span>
                 </Button>
+                <Button
+                  disabled
+                  variant="outline"
+                  size="sm"
+                  className="hidden md:flex items-center gap-1.5 opacity-50 cursor-not-allowed"
+                  title="Coming soon"
+                >
+                  <Mail className="h-4 w-4" />
+                  <span className="text-xs">Share via email</span>
+                </Button>
+                {responses.length > 0 && (
+                  <Button
+                    onClick={exportToCSV}
+                    variant="outline"
+                    size="sm"
+                    className="hidden md:flex items-center gap-1.5"
+                  >
+                    <Download className="h-4 w-4" />
+                    <span className="text-xs">Export</span>
+                  </Button>
+                )}
                 {responses.length >= 3 && (
                   <Button
                     onClick={handleAIAnalysis}
@@ -483,10 +483,10 @@ export default function ResultsPage() {
               )}
 
               {/* AI Analysis Results - in center column */}
-              {aiAnalysis && (
+              {responses.length >= 3 && (
                 <div className="space-y-3">
                   {/* Quality Metrics Warning */}
-                  {aiAnalysis.quality && aiAnalysis.quality.filteredResponses > 0 && (
+                  {aiAnalysis?.quality && aiAnalysis.quality.filteredResponses > 0 && (
                     <Card className="p-3 bg-yellow-50 border-2 border-yellow-300">
                       <div className="flex items-start gap-2">
                         <div className="text-xl">⚠️</div>
@@ -506,7 +506,26 @@ export default function ResultsPage() {
                       <Sparkles className="h-5 w-5 text-purple-600" />
                       <h3 className="text-sm font-bold text-gray-900">AI Summary</h3>
                     </div>
-                    <p className="text-xs text-gray-700 mb-3">{aiAnalysis.summary?.summary}</p>
+
+                    {!aiAnalysis && !loadingCachedAnalysis && (
+                      <div className="py-8 text-center">
+                        <div className="text-4xl mb-3">🤖</div>
+                        <p className="text-sm text-gray-600 mb-4">
+                          Click "AI Analysis" above to generate insights from your feedback
+                        </p>
+                      </div>
+                    )}
+
+                    {loadingCachedAnalysis && (
+                      <div className="py-8 text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-3"></div>
+                        <p className="text-xs text-gray-600">Loading analysis...</p>
+                      </div>
+                    )}
+
+                    {aiAnalysis && (
+                      <>
+                        <p className="text-xs text-gray-700 mb-3">{aiAnalysis.summary?.summary}</p>
 
                     {aiAnalysis.summary?.strengths && (
                       <div className="mb-3">
@@ -530,20 +549,22 @@ export default function ResultsPage() {
                       </div>
                     )}
 
-                    {aiAnalysis.summary?.recommendations && (
-                      <div>
-                        <h4 className="text-xs font-semibold text-indigo-700 mb-1">Recommendations:</h4>
-                        <ul className="list-disc pl-4 space-y-0.5">
-                          {aiAnalysis.summary.recommendations.map((rec: string, i: number) => (
-                            <li key={i} className="text-xs text-gray-700">{rec}</li>
-                          ))}
-                        </ul>
-                      </div>
+                        {aiAnalysis.summary?.recommendations && (
+                          <div>
+                            <h4 className="text-xs font-semibold text-indigo-700 mb-1">Recommendations:</h4>
+                            <ul className="list-disc pl-4 space-y-0.5">
+                              {aiAnalysis.summary.recommendations.map((rec: string, i: number) => (
+                                <li key={i} className="text-xs text-gray-700">{rec}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </>
                     )}
                   </Card>
 
                   {/* Sentiment */}
-                  {aiAnalysis.sentiment && (
+                  {aiAnalysis?.sentiment && (
                     <Card className="p-4 bg-white">
                       <h3 className="text-sm font-bold text-gray-900 mb-2">Sentiment</h3>
                       <div className="flex items-center justify-between">
@@ -565,7 +586,7 @@ export default function ResultsPage() {
                   )}
 
                   {/* Themes */}
-                  {aiAnalysis.themes && aiAnalysis.themes.length > 0 && (
+                  {aiAnalysis?.themes && aiAnalysis.themes.length > 0 && (
                     <Card className="p-4 bg-white">
                       <h3 className="text-sm font-bold text-gray-900 mb-2">Key Themes</h3>
                       <div className="space-y-3">
@@ -771,6 +792,23 @@ export default function ResultsPage() {
             </div>
           </div>
         </main>
+
+        {/* Footer */}
+        <footer className="bg-white border-t border-gray-200 py-3">
+          <div className="px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-600">
+              <div className="flex items-center gap-3">
+                <span>🤖 Powered by AI</span>
+                <span className="hidden sm:inline">•</span>
+                <span>🔒 100% Anonymous</span>
+              </div>
+              <div className="text-center sm:text-right">
+                <div>© 2025 <a href="/" className="text-indigo-600 hover:underline font-semibold">VoiceClara</a></div>
+                <div className="mt-1">For questions: <a href="mailto:info@voiceclara.com" className="text-indigo-600 hover:underline">info@voiceclara.com</a></div>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
 
       {/* Response Detail Modal */}
@@ -819,6 +857,14 @@ export default function ResultsPage() {
             </div>
           </Card>
         </div>
+      )}
+
+      {/* Account Settings Modal */}
+      {showAccountSettings && user && (
+        <AccountSettingsModal
+          user={user}
+          onClose={() => setShowAccountSettings(false)}
+        />
       )}
     </div>
   )
