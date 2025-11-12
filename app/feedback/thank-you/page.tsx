@@ -34,8 +34,8 @@ export default function ThankYouPage() {
                     <span className="text-indigo-600 font-bold text-sm">1</span>
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">Your feedback is processed</p>
-                    <p className="text-sm text-gray-600">The recipient will receive your anonymous response</p>
+                    <p className="font-semibold text-gray-900">Your feedback is delivered</p>
+                    <p className="text-sm text-gray-600">The recipient receives your exact words - nothing is changed without your permission</p>
                   </div>
                 </div>
 
@@ -44,8 +44,8 @@ export default function ThankYouPage() {
                     <span className="text-purple-600 font-bold text-sm">2</span>
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">AI analyzes responses</p>
-                    <p className="text-sm text-gray-600">After 3+ responses, AI generates insights and themes</p>
+                    <p className="font-semibold text-gray-900">Recipient collects more responses</p>
+                    <p className="text-sm text-gray-600">After 3+ responses, they can request AI analysis for insights</p>
                   </div>
                 </div>
 
@@ -54,8 +54,8 @@ export default function ThankYouPage() {
                     <span className="text-pink-600 font-bold text-sm">3</span>
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">Recipient sees aggregated feedback</p>
-                    <p className="text-sm text-gray-600">Individual responses stay anonymous forever</p>
+                    <p className="font-semibold text-gray-900">AI helps find patterns</p>
+                    <p className="text-sm text-gray-600">AI generates themes and insights (optional - recipient's choice)</p>
                   </div>
                 </div>
               </div>
