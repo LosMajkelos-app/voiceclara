@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation"
 import { Home, Plus, Users, Zap, FileText, BarChart3, User, LogOut } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
+import LanguageSwitcher from "./language-switcher"
+import { useTranslations } from "next-intl"
 
 interface DashboardSidebarProps {
   user: any
@@ -14,6 +16,7 @@ interface DashboardSidebarProps {
 export default function DashboardSidebar({ user, onAccountSettingsClick }: DashboardSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const t = useTranslations('sidebar')
 
   const isActive = (path: string) => {
     if (path === '/dashboard') {
@@ -40,9 +43,14 @@ export default function DashboardSidebar({ user, onAccountSettingsClick }: Dashb
         {/* Package Level */}
         <div className="px-3 mb-4 flex-shrink-0">
           <div className="px-3 py-2 bg-indigo-50 rounded-lg border border-indigo-200">
-            <p className="text-xs font-semibold text-indigo-900">Free Plan</p>
-            <p className="text-xs text-indigo-600">Unlimited feedback</p>
+            <p className="text-xs font-semibold text-indigo-900">{t('freePlan')}</p>
+            <p className="text-xs text-indigo-600">{t('unlimitedFeedback')}</p>
           </div>
+        </div>
+
+        {/* Language Switcher */}
+        <div className="px-3 mb-4 flex-shrink-0">
+          <LanguageSwitcher />
         </div>
 
         {/* Main Navigation - Scrollable */}
@@ -56,7 +64,7 @@ export default function DashboardSidebar({ user, onAccountSettingsClick }: Dashb
             }`}
           >
             <Home className="h-4 w-4" />
-            Dashboard
+            {t('dashboard')}
           </Link>
 
           <Link
@@ -68,27 +76,27 @@ export default function DashboardSidebar({ user, onAccountSettingsClick }: Dashb
             }`}
           >
             <Plus className="h-4 w-4" />
-            Create Request
+            {t('createRequest')}
           </Link>
 
           {/* Coming Soon Features */}
           <div className="pt-4 mt-4 border-t border-gray-200">
-            <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Coming Soon</p>
-            <button disabled className="w-full flex items-center gap-3 px-3 py-2 mt-2 text-sm font-medium text-gray-400 cursor-not-allowed opacity-60" title="Coming soon">
+            <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('comingSoon')}</p>
+            <button disabled className="w-full flex items-center gap-3 px-3 py-2 mt-2 text-sm font-medium text-gray-400 cursor-not-allowed opacity-60" title={t('comingSoon')}>
               <Users className="h-4 w-4" />
-              Teams
+              {t('teams')}
             </button>
-            <button disabled className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed opacity-60" title="Coming soon">
+            <button disabled className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed opacity-60" title={t('comingSoon')}>
               <Zap className="h-4 w-4" />
-              Integrations
+              {t('integrations')}
             </button>
-            <button disabled className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed opacity-60" title="Coming soon">
+            <button disabled className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed opacity-60" title={t('comingSoon')}>
               <BarChart3 className="h-4 w-4" />
-              Advanced Analytics
+              {t('advancedAnalytics')}
             </button>
-            <button disabled className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed opacity-60" title="Coming soon">
+            <button disabled className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed opacity-60" title={t('comingSoon')}>
               <FileText className="h-4 w-4" />
-              Custom Reports
+              {t('customReports')}
             </button>
           </div>
         </nav>
@@ -100,14 +108,14 @@ export default function DashboardSidebar({ user, onAccountSettingsClick }: Dashb
             className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
           >
             <User className="h-4 w-4" />
-            Profile
+            {t('profile')}
           </button>
           <button
             onClick={handleSignOut}
             className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg"
           >
             <LogOut className="h-4 w-4" />
-            Sign Out
+            {t('signOut')}
           </button>
         </div>
       </div>
