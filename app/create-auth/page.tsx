@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect } from "react"
-import { useRouter } from "@/lib/i18n-navigation"
+import { useRouter } from "next/link"
 import { useAuth } from "@/lib/auth-context"
-import { Link } from "@/lib/i18n-navigation"
+import Link from "next/link"
 import { FeedbackLayout } from "@/components/feedback-layout"
 import { Sparkles, Shield, TrendingUp, ArrowLeft, UserPlus, LogIn, Users } from "lucide-react"
 import { Card } from "@/components/ui/card"

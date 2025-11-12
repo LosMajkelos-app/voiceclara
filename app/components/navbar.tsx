@@ -1,6 +1,6 @@
 "use client"
 
-import { Link } from "@/lib/i18n-navigation"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth-context"
 import {

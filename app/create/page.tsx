@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "@/lib/i18n-navigation"
+import { useRouter } from "next/link"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/lib/auth-context"
 import { FeedbackLayout } from "@/components/feedback-layout"

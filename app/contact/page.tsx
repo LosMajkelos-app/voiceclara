@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
-import { Link } from "@/lib/i18n-navigation"
+import Link from "next/link"
 import Navbar from "@/app/components/navbar"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
