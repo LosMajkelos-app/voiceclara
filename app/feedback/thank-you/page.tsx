@@ -1,6 +1,6 @@
 "use client"
 
-import { Link } from "@/lib/i18n-navigation"
+import Link from "next/link"
 import { Check, Heart, Home, Share2, Sparkles } from "lucide-react"
 
 export default function ThankYouPage() {
@@ -84,7 +84,7 @@ export default function ThankYouPage() {
 
         {/* CTAs */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Link href="/">
+          <Link href="/en">
             <button className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all">
               <Home className="h-5 w-5" />
               Go to Homepage
