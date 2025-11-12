@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { toast } from "sonner"
 import Link from "next/link"
-import { Sparkles, ArrowLeft, Copy, CheckCircle, Calendar, MessageSquare, Search, Filter, Download, Eye, X, ChevronLeft, ChevronRight } from "lucide-react"
+import { Sparkles, ArrowLeft, Copy, CheckCircle, Calendar, MessageSquare, Search, Filter, Download, Eye, X, ChevronLeft, ChevronRight, Home, Settings, Share2, FileText, TrendingUp } from "lucide-react"
 
 interface FeedbackRequest {
   id: string
@@ -256,278 +256,275 @@ export default function ResultsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen flex bg-gray-50">
+      {/* Left Sidebar - Technical Menu */}
+      <aside className="hidden lg:flex lg:flex-col lg:w-56 bg-white border-r border-gray-200">
+        <div className="flex-1 flex flex-col pt-4 pb-4 overflow-y-auto">
+          <nav className="mt-3 flex-1 px-3 space-y-1">
+            <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">
+              <Home className="h-4 w-4" />
+              Dashboard
+            </Link>
+            <button
+              onClick={copyShareLink}
+              className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
+            >
+              <Share2 className="h-4 w-4" />
+              Copy Share Link
+            </button>
+            {responses.length > 0 && (
+              <button
+                onClick={exportToCSV}
+                className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
+              >
+                <Download className="h-4 w-4" />
+                Export CSV
+              </button>
+            )}
+            {responses.length >= 3 && (
+              <button
+                onClick={handleAIAnalysis}
+                disabled={analyzingAI}
+                className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg disabled:opacity-50"
+              >
+                <Sparkles className="h-4 w-4" />
+                {analyzingAI ? "Analyzing..." : "AI Analysis"}
+              </button>
+            )}
 
-        {/* Back Button */}
-        <Link href="/dashboard" className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 mb-6">
-          <ArrowLeft className="h-4 w-4" />
-          <span>Back to Dashboard</span>
-        </Link>
-
-        {/* Header */}
-        <Card className="p-8 bg-white/80 backdrop-blur-sm mb-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-indigo-900 mb-2">
-                {request.title}
-              </h1>
-              <p className="text-gray-600">
-                Created by {request.creator_name || "Anonymous"}
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold text-indigo-600">
-                {responses.length} Response{responses.length !== 1 ? 's' : ''}
-              </p>
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="flex items-center gap-3 p-4 bg-indigo-50 rounded-lg">
-              <MessageSquare className="h-8 w-8 text-indigo-600" />
-              <div>
-                <p className="text-sm text-gray-600">Total Responses</p>
-                <p className="text-2xl font-bold text-indigo-900">{responses.length}</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-lg">
-              <div className="p-2 bg-purple-100 rounded-full">
-                <span className="text-2xl">📊</span>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Questions</p>
-                <p className="text-2xl font-bold text-purple-900">{request.questions.length}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg">
-              <Calendar className="h-8 w-8 text-green-600" />
-              <div>
-                <p className="text-sm text-gray-600">Created</p>
-                <p className="text-lg font-bold text-green-900">
-                  {new Date(request.created_at).toLocaleDateString()}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Share Link */}
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600 mb-2">Share this link to collect more feedback:</p>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                readOnly
-                value={`${typeof window !== 'undefined' ? window.location.origin : ''}/feedback/${request.share_token}`}
-                className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded text-sm"
-              />
-              <Button onClick={copyShareLink} variant="outline">
-                <Copy className="h-4 w-4 mr-2" />
-                Copy
-              </Button>
-            </div>
-          </div>
-        </Card>
-
-        {/* Success Banner for Newly Created Request */}
-        {isNewlyCreated && (
-          <Card className="p-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white mb-6">
-            <div className="flex items-center gap-4">
-              <div className="text-4xl">🎉</div>
-              <div className="flex-1">
-                <h3 className="text-xl font-bold mb-1">
-                  Feedback Request Created Successfully!
-                </h3>
-                <p className="text-sm opacity-90 mb-3">
-                  Share the link below to start collecting honest, anonymous feedback.
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={copyShareLink}
-                    className="bg-white text-green-600 hover:bg-gray-100"
-                  >
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copy Share Link
-                  </Button>
-                  <Link href="/dashboard">
-                    <Button variant="outline" className="bg-white/10 border-white/30 hover:bg-white/20 text-white">
-                      Go to Dashboard
-                    </Button>
-                  </Link>
+            {/* Quick Stats */}
+            <div className="pt-4 mt-4 border-t border-gray-200">
+              <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Quick Stats</p>
+              <div className="space-y-2">
+                <div className="px-3 py-2 bg-gray-50 rounded-lg">
+                  <p className="text-xs text-gray-600">Responses</p>
+                  <p className="text-lg font-bold text-gray-900">{responses.length}</p>
+                </div>
+                <div className="px-3 py-2 bg-gray-50 rounded-lg">
+                  <p className="text-xs text-gray-600">Questions</p>
+                  <p className="text-lg font-bold text-gray-900">{request.questions.length}</p>
                 </div>
               </div>
             </div>
-          </Card>
-        )}
+          </nav>
+        </div>
+      </aside>
 
-        {/* Guest Login Banner */}
-        {!user && (
-          <Card className="p-6 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 mb-6">
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0">
-                <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                  <Sparkles className="h-5 w-5 text-indigo-600" />
-                </div>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-indigo-900 mb-1">
-                  💡 Save This Request to Your Dashboard
-                </h3>
-                <p className="text-sm text-indigo-800 mb-3">
-                  Create an account to track responses, get AI insights, and manage all your feedback requests in one place. It's free forever!
-                </p>
-                <ul className="text-xs text-indigo-700 space-y-1.5 mb-4">
-                  <li className="flex items-center gap-1.5">
-                    <span className="text-green-600 font-bold">✓</span> Access your requests anytime
-                  </li>
-                  <li className="flex items-center gap-1.5">
-                    <span className="text-green-600 font-bold">✓</span> Get AI-powered insights and themes
-                  </li>
-                  <li className="flex items-center gap-1.5">
-                    <span className="text-green-600 font-bold">✓</span> Track response history over time
-                  </li>
-                  <li className="flex items-center gap-1.5">
-                    <span className="text-green-600 font-bold">✓</span> 100% free, no credit card required
-                  </li>
-                </ul>
-                <div className="flex gap-2">
-                  <Link href="/auth/signup">
-                    <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white">
-                      Create Free Account
-                    </Button>
-                  </Link>
-                  <Link href="/auth/login">
-                    <Button variant="outline" className="border-indigo-600 text-indigo-600 hover:bg-indigo-50">
-                      Sign In
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </Card>
-        )}
-
-        {/* AI Analysis Unlock Message */}
-        {responses.length < 3 && (
-          <Card className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 mb-6">
-            <div className="flex items-center gap-3">
-              <Sparkles className="h-8 w-8 text-purple-600 flex-shrink-0" />
-              <div className="flex-1">
-                <h3 className="font-bold text-gray-900 mb-1">
-                  🤖 AI Analysis Coming Soon!
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Collect at least 3 responses to unlock AI-powered insights: 
-                  themes, sentiment analysis, and blind spot detection.
-                </p>
-                <div className="mt-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="flex-1 bg-purple-200 rounded-full h-2">
-                      <div 
-                        className="bg-purple-600 h-2 rounded-full transition-all"
-                        style={{ width: `${(responses.length / 3) * 100}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-xs font-medium text-purple-600">
-                      {responses.length}/3
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500">
-                    {3 - responses.length} more response{3 - responses.length !== 1 ? 's' : ''} needed
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Card>
-        )}
-
-        {responses.length >= 3 && (
-          <>
-            <Card className="p-6 bg-gradient-to-r from-green-500 to-teal-600 text-white mb-6">
+      {/* Main Content - Flex Container for Center + Right */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Bar */}
+        <header className="bg-white border-b border-gray-200">
+          <div className="px-4 sm:px-6 lg:px-8 py-3">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <CheckCircle className="h-8 w-8 flex-shrink-0" />
-                <div className="flex-1">
-                  <h3 className="font-bold mb-1">
-                    ✅ AI Analysis Available!
-                  </h3>
-                  <p className="text-sm">
-                    You have enough responses for AI-powered insights
-                  </p>
+                <Link href="/dashboard" className="lg:hidden">
+                  <Button variant="outline" size="sm">
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <div>
+                  <h1 className="text-xl font-bold text-gray-900">{request.title}</h1>
+                  <p className="text-xs text-gray-500 mt-0.5">Created by {request.creator_name || "Anonymous"}</p>
                 </div>
-                <Button
-                  className="bg-white text-green-600 hover:bg-gray-100"
-                  onClick={handleAIAnalysis}
-                  disabled={analyzingAI}
-                >
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  {analyzingAI ? "Analyzing..." : "Analyze with AI"}
-                </Button>
               </div>
-            </Card>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={copyShareLink}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1.5"
+                >
+                  <Copy className="h-4 w-4" />
+                  <span className="hidden sm:inline text-xs">Copy Link</span>
+                </Button>
+                {responses.length >= 3 && (
+                  <Button
+                    onClick={handleAIAnalysis}
+                    disabled={analyzingAI}
+                    size="sm"
+                    className="bg-indigo-600 hover:bg-indigo-700 flex items-center gap-1.5"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    <span className="text-xs">{analyzingAI ? "Analyzing..." : "AI Analysis"}</span>
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </header>
 
-            {/* AI Analysis Results */}
-            {aiAnalysis && (
-              <div className="mb-6 space-y-4">
-                {/* Quality Metrics Warning */}
-                {aiAnalysis.quality && aiAnalysis.quality.filteredResponses > 0 && (
-                  <Card className="p-4 bg-yellow-50 border-2 border-yellow-300">
-                    <div className="flex items-start gap-3">
-                      <div className="text-2xl">⚠️</div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-yellow-900 mb-1">Response Quality Notice</h4>
-                        <p className="text-sm text-yellow-800 mb-2">
-                          {aiAnalysis.quality.filteredResponses} of {aiAnalysis.quality.totalResponses} response(s) were filtered as test/spam responses (e.g., "asdasd", "test", very short answers).
-                        </p>
-                        <div className="flex items-center gap-4 text-xs">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-green-700">✓ Valid:</span>
-                            <span className="text-gray-700">{aiAnalysis.quality.validResponses}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-red-700">✗ Filtered:</span>
-                            <span className="text-gray-700">{aiAnalysis.quality.filteredResponses}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-indigo-700">Avg Quality:</span>
-                            <span className="text-gray-700">{aiAnalysis.quality.averageQuality}/100</span>
-                          </div>
-                        </div>
+        {/* Main Content Grid */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="h-full lg:grid lg:grid-cols-2 lg:gap-4 p-4">
+            {/* CENTER COLUMN - Request Details */}
+            <div className="space-y-4 lg:pr-2">
+              {/* Success Banner */}
+              {isNewlyCreated && (
+                <Card className="p-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+                  <div className="flex items-center gap-3">
+                    <div className="text-3xl">🎉</div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold mb-1">Request Created!</h3>
+                      <p className="text-xs opacity-90">Share the link to collect feedback</p>
+                    </div>
+                  </div>
+                </Card>
+              )}
+
+              {/* Stats Cards */}
+              <div className="grid grid-cols-3 gap-2">
+                <Card className="p-3 bg-white">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5 text-indigo-600" />
+                    <div>
+                      <p className="text-xs text-gray-600">Responses</p>
+                      <p className="text-lg font-bold text-gray-900">{responses.length}</p>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-3 bg-white">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-purple-600" />
+                    <div>
+                      <p className="text-xs text-gray-600">Questions</p>
+                      <p className="text-lg font-bold text-gray-900">{request.questions.length}</p>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-3 bg-white">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-green-600" />
+                    <div>
+                      <p className="text-xs text-gray-600">Created</p>
+                      <p className="text-xs font-bold text-gray-900">
+                        {new Date(request.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              {/* Share Link Card */}
+              <Card className="p-4 bg-white">
+                <h3 className="text-sm font-bold text-gray-900 mb-2">Share Link</h3>
+                <p className="text-xs text-gray-600 mb-2">Share this link to collect more feedback:</p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={`${typeof window !== 'undefined' ? window.location.origin : ''}/feedback/${request.share_token}`}
+                    className="flex-1 px-2 py-1.5 bg-gray-50 border border-gray-300 rounded text-xs"
+                  />
+                  <Button onClick={copyShareLink} variant="outline" size="sm" className="h-auto py-1.5">
+                    <Copy className="h-3 w-3" />
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Questions List */}
+              <Card className="p-4 bg-white">
+                <h3 className="text-sm font-bold text-gray-900 mb-3">Questions ({request.questions.length})</h3>
+                <div className="space-y-2">
+                  {request.questions.map((q, i) => (
+                    <div key={i} className="flex gap-2 text-xs">
+                      <span className="font-semibold text-indigo-600 flex-shrink-0">{i + 1}.</span>
+                      <p className="text-gray-700">{q}</p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              {/* AI Analysis Progress */}
+              {responses.length < 3 && (
+                <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200">
+                  <div className="flex items-start gap-3">
+                    <Sparkles className="h-6 w-6 text-purple-600 flex-shrink-0" />
+                    <div className="flex-1">
+                      <h3 className="text-sm font-bold text-gray-900 mb-1">AI Analysis Locked</h3>
+                      <p className="text-xs text-gray-600 mb-2">
+                        Collect {3 - responses.length} more response{3 - responses.length !== 1 ? 's' : ''} to unlock AI insights
+                      </p>
+                      <div className="w-full bg-purple-200 rounded-full h-1.5">
+                        <div
+                          className="bg-purple-600 h-1.5 rounded-full transition-all"
+                          style={{ width: `${(responses.length / 3) * 100}%` }}
+                        ></div>
                       </div>
                     </div>
-                  </Card>
-                )}
-
-                {/* Summary */}
-                <Card className="p-6 bg-white/80 backdrop-blur-sm">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Sparkles className="h-6 w-6 text-purple-600" />
-                    <h3 className="text-xl font-bold text-gray-900">AI Executive Summary</h3>
                   </div>
-                  <div className="prose prose-sm max-w-none">
-                    <p className="text-gray-700 whitespace-pre-wrap mb-4">
-                      {aiAnalysis.summary?.summary}
-                    </p>
+                </Card>
+              )}
+
+              {/* Guest Login Banner */}
+              {!user && (
+                <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200">
+                  <div className="flex items-start gap-2">
+                    <Sparkles className="h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <h3 className="text-sm font-bold text-indigo-900 mb-1">Save to Dashboard</h3>
+                      <p className="text-xs text-indigo-800 mb-2">
+                        Create a free account to track responses and get AI insights
+                      </p>
+                      <div className="flex gap-2">
+                        <Link href="/auth/signup">
+                          <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 h-7 text-xs">
+                            Sign Up
+                          </Button>
+                        </Link>
+                        <Link href="/auth/login">
+                          <Button variant="outline" size="sm" className="border-indigo-600 text-indigo-600 h-7 text-xs">
+                            Sign In
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              )}
+
+              {/* AI Analysis Results - in center column */}
+              {aiAnalysis && (
+                <div className="space-y-3">
+                  {/* Quality Metrics Warning */}
+                  {aiAnalysis.quality && aiAnalysis.quality.filteredResponses > 0 && (
+                    <Card className="p-3 bg-yellow-50 border-2 border-yellow-300">
+                      <div className="flex items-start gap-2">
+                        <div className="text-xl">⚠️</div>
+                        <div className="flex-1">
+                          <h4 className="text-xs font-bold text-yellow-900 mb-1">Quality Notice</h4>
+                          <p className="text-xs text-yellow-800">
+                            {aiAnalysis.quality.filteredResponses} of {aiAnalysis.quality.totalResponses} responses filtered as test/spam
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  )}
+
+                  {/* Summary */}
+                  <Card className="p-4 bg-white">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Sparkles className="h-5 w-5 text-purple-600" />
+                      <h3 className="text-sm font-bold text-gray-900">AI Summary</h3>
+                    </div>
+                    <p className="text-xs text-gray-700 mb-3">{aiAnalysis.summary?.summary}</p>
 
                     {aiAnalysis.summary?.strengths && (
-                      <div className="mb-4">
-                        <h4 className="font-semibold text-green-700 mb-2">💪 Key Strengths:</h4>
-                        <ul className="list-disc pl-5 space-y-1">
+                      <div className="mb-3">
+                        <h4 className="text-xs font-semibold text-green-700 mb-1">Strengths:</h4>
+                        <ul className="list-disc pl-4 space-y-0.5">
                           {aiAnalysis.summary.strengths.map((strength: string, i: number) => (
-                            <li key={i} className="text-gray-700">{strength}</li>
+                            <li key={i} className="text-xs text-gray-700">{strength}</li>
                           ))}
                         </ul>
                       </div>
                     )}
 
                     {aiAnalysis.summary?.growthAreas && (
-                      <div className="mb-4">
-                        <h4 className="font-semibold text-orange-700 mb-2">🌱 Growth Areas:</h4>
-                        <ul className="list-disc pl-5 space-y-1">
+                      <div className="mb-3">
+                        <h4 className="text-xs font-semibold text-orange-700 mb-1">Growth Areas:</h4>
+                        <ul className="list-disc pl-4 space-y-0.5">
                           {aiAnalysis.summary.growthAreas.map((area: string, i: number) => (
-                            <li key={i} className="text-gray-700">{area}</li>
+                            <li key={i} className="text-xs text-gray-700">{area}</li>
                           ))}
                         </ul>
                       </div>
@@ -535,371 +532,294 @@ export default function ResultsPage() {
 
                     {aiAnalysis.summary?.recommendations && (
                       <div>
-                        <h4 className="font-semibold text-indigo-700 mb-2">🎯 Recommendations:</h4>
-                        <ul className="list-disc pl-5 space-y-1">
+                        <h4 className="text-xs font-semibold text-indigo-700 mb-1">Recommendations:</h4>
+                        <ul className="list-disc pl-4 space-y-0.5">
                           {aiAnalysis.summary.recommendations.map((rec: string, i: number) => (
-                            <li key={i} className="text-gray-700">{rec}</li>
+                            <li key={i} className="text-xs text-gray-700">{rec}</li>
                           ))}
                         </ul>
                       </div>
                     )}
-                  </div>
-                </Card>
+                  </Card>
 
-                {/* Sentiment */}
-                {aiAnalysis.sentiment && (
-                  <Card className="p-6 bg-white/80 backdrop-blur-sm">
-                    <h3 className="text-lg font-bold text-gray-900 mb-3">😊 Overall Sentiment</h3>
-                    <div className="flex items-center gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
+                  {/* Sentiment */}
+                  {aiAnalysis.sentiment && (
+                    <Card className="p-4 bg-white">
+                      <h3 className="text-sm font-bold text-gray-900 mb-2">Sentiment</h3>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
                           <span className="text-2xl">
                             {aiAnalysis.sentiment.sentiment === 'positive' && '😊'}
                             {aiAnalysis.sentiment.sentiment === 'constructive' && '💡'}
                             {aiAnalysis.sentiment.sentiment === 'neutral' && '😐'}
                             {aiAnalysis.sentiment.sentiment === 'concerned' && '😟'}
                           </span>
-                          <span className="font-semibold text-lg capitalize">
-                            {aiAnalysis.sentiment.sentiment}
-                          </span>
+                          <span className="text-sm font-semibold capitalize">{aiAnalysis.sentiment.sentiment}</span>
                         </div>
-                        <p className="text-sm text-gray-600">{aiAnalysis.sentiment.explanation}</p>
+                        <div className="text-right">
+                          <p className="text-lg font-bold text-indigo-600">{aiAnalysis.sentiment.confidence}%</p>
+                          <p className="text-xs text-gray-500">Confidence</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-3xl font-bold text-indigo-600">
-                          {aiAnalysis.sentiment.confidence}%
-                        </p>
-                        <p className="text-xs text-gray-500">Confidence</p>
-                      </div>
-                    </div>
-                  </Card>
-                )}
+                    </Card>
+                  )}
 
-                {/* Themes */}
-                {aiAnalysis.themes && aiAnalysis.themes.length > 0 && (
-                  <Card className="p-6 bg-white/80 backdrop-blur-sm">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">🔍 Key Themes</h3>
-                    <div className="space-y-4">
-                      {aiAnalysis.themes.map((theme: any, i: number) => (
-                        <div key={i} className="border-l-4 border-indigo-400 pl-4 py-2">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-semibold text-gray-900">{theme.name}</h4>
-                            <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded-full font-medium">
-                              {theme.count} mentions
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-2">{theme.description}</p>
-                          {theme.quotes && theme.quotes.length > 0 && (
-                            <div className="mt-2 space-y-1">
-                              {theme.quotes.map((quote: string, qi: number) => (
-                                <p key={qi} className="text-xs text-gray-500 italic pl-3 border-l-2 border-gray-200">
-                                  "{quote}"
-                                </p>
-                              ))}
+                  {/* Themes */}
+                  {aiAnalysis.themes && aiAnalysis.themes.length > 0 && (
+                    <Card className="p-4 bg-white">
+                      <h3 className="text-sm font-bold text-gray-900 mb-2">Key Themes</h3>
+                      <div className="space-y-3">
+                        {aiAnalysis.themes.map((theme: any, i: number) => (
+                          <div key={i} className="border-l-4 border-indigo-400 pl-3 py-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <h4 className="text-xs font-semibold text-gray-900">{theme.name}</h4>
+                              <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs rounded-full">
+                                {theme.count}
+                              </span>
                             </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </Card>
-                )}
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Empty State */}
-        {responses.length === 0 && (
-          <Card className="p-12 bg-white/80 backdrop-blur-sm text-center">
-            <div className="text-6xl mb-4">📭</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              No Responses Yet
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Share your feedback request link to start collecting responses
-            </p>
-            <Button onClick={copyShareLink} className="bg-indigo-600 hover:bg-indigo-700">
-              <Copy className="mr-2 h-4 w-4" />
-              Copy Share Link
-            </Button>
-          </Card>
-        )}
-
-        {/* All Responses - New Table View */}
-        {responses.length > 0 && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">All Responses ({responses.length})</h2>
-              <Button
-                onClick={exportToCSV}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <Download className="h-4 w-4" />
-                Export CSV
-              </Button>
+                            <p className="text-xs text-gray-600">{theme.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Filters and Search */}
-            <Card className="p-4 bg-white/80 backdrop-blur-sm">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Search */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search responses..."
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value)
-                      setCurrentPage(1)
-                    }}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
+            {/* RIGHT COLUMN - Responses Table */}
+            <div className="space-y-3 lg:pl-2 mt-4 lg:mt-0">
+              {/* Empty State */}
+              {responses.length === 0 && (
+                <Card className="p-8 bg-white text-center">
+                  <div className="text-5xl mb-3">📭</div>
+                  <h2 className="text-lg font-bold text-gray-900 mb-2">No Responses Yet</h2>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Share your feedback link to start collecting responses
+                  </p>
+                  <Button onClick={copyShareLink} size="sm" className="bg-indigo-600 hover:bg-indigo-700">
+                    <Copy className="mr-1.5 h-4 w-4" />
+                    Copy Share Link
+                  </Button>
+                </Card>
+              )}
 
-                {/* Sentiment Filter */}
-                <div className="relative">
-                  <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <select
-                    value={sentimentFilter}
-                    onChange={(e) => {
-                      setSentimentFilter(e.target.value)
-                      setCurrentPage(1)
-                    }}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-white"
-                  >
-                    <option value="all">All Sentiments</option>
-                    <option value="positive">😊 Positive</option>
-                    <option value="neutral">😐 Neutral</option>
-                    <option value="negative">😔 Negative</option>
-                  </select>
-                </div>
+              {/* Responses Section */}
+              {responses.length > 0 && (
+                <>
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-base font-bold text-gray-900">Responses ({responses.length})</h2>
+                    <Button
+                      onClick={exportToCSV}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-1.5 h-7"
+                    >
+                      <Download className="h-3 w-3" />
+                      <span className="text-xs">CSV</span>
+                    </Button>
+                  </div>
 
-                {/* Sort Order */}
-                <select
-                  value={sortOrder}
-                  onChange={(e) => setSortOrder(e.target.value as "newest" | "oldest")}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-white"
-                >
-                  <option value="newest">Newest First</option>
-                  <option value="oldest">Oldest First</option>
-                </select>
-              </div>
-            </Card>
+                  {/* Filters */}
+                  <Card className="p-3 bg-white">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <div className="relative">
+                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400" />
+                        <input
+                          type="text"
+                          placeholder="Search..."
+                          value={searchQuery}
+                          onChange={(e) => {
+                            setSearchQuery(e.target.value)
+                            setCurrentPage(1)
+                          }}
+                          className="w-full pl-7 pr-2 py-1.5 border border-gray-300 rounded text-xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                      </div>
+                      <select
+                        value={sortOrder}
+                        onChange={(e) => setSortOrder(e.target.value as "newest" | "oldest")}
+                        className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                      >
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                      </select>
+                    </div>
+                  </Card>
 
-            {/* Desktop Table */}
-            <Card className="hidden md:block overflow-hidden bg-white/80 backdrop-blur-sm">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        #
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Date & Time
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Preview
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Sentiment
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
+                  {/* Desktop Table */}
+                  <Card className="hidden md:block overflow-hidden bg-white">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-gray-50 border-b border-gray-200">
+                          <tr>
+                            <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600">#</th>
+                            <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600">Date</th>
+                            <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600">Preview</th>
+                            <th className="px-3 py-2 text-center text-xs font-semibold text-gray-600">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {paginatedResponses.map((response, index) => {
+                            const globalIndex = (currentPage - 1) * itemsPerPage + index + 1
+                            const firstAnswer = response.answers[0]
+                            return (
+                              <tr key={response.id} className="hover:bg-gray-50 transition-colors">
+                                <td className="px-3 py-2 text-xs font-medium text-gray-900">#{globalIndex}</td>
+                                <td className="px-3 py-2 text-xs text-gray-600">
+                                  {new Date(response.submitted_at).toLocaleDateString()}
+                                </td>
+                                <td className="px-3 py-2 text-xs text-gray-700">
+                                  <p className="font-medium text-gray-900 mb-0.5">
+                                    {truncateText(firstAnswer.question, 40)}
+                                  </p>
+                                  <p className="text-gray-600">
+                                    {truncateText(firstAnswer.answer, 60)}
+                                  </p>
+                                  {response.answers.length > 1 && (
+                                    <p className="text-xs text-indigo-600 mt-0.5">
+                                      +{response.answers.length - 1} more
+                                    </p>
+                                  )}
+                                </td>
+                                <td className="px-3 py-2 text-center">
+                                  <Button
+                                    onClick={() => setSelectedResponse(response)}
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-7 px-2 text-xs"
+                                  >
+                                    <Eye className="h-3 w-3" />
+                                  </Button>
+                                </td>
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </Card>
+
+                  {/* Mobile Cards */}
+                  <div className="md:hidden space-y-2">
                     {paginatedResponses.map((response, index) => {
                       const globalIndex = (currentPage - 1) * itemsPerPage + index + 1
                       const firstAnswer = response.answers[0]
                       return (
-                        <tr key={response.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                            #{globalIndex}
-                          </td>
-                          <td className="px-4 py-4 text-sm text-gray-600">
-                            <div>
+                        <Card key={response.id} className="p-3 bg-white">
+                          <div className="flex items-start justify-between mb-2">
+                            <span className="text-xs font-bold text-gray-900">#{globalIndex}</span>
+                            <span className="text-xs text-gray-500">
                               {new Date(response.submitted_at).toLocaleDateString()}
-                            </div>
-                            <div className="text-xs text-gray-400">
-                              {new Date(response.submitted_at).toLocaleTimeString()}
-                            </div>
-                          </td>
-                          <td className="px-4 py-4 text-sm text-gray-700">
-                            <div className="space-y-1">
-                              <p className="font-medium text-gray-900">
-                                {truncateText(firstAnswer.question, 50)}
-                              </p>
-                              <p className="text-gray-600">
-                                {truncateText(firstAnswer.answer, 100)}
-                              </p>
-                              {response.answers.length > 1 && (
-                                <p className="text-xs text-indigo-600">
-                                  +{response.answers.length - 1} more answer(s)
-                                </p>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-4 py-4 text-center">
-                            <span className="text-2xl">😐</span>
-                          </td>
-                          <td className="px-4 py-4 text-center">
-                            <Button
-                              onClick={() => setSelectedResponse(response)}
-                              variant="outline"
-                              size="sm"
-                              className="flex items-center gap-1"
-                            >
-                              <Eye className="h-4 w-4" />
-                              View
-                            </Button>
-                          </td>
-                        </tr>
+                            </span>
+                          </div>
+                          <p className="text-xs font-medium text-gray-900 mb-1">
+                            {truncateText(firstAnswer.question, 50)}
+                          </p>
+                          <p className="text-xs text-gray-600 mb-2">
+                            {truncateText(firstAnswer.answer, 80)}
+                          </p>
+                          <Button
+                            onClick={() => setSelectedResponse(response)}
+                            variant="outline"
+                            size="sm"
+                            className="w-full h-7 text-xs"
+                          >
+                            <Eye className="h-3 w-3 mr-1" />
+                            View Full
+                          </Button>
+                        </Card>
                       )
                     })}
-                  </tbody>
-                </table>
-              </div>
-            </Card>
+                  </div>
 
-            {/* Mobile Cards */}
-            <div className="md:hidden space-y-4">
-              {paginatedResponses.map((response, index) => {
-                const globalIndex = (currentPage - 1) * itemsPerPage + index + 1
-                const firstAnswer = response.answers[0]
-                return (
-                  <Card key={response.id} className="p-4 bg-white/80 backdrop-blur-sm">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-gray-900">#{globalIndex}</span>
-                        <span className="text-2xl">😐</span>
-                      </div>
-                      <div className="text-xs text-gray-500 text-right">
-                        <div>{new Date(response.submitted_at).toLocaleDateString()}</div>
-                        <div>{new Date(response.submitted_at).toLocaleTimeString()}</div>
-                      </div>
-                    </div>
-                    <div className="mb-3">
-                      <p className="font-medium text-gray-900 text-sm mb-1">
-                        {truncateText(firstAnswer.question, 50)}
-                      </p>
-                      <p className="text-gray-600 text-sm">
-                        {truncateText(firstAnswer.answer, 100)}
-                      </p>
-                      {response.answers.length > 1 && (
-                        <p className="text-xs text-indigo-600 mt-1">
-                          +{response.answers.length - 1} more answer(s)
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <Card className="p-3 bg-white">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-gray-600">
+                          {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredAndSortedResponses.length)} of {filteredAndSortedResponses.length}
                         </p>
-                      )}
-                    </div>
-                    <Button
-                      onClick={() => setSelectedResponse(response)}
-                      variant="outline"
-                      size="sm"
-                      className="w-full flex items-center justify-center gap-1"
-                    >
-                      <Eye className="h-4 w-4" />
-                      View Full Response
-                    </Button>
-                  </Card>
-                )
-              })}
+                        <div className="flex items-center gap-2">
+                          <Button
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-2"
+                          >
+                            <ChevronLeft className="h-3 w-3" />
+                          </Button>
+                          <span className="text-xs font-medium px-2">
+                            {currentPage}/{totalPages}
+                          </span>
+                          <Button
+                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-2"
+                          >
+                            <ChevronRight className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  )}
+                </>
+              )}
             </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <Card className="p-4 bg-white/80 backdrop-blur-sm">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-600">
-                    Showing {(currentPage - 1) * itemsPerPage + 1} to{' '}
-                    {Math.min(currentPage * itemsPerPage, filteredAndSortedResponses.length)} of{' '}
-                    {filteredAndSortedResponses.length} responses
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm font-medium px-3">
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    <Button
-                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            )}
           </div>
-        )}
+        </main>
+      </div>
 
-        {/* Response Detail Modal */}
-        {selectedResponse && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedResponse(null)}>
-            <Card className="max-w-3xl w-full max-h-[90vh] overflow-y-auto bg-white" onClick={(e) => e.stopPropagation()}>
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-2xl font-bold text-gray-900">Response Details</h3>
-                  <button
-                    onClick={() => setSelectedResponse(null)}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                  >
-                    <X className="h-5 w-5 text-gray-500" />
-                  </button>
-                </div>
+      {/* Response Detail Modal */}
+      {selectedResponse && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedResponse(null)}>
+          <Card className="max-w-3xl w-full max-h-[90vh] overflow-y-auto bg-white" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-900">Response Details</h3>
+                <button
+                  onClick={() => setSelectedResponse(null)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X className="h-5 w-5 text-gray-500" />
+                </button>
+              </div>
 
-                <div className="mb-4 pb-4 border-b border-gray-200">
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      {new Date(selectedResponse.submitted_at).toLocaleString()}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">😐</span>
-                      <span>Neutral</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  {selectedResponse.answers.map((answer, index) => (
-                    <div key={index} className="border-l-4 border-indigo-400 pl-4 py-2">
-                      <p className="font-semibold text-gray-900 mb-2">
-                        {index + 1}. {answer.question}
-                      </p>
-                      <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                        {answer.answer}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-gray-200">
-                  <Button
-                    onClick={() => setSelectedResponse(null)}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
-                  >
-                    Close
-                  </Button>
+              <div className="mb-4 pb-4 border-b border-gray-200">
+                <div className="flex items-center gap-3 text-sm text-gray-600">
+                  <Calendar className="h-4 w-4" />
+                  {new Date(selectedResponse.submitted_at).toLocaleString()}
                 </div>
               </div>
-            </Card>
-          </div>
-        )}
 
-      </div>
+              <div className="space-y-4">
+                {selectedResponse.answers.map((answer, index) => (
+                  <div key={index} className="border-l-4 border-indigo-400 pl-4 py-2">
+                    <p className="font-semibold text-gray-900 mb-2">
+                      {index + 1}. {answer.question}
+                    </p>
+                    <p className="text-gray-700 whitespace-pre-wrap text-sm leading-relaxed">
+                      {answer.answer}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <Button
+                  onClick={() => setSelectedResponse(null)}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }
