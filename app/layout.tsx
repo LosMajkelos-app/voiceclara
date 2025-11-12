@@ -1,6 +1,6 @@
 import "./globals.css"
 
-// Root layout - minimal, locale layout handles html/body
+// Minimal root layout - locale layout handles full structure
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return children
 }
