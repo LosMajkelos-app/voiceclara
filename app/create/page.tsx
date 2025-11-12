@@ -46,56 +46,57 @@ export default function CreatePage() {
   }
 
   const proceedToQuestions = async () => {
-  if (!creatorName.trim()) {
-    alert("Please enter your name")
-    return
-  }
-  if (!creatorEmail.trim() || !creatorEmail.includes('@')) {
-    alert("Please enter a valid email")
-    return
-  }
-  if (!templateType) {
-    alert("Please select a template")
-    return
-  }
+    if (!creatorName.trim()) {
+      alert("Please enter your name")
+      return
+    }
+    if (!creatorEmail.trim() || !creatorEmail.includes('@')) {
+      alert("Please enter a valid email")
+      return
+    }
+    if (!templateType) {
+      alert("Please select a template")
+      return
+    }
 
-  // AI Generation
-  if (templateType === "custom") {
-    if (!customPrompt.trim()) {
+    if (templateType === "custom" && !customPrompt.trim()) {
       alert("Please describe what feedback you need")
       return
     }
 
-    setLoading(true)
+    if (templateType === "custom") {
+      // Real AI generation
+      setLoading(true)
 
-    try {
-      // Call AI API
-      const response = await fetch('/api/generate-questions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: customPrompt })
-      })
+      try {
+        const response = await fetch('/api/generate-questions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: customPrompt })
+        })
 
-      const result = await response.json()
+        const data = await response.json()
 
-      if (result.error) {
-        alert(result.error)
+        if (response.ok && data.questions) {
+          setTitle("AI-Generated Feedback Request")
+          setQuestions(data.questions)
+        } else {
+          alert("AI generation failed: " + (data.error || "Unknown error"))
+          setLoading(false)
+          return
+        }
+      } catch (error) {
+        console.error('AI generation error:', error)
+        alert("Failed to generate questions. Please try again.")
         setLoading(false)
         return
       }
 
-      setTitle(result.title || "AI Generated Feedback Request")
-      setQuestions(result.questions || [])
       setLoading(false)
-    } catch (error) {
-      alert("Failed to generate questions with AI")
-      setLoading(false)
-      return
     }
-  }
 
-  setStep(2)
-}
+    setStep(2)
+  }
 
   const addQuestion = () => {
     if (questions.length < 10) {
@@ -156,7 +157,7 @@ export default function CreatePage() {
         return
       }
 
-      router.push(`/feedback/${data.share_token}?created=true`)
+      router.push(`/results/${data.results_token}?created=true`)
     } catch (err) {
       console.error('Catch error:', err)
       alert("Failed to create request")
@@ -373,6 +374,42 @@ export default function CreatePage() {
               </button>
             )}
           </div>
+
+          {/* Guest Login Banner */}
+          {!user && (
+            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0">
+                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                    <Sparkles className="h-4 w-4 text-indigo-600" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-indigo-900 mb-1">
+                    💡 Create an account to unlock more features
+                  </p>
+                  <p className="text-xs text-indigo-700 mb-3">
+                    Save this request to your dashboard, get AI insights, and track responses over time. It's free forever!
+                  </p>
+                  <div className="flex gap-2">
+                    <a
+                      href="/auth/signup"
+                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 underline"
+                    >
+                      Create Account
+                    </a>
+                    <span className="text-xs text-gray-400">•</span>
+                    <a
+                      href="/auth/login"
+                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 underline"
+                    >
+                      Sign In
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <button
             onClick={handleCreate}

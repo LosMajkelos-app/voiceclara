@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import Link from "next/link"
 import { FeedbackLayout } from "@/components/feedback-layout"
-import { Sparkles, Shield, TrendingUp } from "lucide-react"
+import { Sparkles, Shield, TrendingUp, ArrowLeft, UserPlus, LogIn, Users } from "lucide-react"
+import { Card } from "@/components/ui/card"
 
 export default function CreateAuthPage() {
   const router = useRouter()
@@ -71,9 +72,15 @@ export default function CreateAuthPage() {
         </>
       }
     >
+      {/* Back Button */}
+      <Link href="/" className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-6 transition-colors">
+        <ArrowLeft className="h-4 w-4" />
+        Back to Homepage
+      </Link>
+
       <div className="max-w-md mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="mb-6 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
             Create Feedback Request
           </h1>
           <p className="text-gray-600">
@@ -81,38 +88,83 @@ export default function CreateAuthPage() {
           </p>
         </div>
 
-        <div className="space-y-4">
-          <Link href="/auth/login">
-            <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition-all">
-              Sign In
-            </button>
-          </Link>
+        <Card className="p-6 bg-white/90 backdrop-blur-sm shadow-xl">
+          <div className="space-y-3">
+            {/* Sign In Button */}
+            <Link href="/auth/login">
+              <button className="w-full group relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all">
+                <div className="flex items-center justify-center gap-2">
+                  <LogIn className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                  Sign In to Existing Account
+                </div>
+              </button>
+            </Link>
 
-          <Link href="/auth/signup">
-            <button className="w-full bg-white border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-semibold py-3 rounded-xl transition-all">
-              Create Account
-            </button>
-          </Link>
+            {/* Create Account Button */}
+            <Link href="/auth/signup">
+              <button className="w-full group bg-white border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-700 font-semibold py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg">
+                <div className="flex items-center justify-center gap-2">
+                  <UserPlus className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                  Create New Account
+                </div>
+              </button>
+            </Link>
 
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
+            {/* Divider */}
+            <div className="relative my-5">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t-2 border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white text-gray-500 font-medium">Or continue without account</span>
+              </div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-gray-50 text-gray-500">Or</span>
+
+            {/* Guest Button */}
+            <Link href="/create">
+              <button className="w-full group bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold py-3.5 rounded-xl transition-all shadow-sm hover:shadow-md">
+                <div className="flex items-center justify-center gap-2">
+                  <Users className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                  Continue as Guest
+                </div>
+              </button>
+            </Link>
+          </div>
+
+          {/* Info Banner */}
+          <div className="mt-5 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-indigo-200 rounded-xl">
+            <div className="flex gap-3">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <Shield className="h-4 w-4 text-indigo-600" />
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-indigo-900 mb-2">
+                  ✨ Account Benefits
+                </p>
+                <ul className="text-xs text-indigo-800 space-y-1">
+                  <li className="flex items-center gap-1.5">
+                    <span className="text-green-600">✓</span> Save and track all your requests
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span className="text-green-600">✓</span> Access AI-powered insights
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span className="text-green-600">✓</span> View response history
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span className="text-green-600">✓</span> Free forever
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
 
-          <Link href="/create">
-            <button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 rounded-xl transition-all">
-              Continue as Guest
-            </button>
-          </Link>
-        </div>
-
-        <p className="text-xs text-gray-500 text-center mt-6">
-          Guest users can create requests but won't have a dashboard
-        </p>
+          <p className="text-xs text-gray-500 text-center mt-4">
+            💡 Guest users can create requests but won't have access to dashboard features
+          </p>
+        </Card>
       </div>
     </FeedbackLayout>
   )

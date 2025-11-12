@@ -17,33 +17,39 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-        
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+
         {/* Logo */}
-        <Link href="/" className="text-2xl font-bold text-indigo-900 hover:text-indigo-700 transition-colors">
+        <Link href="/" className="text-xl font-bold text-indigo-900 hover:text-indigo-700 transition-colors">
           VoiceClara
         </Link>
 
         {/* Nav items */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {!loading && (
             <>
               {user ? (
                 <>
                   <Link href="/dashboard">
-                    <Button variant="ghost">Dashboard</Button>
+                    <Button variant="ghost" size="sm">Dashboard</Button>
+                  </Link>
+                  <Link href="/pricing">
+                    <Button variant="ghost" size="sm">Pricing</Button>
+                  </Link>
+                  <Link href="/contact">
+                    <Button variant="ghost" size="sm">Contact</Button>
                   </Link>
                   <Link href="/create">
-                    <Button variant="default" className="bg-indigo-600 hover:bg-indigo-700">
+                    <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
                       Create Request
                     </Button>
                   </Link>
-                  
+
                   {/* User dropdown */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <User className="h-5 w-5" />
+                      <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
+                        <User className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -67,11 +73,17 @@ export default function Navbar() {
                 </>
               ) : (
                 <>
-                  <Link href="/auth/login">
-                    <Button variant="ghost">Sign In</Button>
+                  <Link href="/pricing">
+                    <Button variant="ghost" size="sm">Pricing</Button>
                   </Link>
-                  <Link href="/auth/signup">
-                    <Button variant="default" className="bg-indigo-600 hover:bg-indigo-700">
+                  <Link href="/contact">
+                    <Button variant="ghost" size="sm">Contact</Button>
+                  </Link>
+                  <Link href="/auth/login">
+                    <Button variant="ghost" size="sm">Sign In</Button>
+                  </Link>
+                  <Link href="/create-auth">
+                    <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
                       Get Started
                     </Button>
                   </Link>

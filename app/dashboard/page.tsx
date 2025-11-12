@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth-context"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { BarChart3, MessageSquare, Plus } from "lucide-react"
+import { BarChart3, MessageSquare, Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import Navbar from "@/app/components/navbar"
 
@@ -26,6 +26,7 @@ function DashboardContent() {
   const { user, loading: authLoading } = useAuth()
   const [requests, setRequests] = useState<FeedbackRequest[]>([])
   const [loading, setLoading] = useState(true)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const hasFetched = useRef(false)
 
   // Show linked success message
@@ -131,6 +132,46 @@ function DashboardContent() {
       router.push('/auth/login')
     }
   }, [user, authLoading, router])
+
+  const handleDeleteRequest = async (requestId: string, title: string) => {
+    if (!confirm(`Are you sure you want to delete "${title}"? This cannot be undone.`)) {
+      return
+    }
+
+    setDeletingId(requestId)
+
+    try {
+      // Delete all responses first
+      const { error: responsesError } = await supabase
+        .from('responses')
+        .delete()
+        .eq('feedback_request_id', requestId)
+
+      if (responsesError) {
+        console.error('Error deleting responses:', responsesError)
+      }
+
+      // Delete the request
+      const { error: requestError } = await supabase
+        .from('feedback_requests')
+        .delete()
+        .eq('id', requestId)
+        .eq('user_id', user?.id)
+
+      if (requestError) {
+        toast.error("Failed to delete request: " + requestError.message)
+      } else {
+        toast.success("Request deleted successfully! 🗑️")
+        // Remove from local state
+        setRequests(requests.filter(req => req.id !== requestId))
+      }
+    } catch (err) {
+      console.error('Delete error:', err)
+      toast.error("Failed to delete request")
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   if (authLoading || loading) {
     return (
@@ -258,8 +299,8 @@ function DashboardContent() {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => {
                             const shareLink = `${window.location.origin}/feedback/${request.share_token}`
@@ -274,6 +315,15 @@ function DashboardContent() {
                             View Results
                           </Button>
                         </Link>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteRequest(request.id, request.title)}
+                          disabled={deletingId === request.id}
+                          className="text-red-600 hover:bg-red-50 border-red-200"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </Card>
