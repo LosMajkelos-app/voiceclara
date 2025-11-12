@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { BarChart3, MessageSquare, Plus, Trash2, Bell } from "lucide-react"
 import { toast } from "sonner"
-import Navbar from "@/app/components/navbar"
 import DashboardSidebar from "@/app/components/dashboard-sidebar"
 import AccountSettingsModal from "@/app/components/account-settings-modal"
 
@@ -180,8 +179,7 @@ function DashboardContent() {
   if (authLoading || loading) {
     return (
       <>
-        <Navbar />
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <Card className="p-8 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading your dashboard...</p>
@@ -197,7 +195,6 @@ function DashboardContent() {
 
   return (
     <>
-      <Navbar />
       <div className="min-h-screen flex bg-gray-50">
         {/* Unified Sidebar */}
         <DashboardSidebar
@@ -240,7 +237,7 @@ function DashboardContent() {
           </header>
 
           {/* Main Content Area */}
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1 overflow-y-auto pb-20">
             <div className="px-4 sm:px-6 lg:px-8 py-4">
 
               {/* Stats Cards - More Compact */}
@@ -358,8 +355,8 @@ function DashboardContent() {
           </main>
 
           {/* Footer */}
-          <footer className="bg-white border-t border-gray-200 py-3">
-            <div className="px-4 sm:px-6 lg:px-8">
+          <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 z-10">
+            <div className="px-4 sm:px-6 lg:px-8 lg:pl-60">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-600">
                 <div className="flex items-center gap-3">
                   <span>🤖 Powered by AI</span>
@@ -392,8 +389,7 @@ export default function DashboardPage() {
   return (
     <Suspense fallback={
       <>
-        <Navbar />
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <Card className="p-8 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading your dashboard...</p>

@@ -354,7 +354,7 @@ export default function ResultsPage() {
         </header>
 
         {/* Main Content Grid */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto pb-20">
           <div className="h-full lg:grid lg:grid-cols-2 lg:gap-4 p-4">
             {/* CENTER COLUMN - Request Details */}
             <div className="space-y-4 lg:pr-2">
@@ -794,8 +794,8 @@ export default function ResultsPage() {
         </main>
 
         {/* Footer */}
-        <footer className="bg-white border-t border-gray-200 py-3">
-          <div className="px-4 sm:px-6 lg:px-8">
+        <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 z-10">
+          <div className="px-4 sm:px-6 lg:px-8 lg:pl-60">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-600">
               <div className="flex items-center gap-3">
                 <span>🤖 Powered by AI</span>
