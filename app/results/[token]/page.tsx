@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { toast } from "sonner"
 import Link from "next/link"
-import { Sparkles, ArrowLeft, Copy, CheckCircle, Calendar, MessageSquare, Search, Filter, Download, Eye, X, ChevronLeft, ChevronRight, Share2, Mail } from "lucide-react"
+import { Sparkles, ArrowLeft, Copy, CheckCircle, Calendar, MessageSquare, Search, Filter, Download, Eye, X, ChevronLeft, ChevronRight, Share2, Mail, FileText } from "lucide-react"
 import DashboardSidebar from "@/app/components/dashboard-sidebar"
 import AccountSettingsModal from "@/app/components/account-settings-modal"
 
