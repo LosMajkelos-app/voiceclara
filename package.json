@@ -26,6 +26,7 @@
     "geist": "^1.5.1",
     "lucide-react": "^0.548.0",
     "next": "16.0.0",
+    "next-intl": "^4.5.1",
     "openai": "^6.7.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
