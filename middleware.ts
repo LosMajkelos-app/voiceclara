@@ -8,16 +8,19 @@ export default createMiddleware({
   // Used when no locale matches
   defaultLocale,
 
-  // Always use locale prefix in URLs
-  localePrefix: 'as-needed'
+  // Always use locale prefix in URLs (e.g., /en, /pl)
+  localePrefix: 'always'
 });
 
 export const config = {
-  // Match all pathnames except for
-  // - API routes
+  // Match all pathnames except for:
+  // - API routes (/api/*)
   // - _next (Next.js internals)
-  // - _static (inside /public)
+  // - Static files (with file extensions)
   // - Supabase auth callback
-  // - all items inside /public (images etc)
-  matcher: ['/((?!api|_next|_static|.*\\..*|auth/callback).*)']
+  matcher: [
+    '/',
+    '/(en|pl)/:path*',
+    '/((?!api|_next|_static|.*\\..*).*)'
+  ]
 };
