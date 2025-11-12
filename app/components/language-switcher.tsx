@@ -1,9 +1,8 @@
 "use client"
 
-import { usePathname, useRouter } from 'next/navigation'
 import { useLocale } from 'next-intl'
 import { Globe } from 'lucide-react'
-import { locales } from '@/i18n'
+import { useRouter, usePathname } from '@/lib/i18n-navigation'
 
 export default function LanguageSwitcher() {
   const locale = useLocale()
@@ -11,11 +10,9 @@ export default function LanguageSwitcher() {
   const pathname = usePathname()
 
   const switchLocale = (newLocale: string) => {
-    // Remove current locale from pathname
-    const pathnameWithoutLocale = pathname.replace(`/${locale}`, '')
-
-    // Navigate to the same page with new locale
-    router.push(`/${newLocale}${pathnameWithoutLocale}`)
+    // Use i18n-aware router to switch locale
+    // The router automatically handles locale prefixing
+    router.replace(pathname, { locale: newLocale })
   }
 
   return (

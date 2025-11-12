@@ -1,6 +1,6 @@
 "use client"
 
-import Link from "next/link"
+import { Link } from "@/lib/i18n-navigation"
 import { Check, Heart, Home, Share2, Sparkles } from "lucide-react"
 
 export default function ThankYouPage() {

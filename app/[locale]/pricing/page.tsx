@@ -1,4 +1,4 @@
-import Link from "next/link"
+import { Link } from "@/lib/i18n-navigation"
 import type { Metadata } from "next"
 import Navbar from "@/app/components/navbar"
 import { Button } from "@/components/ui/button"

@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useState, useRef, Suspense } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import Link from "next/link"
+import { useSearchParams } from "next/navigation"
+import { Link, useRouter } from "@/lib/i18n-navigation"
 import { useAuth } from "@/lib/auth-context"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
