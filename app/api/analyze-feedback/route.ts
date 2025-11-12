@@ -9,37 +9,43 @@ export async function POST(request: NextRequest) {
   try {
     const { answers } = await request.json()
 
-    const prompt = `You are a feedback analysis expert. Analyze these feedback responses and provide:
-1. Overall quality score (0-100)
-2. Specificity score (0-100)
-3. Constructiveness score (0-100)
-4. Clarity score (0-100)
-5. 3 actionable suggestions for improvement
-6. For each answer, provide:
-   - A quality score
-   - Specific feedback
-   - An improved version
+    const prompt = `You are an expert feedback quality analyzer. Analyze these responses and score them 0-100 based on:
 
-Responses:
+SPECIFICITY (0-100):
+- 0-30: Vague, generic responses ("good", "ok", "fine")
+- 40-60: Some specific points but lacking detail
+- 70-85: Concrete examples and specific observations
+- 90-100: Detailed, specific, actionable feedback with examples
+
+CONSTRUCTIVENESS (0-100):
+- 0-30: Only negative or only praise, no balance
+- 40-60: Some constructive elements but could be more actionable
+- 70-85: Balanced positive and constructive with suggestions
+- 90-100: Thoughtful, actionable suggestions for improvement
+
+CLARITY (0-100):
+- 0-30: Unclear, confusing, hard to understand ("sdsdsds", random text)
+- 40-60: Understandable but could be clearer
+- 70-85: Clear, well-structured thoughts
+- 90-100: Crystal clear, professional communication
+
+OVERALL (0-100): Average of the three scores
+
+BE STRICT. Random text like "asdasd" or "sdfgsdfg" should score 0-10 in all categories.
+
+Responses to analyze:
 ${answers.map((a: any, i: number) => `Q${i + 1}: ${a.question}\nA: ${a.answer}`).join('\n\n')}
 
-Return JSON format:
+Return ONLY valid JSON:
 {
   "overall": number,
   "specificity": number,
   "constructiveness": number,
   "clarity": number,
-  "suggestions": ["...", "...", "..."],
-  "per_answer_feedback": [
-    {
-      "question": "...",
-      "original": "...",
-      "score": number,
-      "feedback": "...",
-      "improved": "..."
-    }
-  ]
+  "suggestions": ["suggestion1", "suggestion2", "suggestion3"]
 }`
+
+
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
