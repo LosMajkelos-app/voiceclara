@@ -69,15 +69,11 @@ export default async function LocaleLayout({
   const messages = await getMessages({ locale });
 
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <body>
-        <AuthProvider>
-          <NextIntlClientProvider messages={messages}>
-            {children}
-            <Toaster position="top-center" />
-          </NextIntlClientProvider>
-        </AuthProvider>
-      </body>
-    </html>
+    <AuthProvider>
+      <NextIntlClientProvider messages={messages}>
+        {children}
+        <Toaster position="top-center" />
+      </NextIntlClientProvider>
+    </AuthProvider>
   );
 }
