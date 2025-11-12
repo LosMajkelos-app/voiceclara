@@ -6,8 +6,8 @@ import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/lib/auth-context";
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
-  const { locale } = await params;
+export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
+  const { locale } = params;
   return {
     title: {
       default: locale === 'pl'
@@ -56,9 +56,9 @@ export default async function LocaleLayout({
   params
 }: {
   children: React.ReactNode;
-  params: Promise<{ locale: string }>;
+  params: { locale: string };
 }) {
-  const { locale } = await params;
+  const { locale } = params;
 
   // Validate locale
   if (!locales.includes(locale as any)) {
