@@ -7,9 +7,11 @@ import { useAuth } from "@/lib/auth-context"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { BarChart3, MessageSquare, Plus, Trash2, Settings, Users, Zap, FileText, LogOut, Home, Bell, ChevronDown } from "lucide-react"
+import { BarChart3, MessageSquare, Plus, Trash2, Bell } from "lucide-react"
 import { toast } from "sonner"
 import Navbar from "@/app/components/navbar"
+import DashboardSidebar from "@/app/components/dashboard-sidebar"
+import AccountSettingsModal from "@/app/components/account-settings-modal"
 
 interface FeedbackRequest {
   id: string
@@ -27,7 +29,8 @@ function DashboardContent() {
   const [requests, setRequests] = useState<FeedbackRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [showSettings, setShowSettings] = useState(false)
+  const [showAccountSettings, setShowAccountSettings] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
   const hasFetched = useRef(false)
 
   // Show linked success message
@@ -196,42 +199,11 @@ function DashboardContent() {
     <>
       <Navbar />
       <div className="min-h-screen flex bg-gray-50">
-        {/* Sidebar */}
-        <aside className="hidden lg:flex lg:flex-col lg:w-56 bg-white border-r border-gray-200">
-          <div className="flex-1 flex flex-col pt-4 pb-4 overflow-y-auto">
-            <nav className="mt-3 flex-1 px-3 space-y-1">
-              <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg">
-                <Home className="h-4 w-4" />
-                Dashboard
-              </Link>
-              <Link href="/create" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">
-                <Plus className="h-4 w-4" />
-                Create Request
-              </Link>
-
-              {/* Coming Soon Features */}
-              <div className="pt-4 mt-4 border-t border-gray-200">
-                <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Coming Soon</p>
-                <button disabled className="w-full flex items-center gap-3 px-3 py-2 mt-2 text-sm font-medium text-gray-400 cursor-not-allowed opacity-60" title="Coming soon">
-                  <Users className="h-4 w-4" />
-                  Teams
-                </button>
-                <button disabled className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed opacity-60" title="Coming soon">
-                  <Zap className="h-4 w-4" />
-                  Integrations
-                </button>
-                <button disabled className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed opacity-60" title="Coming soon">
-                  <BarChart3 className="h-4 w-4" />
-                  Advanced Analytics
-                </button>
-                <button disabled className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed opacity-60" title="Coming soon">
-                  <FileText className="h-4 w-4" />
-                  Custom Reports
-                </button>
-              </div>
-            </nav>
-          </div>
-        </aside>
+        {/* Unified Sidebar */}
+        <DashboardSidebar
+          user={user}
+          onAccountSettingsClick={() => setShowAccountSettings(true)}
+        />
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -244,40 +216,18 @@ function DashboardContent() {
                   <p className="text-xs text-gray-500 mt-0.5">Welcome back, {user.user_metadata?.full_name || user.email?.split('@')[0]}!</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Button variant="outline" size="sm" className="hidden md:flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="hidden md:flex items-center gap-2"
+                    onClick={() => {
+                      setShowNotifications(true)
+                      toast.info("No new notifications")
+                    }}
+                  >
                     <Bell className="h-4 w-4" />
                     <span className="text-xs">Notifications</span>
                   </Button>
-                  <div className="relative">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-2"
-                      onClick={() => setShowSettings(!showSettings)}
-                    >
-                      <Settings className="h-4 w-4" />
-                      <span className="text-xs hidden sm:inline">Settings</span>
-                      <ChevronDown className="h-3 w-3" />
-                    </Button>
-                    {showSettings && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
-                        <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-                          <Settings className="h-4 w-4" />
-                          Account Settings
-                        </button>
-                        <button
-                          onClick={async () => {
-                            await supabase.auth.signOut()
-                            router.push('/')
-                          }}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                        >
-                          <LogOut className="h-4 w-4" />
-                          Sign Out
-                        </button>
-                      </div>
-                    )}
-                  </div>
                   <Link href="/create">
                     <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 flex items-center gap-1.5">
                       <Plus className="h-4 w-4" />
@@ -323,16 +273,16 @@ function DashboardContent() {
 
                 <Card className="p-3 bg-gradient-to-br from-indigo-50 to-blue-50 border-indigo-200">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-indigo-600 rounded-lg">
-                      <Plus className="h-5 w-5 text-white" />
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <BarChart3 className="h-5 w-5 text-green-600" />
                     </div>
-                    <div className="flex-1">
-                      <p className="text-xs text-indigo-900 font-medium mb-1">Quick Create</p>
-                      <Link href="/create">
-                        <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 w-full h-7 text-xs">
-                          New Request →
-                        </Button>
-                      </Link>
+                    <div>
+                      <p className="text-xs text-gray-600">Avg per Request</p>
+                      <p className="text-xl font-bold text-gray-900">
+                        {requests.length > 0
+                          ? Math.round(requests.reduce((sum, req) => sum + (req.response_count || 0), 0) / requests.length)
+                          : 0}
+                      </p>
                     </div>
                   </div>
                 </Card>
@@ -342,13 +292,8 @@ function DashboardContent() {
               <Card className="p-4 bg-white">
                 <div className="flex justify-between items-center mb-3">
                   <h3 className="text-base font-bold text-gray-900">
-                    Your Feedback Requests
+                    Your Feedback Requests ({requests.length})
                   </h3>
-                  <Link href="/create">
-                    <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 h-8 text-xs">
-                      + New
-                    </Button>
-                  </Link>
                 </div>
 
                 {requests.length === 0 ? (
@@ -357,14 +302,9 @@ function DashboardContent() {
                     <h3 className="text-lg font-semibold text-gray-900 mb-1.5">
                       No requests yet
                     </h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Create your first feedback request to get started!
+                    <p className="text-sm text-gray-600">
+                      Click "New Request" above to create your first feedback request!
                     </p>
-                    <Link href="/create">
-                      <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
-                        Create Your First Request
-                      </Button>
-                    </Link>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -383,14 +323,14 @@ function DashboardContent() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-7 px-2 text-xs"
+                              className="h-7 px-3 text-xs"
                               onClick={() => {
                                 const shareLink = `${window.location.origin}/feedback/${request.share_token}`
                                 navigator.clipboard.writeText(shareLink)
                                 toast.success("Link copied! 📋")
                               }}
                             >
-                              Copy
+                              Copy link to share
                             </Button>
                             <Link href={`/results/${request.results_token}`}>
                               <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 h-7 px-2 text-xs">
@@ -426,8 +366,9 @@ function DashboardContent() {
                   <span className="hidden sm:inline">•</span>
                   <span>🔒 100% Anonymous</span>
                 </div>
-                <div>
-                  © 2025 <a href="/" className="text-indigo-600 hover:underline font-semibold">VoiceClara</a>
+                <div className="text-center sm:text-right">
+                  <div>© 2025 <a href="/" className="text-indigo-600 hover:underline font-semibold">VoiceClara</a></div>
+                  <div className="mt-1">For questions: <a href="mailto:info@voiceclara.com" className="text-indigo-600 hover:underline">info@voiceclara.com</a></div>
                 </div>
               </div>
             </div>
@@ -435,6 +376,14 @@ function DashboardContent() {
 
         </div>
       </div>
+
+      {/* Account Settings Modal */}
+      {showAccountSettings && (
+        <AccountSettingsModal
+          user={user}
+          onClose={() => setShowAccountSettings(false)}
+        />
+      )}
     </>
   )
 }
