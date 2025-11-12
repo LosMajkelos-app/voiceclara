@@ -44,6 +44,8 @@ export default function ResultsPage() {
   const [loading, setLoading] = useState(true)
   const [aiAnalysis, setAiAnalysis] = useState<any>(null)
   const [analyzingAI, setAnalyzingAI] = useState(false)
+  const [aiAnalysisResponseCount, setAiAnalysisResponseCount] = useState<number>(0)
+  const [loadingCachedAnalysis, setLoadingCachedAnalysis] = useState(true)
 
   // Table filters and pagination
   const [searchQuery, setSearchQuery] = useState("")
@@ -102,6 +104,19 @@ export default function ResultsPage() {
           setResponses(responsesData || [])
         }
 
+        // Load cached AI analysis if available
+        const { data: cachedAnalysis, error: analysisError } = await supabase
+          .from("ai_analysis")
+          .select("*")
+          .eq("feedback_request_id", requestData.id)
+          .single()
+
+        if (!analysisError && cachedAnalysis) {
+          setAiAnalysis(cachedAnalysis)
+          setAiAnalysisResponseCount(cachedAnalysis.response_count_at_analysis || 0)
+        }
+        setLoadingCachedAnalysis(false)
+
         setLoading(false)
       } catch (error) {
         console.error("Error:", error)
@@ -123,6 +138,12 @@ export default function ResultsPage() {
   const handleAIAnalysis = async () => {
     if (!request) return
 
+    // Check if there are new responses since last analysis
+    if (aiAnalysis && responses.length === aiAnalysisResponseCount) {
+      toast.info("No new responses since last analysis. Analysis is up to date.")
+      return
+    }
+
     setAnalyzingAI(true)
     toast.info("AI is analyzing your feedback... ⏳")
 
@@ -137,6 +158,7 @@ export default function ResultsPage() {
 
       if (response.ok) {
         setAiAnalysis(data)
+        setAiAnalysisResponseCount(responses.length)
 
         // Show warning if some responses were filtered
         if (data.warning) {
@@ -461,10 +483,10 @@ export default function ResultsPage() {
               )}
 
               {/* AI Analysis Results - in center column */}
-              {aiAnalysis && (
+              {responses.length >= 3 && (
                 <div className="space-y-3">
                   {/* Quality Metrics Warning */}
-                  {aiAnalysis.quality && aiAnalysis.quality.filteredResponses > 0 && (
+                  {aiAnalysis?.quality && aiAnalysis.quality.filteredResponses > 0 && (
                     <Card className="p-3 bg-yellow-50 border-2 border-yellow-300">
                       <div className="flex items-start gap-2">
                         <div className="text-xl">⚠️</div>
@@ -484,7 +506,26 @@ export default function ResultsPage() {
                       <Sparkles className="h-5 w-5 text-purple-600" />
                       <h3 className="text-sm font-bold text-gray-900">AI Summary</h3>
                     </div>
-                    <p className="text-xs text-gray-700 mb-3">{aiAnalysis.summary?.summary}</p>
+
+                    {!aiAnalysis && !loadingCachedAnalysis && (
+                      <div className="py-8 text-center">
+                        <div className="text-4xl mb-3">🤖</div>
+                        <p className="text-sm text-gray-600 mb-4">
+                          Click "AI Analysis" above to generate insights from your feedback
+                        </p>
+                      </div>
+                    )}
+
+                    {loadingCachedAnalysis && (
+                      <div className="py-8 text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-3"></div>
+                        <p className="text-xs text-gray-600">Loading analysis...</p>
+                      </div>
+                    )}
+
+                    {aiAnalysis && (
+                      <>
+                        <p className="text-xs text-gray-700 mb-3">{aiAnalysis.summary?.summary}</p>
 
                     {aiAnalysis.summary?.strengths && (
                       <div className="mb-3">
@@ -508,20 +549,22 @@ export default function ResultsPage() {
                       </div>
                     )}
 
-                    {aiAnalysis.summary?.recommendations && (
-                      <div>
-                        <h4 className="text-xs font-semibold text-indigo-700 mb-1">Recommendations:</h4>
-                        <ul className="list-disc pl-4 space-y-0.5">
-                          {aiAnalysis.summary.recommendations.map((rec: string, i: number) => (
-                            <li key={i} className="text-xs text-gray-700">{rec}</li>
-                          ))}
-                        </ul>
-                      </div>
+                        {aiAnalysis.summary?.recommendations && (
+                          <div>
+                            <h4 className="text-xs font-semibold text-indigo-700 mb-1">Recommendations:</h4>
+                            <ul className="list-disc pl-4 space-y-0.5">
+                              {aiAnalysis.summary.recommendations.map((rec: string, i: number) => (
+                                <li key={i} className="text-xs text-gray-700">{rec}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </>
                     )}
                   </Card>
 
                   {/* Sentiment */}
-                  {aiAnalysis.sentiment && (
+                  {aiAnalysis?.sentiment && (
                     <Card className="p-4 bg-white">
                       <h3 className="text-sm font-bold text-gray-900 mb-2">Sentiment</h3>
                       <div className="flex items-center justify-between">
@@ -543,7 +586,7 @@ export default function ResultsPage() {
                   )}
 
                   {/* Themes */}
-                  {aiAnalysis.themes && aiAnalysis.themes.length > 0 && (
+                  {aiAnalysis?.themes && aiAnalysis.themes.length > 0 && (
                     <Card className="p-4 bg-white">
                       <h3 className="text-sm font-bold text-gray-900 mb-2">Key Themes</h3>
                       <div className="space-y-3">

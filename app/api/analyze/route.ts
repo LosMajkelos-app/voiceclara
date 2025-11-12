@@ -90,6 +90,7 @@ export async function POST(request: NextRequest) {
         sentiment: sentiment,
         summary: summary,
         analyzed_at: new Date().toISOString(),
+        response_count_at_analysis: responses.length,
       })
 
     if (saveError) {
