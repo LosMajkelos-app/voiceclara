@@ -15,12 +15,13 @@ export default createMiddleware({
 export const config = {
   // Match all pathnames except for:
   // - API routes (/api/*)
+  // - Auth routes (/auth/*)
+  // - Feedback share links (/feedback/*)
   // - _next (Next.js internals)
   // - Static files (with file extensions)
-  // - Supabase auth callback
   matcher: [
     '/',
     '/(en|pl)/:path*',
-    '/((?!api|_next|_static|.*\\..*).*)'
+    '/((?!api|auth|feedback|_next|_static|.*\\..*).*)'
   ]
 };
