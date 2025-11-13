@@ -13,6 +13,7 @@ import { Sparkles, ArrowLeft, Copy, CheckCircle, Calendar, MessageSquare, Search
 import DashboardSidebar from "@/app/components/dashboard-sidebar"
 import AccountSettingsModal from "@/app/components/account-settings-modal"
 import AnalyticsCharts from "@/app/components/analytics-charts"
+import EmailInvitationModal from "@/app/components/email-invitation-modal"
 import { exportToEnhancedCSV, exportToPDF } from "@/lib/export-utils"
 
 interface FeedbackRequest {
@@ -58,6 +59,7 @@ export default function ResultsPage() {
   const [selectedResponse, setSelectedResponse] = useState<Response | null>(null)
   const [showAccountSettings, setShowAccountSettings] = useState(false)
   const [showCharts, setShowCharts] = useState(false)
+  const [showEmailModal, setShowEmailModal] = useState(false)
   const itemsPerPage = 10
 
   useEffect(() => {
@@ -300,16 +302,17 @@ export default function ResultsPage() {
                   <span className="hidden sm:inline text-xs">Copy link to share</span>
                   <span className="sm:hidden text-xs">Copy</span>
                 </Button>
-                <Button
-                  disabled
-                  variant="outline"
-                  size="sm"
-                  className="hidden md:flex items-center gap-1.5 opacity-50 cursor-not-allowed"
-                  title="Coming soon"
-                >
-                  <Mail className="h-4 w-4" />
-                  <span className="text-xs">Share via email</span>
-                </Button>
+                {user && (
+                  <Button
+                    onClick={() => setShowEmailModal(true)}
+                    variant="outline"
+                    size="sm"
+                    className="hidden md:flex items-center gap-1.5"
+                  >
+                    <Mail className="h-4 w-4" />
+                    <span className="text-xs">Send Invitations</span>
+                  </Button>
+                )}
                 {responses.length > 0 && (
                   <>
                     <Button
@@ -892,6 +895,15 @@ export default function ResultsPage() {
         <AccountSettingsModal
           user={user}
           onClose={() => setShowAccountSettings(false)}
+        />
+      )}
+
+      {/* Email Invitation Modal */}
+      {showEmailModal && request && (
+        <EmailInvitationModal
+          feedbackRequestId={request.id}
+          requestTitle={request.title}
+          onClose={() => setShowEmailModal(false)}
         />
       )}
     </div>
