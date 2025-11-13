@@ -25,12 +25,10 @@ const LANGUAGE_NAMES: Record<string, string> = {
   'pt': 'Portuguese',
   'it': 'Italian',
   'nl': 'Dutch',
-  'ja': 'Japanese',
-  'zh': 'Chinese',
-  'ko': 'Korean',
-  'ar': 'Arabic',
-  'hi': 'Hindi',
-  'ru': 'Russian'
+  'cs': 'Czech',
+  'sv': 'Swedish',
+  'da': 'Danish',
+  'no': 'Norwegian'
 }
 
 export async function POST(request: NextRequest) {
