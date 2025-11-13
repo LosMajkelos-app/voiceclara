@@ -6,7 +6,7 @@ After the recent update, **Supabase credentials are no longer hardcoded in the b
 
 ### Required Environment Variables
 
-You need to set these 3 environment variables in Vercel:
+You need to set these 5 environment variables in Vercel:
 
 1. **NEXT_PUBLIC_SUPABASE_URL**
    - Your Supabase project URL
@@ -22,6 +22,17 @@ You need to set these 3 environment variables in Vercel:
    - Your OpenAI API key
    - Starts with: `sk-...`
    - Get it from: [OpenAI Platform](https://platform.openai.com/api-keys)
+
+4. **RESEND_API_KEY** (for email invitations)
+   - Your Resend API key
+   - Starts with: `re_...`
+   - Get it from: [Resend Dashboard](https://resend.com/api-keys)
+   - **Setup guide**: See RESEND_SETUP.md for detailed instructions
+
+5. **NEXT_PUBLIC_SITE_URL** (optional but recommended)
+   - Your production URL
+   - Example: `https://voiceclara.com`
+   - Used in email links
 
 ---
 
