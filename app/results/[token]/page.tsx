@@ -9,9 +9,11 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { toast } from "sonner"
 import Link from "next/link"
-import { Sparkles, ArrowLeft, Copy, CheckCircle, Calendar, MessageSquare, Search, Filter, Download, Eye, X, ChevronLeft, ChevronRight, Share2, Mail, FileText } from "lucide-react"
+import { Sparkles, ArrowLeft, Copy, CheckCircle, Calendar, MessageSquare, Search, Filter, Download, Eye, X, ChevronLeft, ChevronRight, Share2, Mail, FileText, FileDown, BarChart } from "lucide-react"
 import DashboardSidebar from "@/app/components/dashboard-sidebar"
 import AccountSettingsModal from "@/app/components/account-settings-modal"
+import AnalyticsCharts from "@/app/components/analytics-charts"
+import { exportToEnhancedCSV, exportToPDF } from "@/lib/export-utils"
 
 interface FeedbackRequest {
   id: string
@@ -55,6 +57,7 @@ export default function ResultsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedResponse, setSelectedResponse] = useState<Response | null>(null)
   const [showAccountSettings, setShowAccountSettings] = useState(false)
+  const [showCharts, setShowCharts] = useState(false)
   const itemsPerPage = 10
 
   useEffect(() => {
@@ -227,37 +230,17 @@ export default function ResultsPage() {
     currentPage * itemsPerPage
   )
 
-  // Export to CSV
-  const exportToCSV = () => {
+  // Export handlers
+  const handleExportCSV = () => {
     if (!request || responses.length === 0) return
-
-    const csvRows = []
-    // Header
-    csvRows.push(['ID', 'Date', 'Time', 'Question', 'Answer', 'Sentiment'].join(','))
-
-    // Data rows
-    responses.forEach((response, index) => {
-      const date = new Date(response.submitted_at)
-      response.answers.forEach(answer => {
-        csvRows.push([
-          index + 1,
-          date.toLocaleDateString(),
-          date.toLocaleTimeString(),
-          `"${answer.question.replace(/"/g, '""')}"`,
-          `"${answer.answer.replace(/"/g, '""')}"`,
-          'Neutral'
-        ].join(','))
-      })
-    })
-
-    const csvContent = csvRows.join('\n')
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    link.download = `${request.title}-responses-${new Date().toISOString().split('T')[0]}.csv`
-    link.click()
-
+    exportToEnhancedCSV({ request, responses, aiAnalysis })
     toast.success('CSV exported successfully!')
+  }
+
+  const handleExportPDF = () => {
+    if (!request || responses.length === 0) return
+    exportToPDF({ request, responses, aiAnalysis })
+    toast.success('PDF exported successfully!')
   }
 
   // Truncate text helper
@@ -328,15 +311,26 @@ export default function ResultsPage() {
                   <span className="text-xs">Share via email</span>
                 </Button>
                 {responses.length > 0 && (
-                  <Button
-                    onClick={exportToCSV}
-                    variant="outline"
-                    size="sm"
-                    className="hidden md:flex items-center gap-1.5"
-                  >
-                    <Download className="h-4 w-4" />
-                    <span className="text-xs">Export</span>
-                  </Button>
+                  <>
+                    <Button
+                      onClick={handleExportCSV}
+                      variant="outline"
+                      size="sm"
+                      className="hidden md:flex items-center gap-1.5"
+                    >
+                      <FileText className="h-4 w-4" />
+                      <span className="text-xs">CSV</span>
+                    </Button>
+                    <Button
+                      onClick={handleExportPDF}
+                      variant="outline"
+                      size="sm"
+                      className="hidden md:flex items-center gap-1.5"
+                    >
+                      <FileDown className="h-4 w-4" />
+                      <span className="text-xs">PDF</span>
+                    </Button>
+                  </>
                 )}
                 {responses.length >= 3 && (
                   <Button
@@ -626,20 +620,53 @@ export default function ResultsPage() {
                 </Card>
               )}
 
+              {/* Analytics Charts Section */}
+              {responses.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-base font-bold text-gray-900">Analytics</h2>
+                    <Button
+                      onClick={() => setShowCharts(!showCharts)}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-1.5 h-7"
+                    >
+                      <BarChart className="h-3 w-3" />
+                      <span className="text-xs">{showCharts ? 'Hide' : 'Show'} Charts</span>
+                    </Button>
+                  </div>
+
+                  {showCharts && (
+                    <AnalyticsCharts responses={responses} aiAnalysis={aiAnalysis} />
+                  )}
+                </div>
+              )}
+
               {/* Responses Section */}
               {responses.length > 0 && (
                 <>
                   <div className="flex items-center justify-between">
                     <h2 className="text-base font-bold text-gray-900">Responses ({responses.length})</h2>
-                    <Button
-                      onClick={exportToCSV}
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-1.5 h-7"
-                    >
-                      <Download className="h-3 w-3" />
-                      <span className="text-xs">CSV</span>
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleExportCSV}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-1.5 h-7"
+                      >
+                        <FileText className="h-3 w-3" />
+                        <span className="text-xs">CSV</span>
+                      </Button>
+                      <Button
+                        onClick={handleExportPDF}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-1.5 h-7"
+                      >
+                        <FileDown className="h-3 w-3" />
+                        <span className="text-xs">PDF</span>
+                      </Button>
+                    </div>
                   </div>
 
                   {/* Filters */}
