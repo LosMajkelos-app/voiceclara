@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth-context"
+import LanguageSwitcher from "@/app/components/language-switcher"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { User } from "lucide-react"
 
-export default function Navbar() {
+export default function Navbar({ showLanguageSwitcher = false }: { showLanguageSwitcher?: boolean }) {
   const { user, signOut, loading } = useAuth()
 
   return (
@@ -26,6 +27,7 @@ export default function Navbar() {
 
         {/* Nav items */}
         <div className="flex items-center gap-3">
+          {showLanguageSwitcher && <LanguageSwitcher />}
           {!loading && (
             <>
               {user ? (

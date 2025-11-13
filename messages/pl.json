@@ -1,0 +1,36 @@
+{
+  "nav": {
+    "home": "Strona główna",
+    "pricing": "Cennik",
+    "contact": "Kontakt",
+    "login": "Zaloguj się",
+    "signup": "Zarejestruj się",
+    "dashboard": "Panel"
+  },
+  "home": {
+    "badge": "Darmowe. Zawsze. Bez Karty Kredytowej.",
+    "heroTitle": "Usłysz Swój Zespół.",
+    "heroSubtitle": "Naprawdę.",
+    "heroDescription": "VoiceClara pomaga zbierać szczere, anonimowe opinie—bez stresu, bez filtrów. Uzyskaj wgląd wsparty AI, który pokazuje, co naprawdę jest ważne dla Twoich ludzi.",
+    "ctaPrimary": "Wypróbuj VoiceClara Za Darmo",
+    "ctaSecondary": "Zobacz Jak To Działa",
+    "noCreditCard": "Bez karty kredytowej • Konfiguracja w 5 minut",
+    "demoTitle": "Demo Produktu Wkrótce",
+    "whyTitle": "Dlaczego Ludzie Nie Mówią, Co Naprawdę Czują?",
+    "whyDescription": "Czasami boją się konsekwencji. Czasami po prostu nie ufają ankietom.\nDzięki VoiceClara możesz wreszcie usłyszeć ich prawdziwy głos—bezpiecznie, anonimowo i bez wysiłku.",
+    "featureAnonymityTitle": "Pełna Anonimowość",
+    "featureAnonymityDesc": "Bez logowania, bez śledzenia. Twój zespół mówi swobodnie bez obaw.",
+    "featureAITitle": "Analiza AI",
+    "featureAIDesc": "Podsumuj nastroje, odkryj powtarzające się tematy, znajdź ślepe punkty.",
+    "featureFreeTitle": "Zawsze Darmowe",
+    "featureFreeDesc": "Bez ukrytych kosztów. Podstawowe funkcje darmowe na zawsze."
+  },
+  "contact": {
+    "title": "Kontakt",
+    "description": "Masz pytania? Chętnie Cię wysłuchamy."
+  },
+  "pricing": {
+    "title": "Cennik",
+    "description": "Prosty, przejrzysty cennik dla każdego."
+  }
+}

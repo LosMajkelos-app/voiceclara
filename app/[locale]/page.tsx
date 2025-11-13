@@ -2,53 +2,54 @@
 
 import Link from "next/link"
 import { useAuth } from "@/lib/auth-context"
+import { useTranslations } from "next-intl"
 import { Sparkles, Shield, TrendingUp, MessageSquare, ArrowRight, Check, Heart, Users, Zap, BarChart3 } from "lucide-react"
 import Navbar from "@/app/components/navbar"
 
 export default function HomePage() {
   const { user } = useAuth()
+  const t = useTranslations('home')
 
   return (
     <>
-      <Navbar />
+      <Navbar showLanguageSwitcher={true} />
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        
+
         {/* Hero Section */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-full text-sm font-bold mb-4 shadow-lg animate-pulse">
               <Check className="h-4 w-4" />
-              Free. Always. No Credit Card.
+              {t('badge')}
             </div>
 
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Hear Your Team.
+              {t('heroTitle')}
               <br />
               <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                For Real.
+                {t('heroSubtitle')}
               </span>
             </h1>
 
             <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
-              VoiceClara helps you collect honest, anonymous feedback—without stress, without filters.
-              Get AI-powered insights that show what truly matters to your people.
+              {t('heroDescription')}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link href={user ? "/create" : "/create-auth"}>
                 <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all inline-flex items-center gap-2">
-                  💬 Try VoiceClara for Free
+                  💬 {t('ctaPrimary')}
                 </button>
               </Link>
               <Link href="#how-it-works">
                 <button className="bg-white border-2 border-gray-300 hover:border-indigo-600 text-gray-700 hover:text-indigo-600 font-semibold px-6 py-3 rounded-xl transition-all">
-                  See How It Works
+                  {t('ctaSecondary')}
                 </button>
               </Link>
             </div>
 
             <p className="text-sm text-gray-600 mt-3 font-medium">
-              No credit card • Setup in 5 minutes
+              {t('noCreditCard')}
             </p>
           </div>
 
@@ -59,7 +60,7 @@ export default function HomePage() {
                 <div className="text-center">
                   <div className="text-4xl mb-2">🎯</div>
                   <p className="text-base font-semibold text-gray-700">
-                    Product Demo Coming Soon
+                    {t('demoTitle')}
                   </p>
                 </div>
               </div>
@@ -71,12 +72,10 @@ export default function HomePage() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-white/50">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Why Don't People Say What They Really Feel?
+              {t('whyTitle')}
             </h2>
             <p className="text-base text-gray-600 mb-8">
-              Sometimes they're afraid of consequences. Sometimes they just don't trust surveys.
-              <br />
-              With VoiceClara, you can finally hear their real voice—safely, anonymously, and effortlessly.
+              {t('whyDescription')}
             </p>
 
             <div className="grid md:grid-cols-3 gap-6 mt-8">
@@ -84,24 +83,24 @@ export default function HomePage() {
                 <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Shield className="h-6 w-6 text-indigo-600" />
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2">Full Anonymity</h3>
-                <p className="text-sm text-gray-600">No logins, no tracking. Your team speaks freely without fear.</p>
+                <h3 className="font-bold text-gray-900 mb-2">{t('featureAnonymityTitle')}</h3>
+                <p className="text-sm text-gray-600">{t('featureAnonymityDesc')}</p>
               </div>
 
               <div className="bg-white rounded-xl p-6 border-2 border-purple-100">
                 <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Sparkles className="h-6 w-6 text-purple-600" />
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2">AI Insights</h3>
-                <p className="text-sm text-gray-600">Summarize moods, uncover recurring themes, spot blind spots.</p>
+                <h3 className="font-bold text-gray-900 mb-2">{t('featureAITitle')}</h3>
+                <p className="text-sm text-gray-600">{t('featureAIDesc')}</p>
               </div>
 
               <div className="bg-white rounded-xl p-6 border-2 border-green-100">
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Zap className="h-6 w-6 text-green-600" />
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2">Quick Setup</h3>
-                <p className="text-sm text-gray-600">Create a survey in minutes, no training needed.</p>
+                <h3 className="font-bold text-gray-900 mb-2">{t('featureFreeTitle')}</h3>
+                <p className="text-sm text-gray-600">{t('featureFreeDesc')}</p>
               </div>
             </div>
           </div>

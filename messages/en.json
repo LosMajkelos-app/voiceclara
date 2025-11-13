@@ -1,0 +1,36 @@
+{
+  "nav": {
+    "home": "Home",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "login": "Log In",
+    "signup": "Sign Up",
+    "dashboard": "Dashboard"
+  },
+  "home": {
+    "badge": "Free. Always. No Credit Card.",
+    "heroTitle": "Hear Your Team.",
+    "heroSubtitle": "For Real.",
+    "heroDescription": "VoiceClara helps you collect honest, anonymous feedback—without stress, without filters. Get AI-powered insights that show what truly matters to your people.",
+    "ctaPrimary": "Try VoiceClara for Free",
+    "ctaSecondary": "See How It Works",
+    "noCreditCard": "No credit card • Setup in 5 minutes",
+    "demoTitle": "Product Demo Coming Soon",
+    "whyTitle": "Why Don't People Say What They Really Feel?",
+    "whyDescription": "Sometimes they're afraid of consequences. Sometimes they just don't trust surveys.\nWith VoiceClara, you can finally hear their real voice—safely, anonymously, and effortlessly.",
+    "featureAnonymityTitle": "Full Anonymity",
+    "featureAnonymityDesc": "No logins, no tracking. Your team speaks freely without fear.",
+    "featureAITitle": "AI Insights",
+    "featureAIDesc": "Summarize moods, uncover recurring themes, spot blind spots.",
+    "featureFreeTitle": "Always Free",
+    "featureFreeDesc": "No hidden costs. Core features free forever."
+  },
+  "contact": {
+    "title": "Contact Us",
+    "description": "Have questions? We'd love to hear from you."
+  },
+  "pricing": {
+    "title": "Pricing",
+    "description": "Simple, transparent pricing for everyone."
+  }
+}
