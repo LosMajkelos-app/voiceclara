@@ -16,9 +16,26 @@ function isPromptSafe(prompt: string): boolean {
   return !BLOCKED_KEYWORDS.some(keyword => lowerPrompt.includes(keyword))
 }
 
+const LANGUAGE_NAMES: Record<string, string> = {
+  'en': 'English',
+  'es': 'Spanish',
+  'fr': 'French',
+  'de': 'German',
+  'pl': 'Polish',
+  'pt': 'Portuguese',
+  'it': 'Italian',
+  'nl': 'Dutch',
+  'ja': 'Japanese',
+  'zh': 'Chinese',
+  'ko': 'Korean',
+  'ar': 'Arabic',
+  'hi': 'Hindi',
+  'ru': 'Russian'
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { prompt } = await request.json()
+    const { prompt, language = 'en' } = await request.json()
 
     // Validate prompt
     if (!prompt || prompt.trim().length < 10) {
@@ -36,17 +53,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const languageName = LANGUAGE_NAMES[language] || 'English'
+
     // Generate with OpenAI
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
-          content: "You are a professional feedback form generator. Create 5-7 thoughtful, open-ended questions based on the user's needs. Questions should encourage honest, constructive feedback. Return JSON format: {title: string, questions: string[]}"
+          content: `You are a professional feedback form generator. Create 5-7 thoughtful, open-ended questions based on the user's needs. Questions should encourage honest, constructive feedback.
+
+IMPORTANT: Generate questions in ${languageName}. All questions must be written in ${languageName}.
+
+Return JSON format: {title: string, questions: string[]}`
         },
         {
           role: "user",
-          content: `Generate feedback questions for: ${prompt}`
+          content: `Generate feedback questions in ${languageName} for: ${prompt}`
         }
       ],
       response_format: { type: "json_object" }

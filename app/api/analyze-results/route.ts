@@ -5,9 +5,26 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 })
 
+const LANGUAGE_NAMES: Record<string, string> = {
+  'en': 'English',
+  'es': 'Spanish',
+  'fr': 'French',
+  'de': 'German',
+  'pl': 'Polish',
+  'pt': 'Portuguese',
+  'it': 'Italian',
+  'nl': 'Dutch',
+  'ja': 'Japanese',
+  'zh': 'Chinese',
+  'ko': 'Korean',
+  'ar': 'Arabic',
+  'hi': 'Hindi',
+  'ru': 'Russian'
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { requestId, responses } = await request.json()
+    const { requestId, responses, language = 'en' } = await request.json()
 
     if (!responses || responses.length < 3) {
       return NextResponse.json(
@@ -16,12 +33,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const languageName = LANGUAGE_NAMES[language] || 'English'
+
     // Format all responses for AI
     const formattedFeedback = responses.map((r: any, i: number) => {
       return `Response #${i + 1}:\n${r.answers.map((a: any) => `Q: ${a.question}\nA: ${a.answer}`).join('\n\n')}`
     }).join('\n\n---\n\n')
 
     const prompt = `Analyze these ${responses.length} feedback responses and provide:
+
+IMPORTANT: Provide your analysis in ${languageName}. All insights, themes, strengths, improvements, and summary should be written in ${languageName}.
 
 1. Overall sentiment (positive/neutral/negative ratio)
 2. Top 3-5 themes that appear across responses
