@@ -93,7 +93,7 @@ export default function HomePage() {
                   <Sparkles className="h-6 w-6 text-purple-600" />
                 </div>
                 <h3 className="font-bold text-gray-900 mb-2">AI Insights</h3>
-                <p className="text-sm text-gray-600">Summarize moods, uncover recurring themes, spot blind spots.</p>
+                <p className="text-sm text-gray-600">Summarize moods, uncover themes, spot blind spots. Works in 14+ languages.</p>
               </div>
 
               <div className="bg-white rounded-xl p-6 border-2 border-green-100">
@@ -179,8 +179,8 @@ export default function HomePage() {
                 AI-Powered Insights
               </h3>
               <p className="text-sm text-gray-600 mb-3">
-                Get sentiment analysis, theme detection, and blind spot identification 
-                automatically with 3+ responses.
+                Get sentiment analysis, theme detection, and blind spot identification
+                automatically with 3+ responses. Works in 14+ languages.
               </p>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li className="flex items-center gap-2">
@@ -190,6 +190,10 @@ export default function HomePage() {
                 <li className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-green-600" />
                   Automatic theme clustering
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-green-600" />
+                  Multi-language support (EN, ES, FR, DE, PL, PT, IT, NL, JA, ZH, KO, AR, HI, RU)
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-green-600" />

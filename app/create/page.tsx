@@ -14,6 +14,7 @@ export default function CreatePage() {
   const [step, setStep] = useState(1)
   const [creatorName, setCreatorName] = useState("")
   const [creatorEmail, setCreatorEmail] = useState("")
+  const [language, setLanguage] = useState("en")
   const [templateType, setTemplateType] = useState<string | null>(null)
   const [customPrompt, setCustomPrompt] = useState("")
 
@@ -72,7 +73,7 @@ export default function CreatePage() {
         const response = await fetch('/api/generate-questions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: customPrompt })
+          body: JSON.stringify({ prompt: customPrompt, language })
         })
 
         const data = await response.json()
@@ -134,6 +135,7 @@ export default function CreatePage() {
       const insertData = {
         title: title.trim(),
         questions: validQuestions,
+        language: language,
         creator_name: creatorName.trim(),
         creator_email: creatorEmail.trim(),
         user_id: user?.id || null,
@@ -275,6 +277,35 @@ export default function CreatePage() {
               className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
             <p className="text-xs text-gray-500 mt-1">We'll send you a link to view responses</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Feedback Language <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="en">🇬🇧 English</option>
+              <option value="es">🇪🇸 Español (Spanish)</option>
+              <option value="fr">🇫🇷 Français (French)</option>
+              <option value="de">🇩🇪 Deutsch (German)</option>
+              <option value="pl">🇵🇱 Polski (Polish)</option>
+              <option value="pt">🇵🇹 Português (Portuguese)</option>
+              <option value="it">🇮🇹 Italiano (Italian)</option>
+              <option value="nl">🇳🇱 Nederlands (Dutch)</option>
+              <option value="ja">🇯🇵 日本語 (Japanese)</option>
+              <option value="zh">🇨🇳 中文 (Chinese)</option>
+              <option value="ko">🇰🇷 한국어 (Korean)</option>
+              <option value="ar">🇸🇦 العربية (Arabic)</option>
+              <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
+              <option value="ru">🇷🇺 Русский (Russian)</option>
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              AI will generate questions and analyze responses in this language. Respondents can reply in any language.
+            </p>
           </div>
 
           <div>

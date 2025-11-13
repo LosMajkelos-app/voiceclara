@@ -5,11 +5,31 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 })
 
+const LANGUAGE_NAMES: Record<string, string> = {
+  'en': 'English',
+  'es': 'Spanish',
+  'fr': 'French',
+  'de': 'German',
+  'pl': 'Polish',
+  'pt': 'Portuguese',
+  'it': 'Italian',
+  'nl': 'Dutch',
+  'ja': 'Japanese',
+  'zh': 'Chinese',
+  'ko': 'Korean',
+  'ar': 'Arabic',
+  'hi': 'Hindi',
+  'ru': 'Russian'
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { answers } = await request.json()
+    const { answers, language = 'en' } = await request.json()
+    const languageName = LANGUAGE_NAMES[language] || 'English'
 
     const prompt = `You are an expert feedback quality analyzer. Analyze these responses and score them 0-100 based on:
+
+IMPORTANT: The feedback language is ${languageName}. Provide your analysis, feedback, and suggestions in ${languageName}.
 
 SPECIFICITY (0-100):
 - 0-30: Vague, generic responses ("good", "ok", "fine")

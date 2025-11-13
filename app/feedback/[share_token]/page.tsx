@@ -99,7 +99,7 @@ export default function FeedbackFormPage() {
     const response = await fetch('/api/analyze-feedback', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ answers: formattedAnswers })
+      body: JSON.stringify({ answers: formattedAnswers, language: request.language || 'en' })
     })
 
     const aiResult = await response.json()
@@ -465,9 +465,19 @@ export default function FeedbackFormPage() {
 
       {/* Feedback for X */}
       <div className="mb-6">
-        <p className="text-sm text-indigo-600 font-semibold mb-2">
+        <p className="text-sm text-indigo-600 font-semibold mb-1">
           Feedback for {request.creator_name}
         </p>
+        {request.language && request.language !== 'en' && (
+          <p className="text-xs text-gray-500 italic">
+            💬 You can respond in any language, but {request.language === 'pl' ? 'Polish' : request.language === 'es' ? 'Spanish' : request.language === 'fr' ? 'French' : request.language === 'de' ? 'German' : request.language === 'pt' ? 'Portuguese' : request.language === 'it' ? 'Italian' : request.language === 'nl' ? 'Dutch' : request.language === 'ja' ? 'Japanese' : request.language === 'zh' ? 'Chinese' : request.language === 'ko' ? 'Korean' : request.language === 'ar' ? 'Arabic' : request.language === 'hi' ? 'Hindi' : request.language === 'ru' ? 'Russian' : request.language.toUpperCase()} is preferred
+          </p>
+        )}
+        {(!request.language || request.language === 'en') && (
+          <p className="text-xs text-gray-500 italic mb-2">
+            💬 You can respond in any language — AI understands all languages!
+          </p>
+        )}
         <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
           {currentQuestion}
         </h2>
