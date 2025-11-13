@@ -17,12 +17,14 @@ export default function CreatePage() {
   const [language, setLanguage] = useState("en")
   const [templateType, setTemplateType] = useState<string | null>(null)
   const [customPrompt, setCustomPrompt] = useState("")
+  const [isTranslating, setIsTranslating] = useState(false)
 
   const [title, setTitle] = useState("")
   const [questions, setQuestions] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
 
-  const templates = [
+  // Base templates in English
+  const baseTemplates = [
     { id: "360", name: "360 Review", icon: "🔄", questions: ["What am I doing well?", "What could I improve?", "What's my biggest blind spot?", "What should I start/stop/continue?", "Any other thoughts?"] },
     { id: "manager", name: "Manager Feedback", icon: "👔", questions: ["How effective is my communication?", "Do I provide clear direction?", "How well do I support your growth?", "What could I improve as a manager?"] },
     { id: "peer", name: "Peer Review", icon: "🤝", questions: ["How well do we collaborate?", "What do I bring to the team?", "Where could I be more helpful?", "Any suggestions for improvement?"] },
@@ -30,12 +32,64 @@ export default function CreatePage() {
     { id: "custom", name: "AI Generated", icon: "✨", questions: [] }
   ]
 
+  const [templates, setTemplates] = useState(baseTemplates)
+
   useEffect(() => {
     if (user) {
       setCreatorName(user.user_metadata?.full_name || "")
       setCreatorEmail(user.email || "")
     }
   }, [user])
+
+  // Translate templates when language changes
+  useEffect(() => {
+    const translateTemplates = async () => {
+      if (language === 'en') {
+        // Reset to English
+        setTemplates(baseTemplates)
+        return
+      }
+
+      setIsTranslating(true)
+
+      try {
+        const translatedTemplates = await Promise.all(
+          baseTemplates.map(async (template) => {
+            if (template.id === 'custom' || template.questions.length === 0) {
+              return template
+            }
+
+            // Translate questions for this template
+            const response = await fetch('/api/translate-template', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                questions: template.questions,
+                language
+              })
+            })
+
+            if (response.ok) {
+              const data = await response.json()
+              return { ...template, questions: data.questions }
+            }
+
+            return template
+          })
+        )
+
+        setTemplates(translatedTemplates)
+      } catch (error) {
+        console.error('Translation error:', error)
+        // Keep English on error
+        setTemplates(baseTemplates)
+      } finally {
+        setIsTranslating(false)
+      }
+    }
+
+    translateTemplates()
+  }, [language])
 
   const handleTemplateSelect = (template: typeof templates[0]) => {
     setTemplateType(template.id)
@@ -296,12 +350,10 @@ export default function CreatePage() {
               <option value="pt">🇵🇹 Português (Portuguese)</option>
               <option value="it">🇮🇹 Italiano (Italian)</option>
               <option value="nl">🇳🇱 Nederlands (Dutch)</option>
-              <option value="ja">🇯🇵 日本語 (Japanese)</option>
-              <option value="zh">🇨🇳 中文 (Chinese)</option>
-              <option value="ko">🇰🇷 한국어 (Korean)</option>
-              <option value="ar">🇸🇦 العربية (Arabic)</option>
-              <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
-              <option value="ru">🇷🇺 Русский (Russian)</option>
+              <option value="cs">🇨🇿 Čeština (Czech)</option>
+              <option value="sv">🇸🇪 Svenska (Swedish)</option>
+              <option value="da">🇩🇰 Dansk (Danish)</option>
+              <option value="no">🇳🇴 Norsk (Norwegian)</option>
             </select>
             <p className="text-xs text-gray-500 mt-1">
               AI will generate questions and analyze responses in this language. Respondents can reply in any language.
