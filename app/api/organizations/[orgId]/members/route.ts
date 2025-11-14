@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 // GET /api/organizations/[orgId]/members - Get organization members
 export async function GET(
   request: NextRequest,
-  { params }: { params: { orgId: string } }
+  { params }: { params: Promise<{ orgId: string }> }
 ) {
   try {
     const cookieStore = cookies()
@@ -17,7 +17,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { orgId } = params
+    const { orgId } = await params
 
     // Verify user has access to this organization
     const { data: membership } = await supabase
@@ -70,7 +70,7 @@ export async function GET(
 // DELETE /api/organizations/[orgId]/members?userId=xxx - Remove member
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { orgId: string } }
+  { params }: { params: Promise<{ orgId: string }> }
 ) {
   try {
     const cookieStore = cookies()
@@ -82,7 +82,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { orgId } = params
+    const { orgId } = await params
     const userIdToRemove = request.nextUrl.searchParams.get('userId')
 
     if (!userIdToRemove) {
@@ -148,7 +148,7 @@ export async function DELETE(
 // PATCH /api/organizations/[orgId]/members - Update member role
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { orgId: string } }
+  { params }: { params: Promise<{ orgId: string }> }
 ) {
   try {
     const cookieStore = cookies()
@@ -160,7 +160,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { orgId } = params
+    const { orgId } = await params
     const body = await request.json()
     const { userId, role } = body
 

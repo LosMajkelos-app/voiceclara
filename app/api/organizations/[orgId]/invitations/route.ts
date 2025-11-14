@@ -8,7 +8,7 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 // GET /api/organizations/[orgId]/invitations - Get pending invitations
 export async function GET(
   request: NextRequest,
-  { params }: { params: { orgId: string } }
+  { params }: { params: Promise<{ orgId: string }> }
 ) {
   try {
     const cookieStore = cookies()
@@ -20,7 +20,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { orgId } = params
+    const { orgId } = await params
 
     // Check if user is admin/owner
     const { data: membership } = await supabase
@@ -57,7 +57,7 @@ export async function GET(
 // POST /api/organizations/[orgId]/invitations - Send invitation
 export async function POST(
   request: NextRequest,
-  { params }: { params: { orgId: string } }
+  { params }: { params: Promise<{ orgId: string }> }
 ) {
   try {
     const cookieStore = cookies()
@@ -69,7 +69,7 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { orgId } = params
+    const { orgId } = await params
     const body = await request.json()
     const { email, role = 'member' } = body
 
@@ -218,7 +218,7 @@ export async function POST(
 // DELETE /api/organizations/[orgId]/invitations?invitationId=xxx - Cancel invitation
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { orgId: string } }
+  { params }: { params: Promise<{ orgId: string }> }
 ) {
   try {
     const cookieStore = cookies()
@@ -230,7 +230,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { orgId } = params
+    const { orgId } = await params
     const invitationId = request.nextUrl.searchParams.get('invitationId')
 
     if (!invitationId) {
