@@ -4,12 +4,16 @@ import Link from "next/link"
 import { useAuth } from "@/lib/auth-context"
 import { Sparkles, Shield, TrendingUp, MessageSquare, ArrowRight, Check, Heart, Users, Zap, BarChart3 } from "lucide-react"
 import Navbar from "@/app/components/navbar"
+import { Analytics } from "@/app/components/analytics"
+import { CookieConsent } from "@/app/components/cookie-consent"
 
 export default function HomePage() {
   const { user } = useAuth()
 
   return (
     <>
+      <Analytics />
+      <CookieConsent />
       <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         

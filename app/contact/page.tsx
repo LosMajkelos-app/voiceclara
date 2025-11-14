@@ -4,6 +4,8 @@ import { useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/app/components/navbar"
+import { Analytics } from "@/app/components/analytics"
+import { CookieConsent } from "@/app/components/cookie-consent"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Mail, MessageSquare, Phone, MapPin, Send } from "lucide-react"
@@ -326,6 +328,8 @@ function ContactForm() {
 export default function ContactPage() {
   return (
     <>
+      <Analytics />
+      <CookieConsent />
       <Navbar />
       <Suspense fallback={
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">

@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { FeedbackLayout } from "@/components/feedback-layout"
+import { AlertMessage } from "@/components/ui/alert-message"
 import { Sparkles, Shield, TrendingUp, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
@@ -12,22 +13,24 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
   const handleLogin = async () => {
     if (!email || !password) {
-      alert("Please fill in all fields")
+      setError("Please fill in all fields")
       return
     }
 
     setLoading(true)
+    setError("")
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password
     })
 
-    if (error) {
-      alert("Login failed: " + error.message)
+    if (authError) {
+      setError(authError.message)
       setLoading(false)
       return
     }
@@ -37,17 +40,18 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     setLoading(true)
+    setError("")
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error: authError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${siteUrl}/auth/callback`,
       },
     })
 
-    if (error) {
-      alert("Google login failed: " + error.message)
+    if (authError) {
+      setError(authError.message)
       setLoading(false)
     }
   }
@@ -113,6 +117,16 @@ export default function LoginPage() {
             Welcome back to VoiceClara
           </p>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <AlertMessage
+            type="error"
+            title="Login Failed"
+            message={error}
+            onClose={() => setError("")}
+          />
+        )}
 
         <div className="space-y-4">
           {/* Google Login */}

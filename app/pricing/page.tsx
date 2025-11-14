@@ -1,6 +1,8 @@
 import Link from "next/link"
 import type { Metadata } from "next"
 import Navbar from "@/app/components/navbar"
+import { AnalyticsWrapper } from "@/app/components/analytics-wrapper"
+import { CookieConsentWrapper } from "@/app/components/cookie-consent-wrapper"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Check, Sparkles, Zap, Building2 } from "lucide-react"
@@ -81,6 +83,8 @@ export default function PricingPage() {
 
   return (
     <>
+      <AnalyticsWrapper />
+      <CookieConsentWrapper />
       <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -104,7 +108,7 @@ export default function PricingPage() {
             {plans.map((plan) => (
               <Card
                 key={plan.name}
-                className={`relative p-6 ${
+                className={`relative overflow-hidden ${
                   plan.popular
                     ? 'border-4 border-purple-500 shadow-2xl scale-105'
                     : 'border-2 border-gray-200'
@@ -112,56 +116,59 @@ export default function PricingPage() {
               >
                 {/* Popular Badge */}
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
                     <span className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-4 py-1 rounded-full text-sm font-semibold shadow-lg">
                       ⭐ Most Popular
                     </span>
                   </div>
                 )}
 
-                {/* Icon */}
-                <div className={`inline-flex p-3 rounded-lg ${plan.bgColor} mb-3`}>
-                  <plan.icon className={`h-7 w-7 ${plan.iconColor}`} />
+                {/* Colored Header Bar with Plan Name */}
+                <div className={`${plan.bgColor} px-6 py-4 flex items-center justify-between`}>
+                  <h3 className={`text-2xl font-bold ${plan.name === 'Pro' ? 'text-white' : plan.iconColor}`}>
+                    {plan.name}
+                  </h3>
+                  <plan.icon className={`h-8 w-8 ${plan.name === 'Pro' ? 'text-white' : plan.iconColor}`} />
                 </div>
 
-                {/* Plan Name */}
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  {plan.name}
-                </h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  {plan.description}
-                </p>
+                {/* Card Content */}
+                <div className="p-6">
+                  {/* Price */}
+                  <div className="mb-3">
+                    <span className="text-5xl font-bold text-gray-900">
+                      {plan.price}
+                    </span>
+                    <span className="text-gray-600 ml-2 text-lg">{plan.period}</span>
+                  </div>
 
-                {/* Price */}
-                <div className="mb-4">
-                  <span className="text-4xl font-bold text-gray-900">
-                    {plan.price}
-                  </span>
-                  <span className="text-gray-600 ml-2">{plan.period}</span>
+                  {/* Description */}
+                  <p className="text-gray-600 text-sm mb-5">
+                    {plan.description}
+                  </p>
+
+                  {/* CTA Button */}
+                  <Link href={plan.ctaLink}>
+                    <Button
+                      className={`w-full mb-5 ${
+                        plan.popular
+                          ? 'bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white'
+                          : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                      }`}
+                    >
+                      {plan.cta}
+                    </Button>
+                  </Link>
+
+                  {/* Features */}
+                  <ul className="space-y-2.5">
+                    {plan.features.map((feature, index) => (
+                      <li key={index} className="flex items-start gap-2.5">
+                        <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-700 text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-
-                {/* CTA Button */}
-                <Link href={plan.ctaLink}>
-                  <Button
-                    className={`w-full mb-4 ${
-                      plan.popular
-                        ? 'bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white'
-                        : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                    }`}
-                  >
-                    {plan.cta}
-                  </Button>
-                </Link>
-
-                {/* Features */}
-                <ul className="space-y-3">
-                  {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700 text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
               </Card>
             ))}
           </div>
