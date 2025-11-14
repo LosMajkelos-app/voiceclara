@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
-import { ArrowLeft, ArrowRight, Check, Sparkles, Shield, Activity, Edit } from "lucide-react"
+import { ArrowLeft, ArrowRight, Sparkles, Shield, Activity, Edit } from "lucide-react"
 import { FeedbackLayout } from "@/components/feedback-layout"
 
 export default function FeedbackFormPage() {
@@ -588,24 +588,14 @@ export default function FeedbackFormPage() {
         </button>
 
         {isLastQuestion ? (
-          <div className="flex gap-3">
-            <button
-              onClick={handleDirectSubmit}
-              disabled={submitting}
-              className="flex items-center gap-2 bg-white border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-semibold px-6 py-3 rounded-xl transition-all"
-            >
-              <Check className="h-5 w-5" />
-              Submit Now
-            </button>
-            <button
-              onClick={handleReviewWithAI}
-              disabled={submitting}
-              className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl"
-            >
-              <Sparkles className="h-5 w-5" />
-              Review with AI
-            </button>
-          </div>
+          <button
+            onClick={handleReviewWithAI}
+            disabled={submitting}
+            className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl"
+          >
+            <Sparkles className="h-5 w-5" />
+            Review with AI →
+          </button>
         ) : (
           <button
             onClick={handleNext}
