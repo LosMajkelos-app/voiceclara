@@ -279,33 +279,37 @@ export default function CreatePage() {
         <>
           {/* Scrollable Content */}
           <div className="overflow-y-auto max-h-[calc(100vh-280px)] pr-2 mb-20">
-            <div className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Your Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={creatorName}
-                  onChange={(e) => setCreatorName(e.target.value)}
-                  placeholder="John Doe"
-                  className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                />
-              </div>
+            <div className="space-y-4">
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Your Email <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="email"
-                  value={creatorEmail}
-                  onChange={(e) => setCreatorEmail(e.target.value)}
-                  placeholder="john@example.com"
-                  className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                />
-                <p className="text-xs text-gray-500 mt-1">We'll send you a link to view responses</p>
+              {/* Name and Email in Grid on Desktop */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Your Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={creatorName}
+                    onChange={(e) => setCreatorName(e.target.value)}
+                    placeholder="John Doe"
+                    className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Your Email <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={creatorEmail}
+                    onChange={(e) => setCreatorEmail(e.target.value)}
+                    placeholder="john@example.com"
+                    className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
               </div>
+              <p className="text-xs text-gray-500 -mt-2">We'll send you a link to view responses</p>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -330,7 +334,7 @@ export default function CreatePage() {
                   <option value="no">🇳🇴 Norsk (Norwegian)</option>
                 </select>
                 <p className="text-xs text-gray-500 mt-1">
-                  AI will generate questions and analyze responses in this language. Respondents can reply in any language.
+                  AI will analyze in this language. Respondents can reply in any language.
                 </p>
               </div>
 
@@ -338,19 +342,19 @@ export default function CreatePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Choose Template <span className="text-red-500">*</span>
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   {templates.map((template) => (
                     <button
                       key={template.id}
                       onClick={() => handleTemplateSelect(template)}
-                      className={`p-4 border-2 rounded-lg text-left transition-all ${
+                      className={`p-3 border-2 rounded-lg text-left transition-all ${
                         templateType === template.id
                           ? 'border-indigo-500 bg-indigo-50'
                           : 'border-gray-200 bg-white hover:border-indigo-300'
                       }`}
                     >
-                      <div className="text-2xl mb-2">{template.icon}</div>
-                      <p className="font-semibold text-sm">{template.name}</p>
+                      <div className="text-xl mb-1">{template.icon}</div>
+                      <p className="font-semibold text-xs">{template.name}</p>
                     </button>
                   ))}
                 </div>
@@ -365,7 +369,7 @@ export default function CreatePage() {
                     value={customPrompt}
                     onChange={(e) => setCustomPrompt(e.target.value)}
                     placeholder="E.g., I need feedback on my presentation skills"
-                    className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 min-h-[100px]"
+                    className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 min-h-[80px]"
                   />
                 </div>
               )}
