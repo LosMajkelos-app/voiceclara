@@ -4,6 +4,173 @@ Target: **HR Managers / People Ops** managing feedback for teams
 
 ---
 
+## 🚨 CRITICAL FIXES (Must Fix Before MVP)
+
+These are blocking issues that break core user flows. **Fix these FIRST.**
+
+### CRITICAL-1: Create Flow - Header Disappears on Long Content ⚠️
+**Problem:**
+- Nagłówek "Create Feedback Request" wyjeżdża poza ekran gdy jest dużo tekstu
+- Button "Continue" też może zniknąć
+- User musi scrollować żeby znaleźć button
+
+**Solution:**
+```tsx
+// Make header sticky + button always visible
+<div className="sticky top-0 bg-white z-10 pb-4">
+  <h1>Create Feedback Request</h1>
+</div>
+
+<div className="overflow-y-auto max-h-[60vh]">
+  {/* Form content */}
+</div>
+
+<div className="sticky bottom-0 bg-white pt-4 border-t">
+  <Button>Continue to Questions →</Button>
+</div>
+```
+
+**Impact:** 🔴🔴🔴 CRITICAL - Users get stuck, can't submit
+**Time:** 30 min
+
+---
+
+### CRITICAL-2: AI Generation - No Progress Feedback (10+ seconds) ⚠️
+**Problem:**
+- "Generating..." spinner for 10+ seconds
+- User nie wie czy się zawiesiło
+- Brak informacji że to normalnie trwa długo
+
+**Solution:**
+```tsx
+// Progressive status messages
+const messages = [
+  { time: 0, text: "🤖 AI is thinking...", subtext: "Analyzing your request" },
+  { time: 3000, text: "💭 Generating questions...", subtext: "This may take 10-20 seconds" },
+  { time: 8000, text: "✨ Almost there...", subtext: "Polishing the final questions" },
+  { time: 15000, text: "⏳ Still working...", subtext: "AI is being extra thorough" }
+]
+
+// Show animated progress bar + rotating messages
+```
+
+**Impact:** 🔴🔴🔴 CRITICAL - Users think it's broken
+**Time:** 1 hour
+
+---
+
+### CRITICAL-3: Last Question - Remove "Submit Now", Keep Only "Review with AI" ⚠️
+**Problem:**
+- Dwa buttony: "Submit Now" i "Review with AI"
+- Users skip AI review
+- Chcemy zawsze pokazać AI feedback
+
+**Solution:**
+```tsx
+// Remove "Submit Now" button completely
+// Keep only "Review with AI" button
+{isLastQuestion && (
+  <Button onClick={handleReviewWithAI}>
+    <Sparkles /> Review with AI →
+  </Button>
+)}
+
+// Always show AI analysis before final submit
+```
+
+**Impact:** 🔴🔴 HIGH - Better feedback quality
+**Time:** 15 min
+
+---
+
+### CRITICAL-4: Mobile UX - Completely Broken ⚠️
+**Problem:**
+- Wersja mobile czasami nie da się nic zobaczyć
+- Sidebar zajmuje cały ekran
+- Buttony za małe
+- Text overflow
+- **Mobile jest kluczowy przy dawaniu feedbacku**
+
+**Solution:**
+```tsx
+// Responsive design overhaul
+- Hide sidebar on mobile (hamburger menu)
+- Increase touch targets (min 44px)
+- Stack columns vertically
+- Reduce padding/margins
+- Test on iPhone SE, iPhone 14, Android
+
+// Add mobile-first breakpoints
+className="px-4 md:px-6 lg:px-8"
+className="text-base md:text-lg"
+className="py-3 md:py-4"
+```
+
+**Impact:** 🔴🔴🔴 CRITICAL - 50%+ users on mobile
+**Time:** 3-4 hours
+
+---
+
+### CRITICAL-5: Replace Toast Notifications with Inline HTML Messages ⚠️
+**Problem:**
+- Toast messages znikają po 3-5 sekund
+- User traci ważne informacje
+- Po rejestracji: "Check your email" znika → user nie wie co dalej
+
+**Solution:**
+```tsx
+// Replace toast with persistent inline messages
+// Example: After signup
+{emailSent && (
+  <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 mb-4">
+    <div className="flex items-center gap-3">
+      <Mail className="h-6 w-6 text-green-600" />
+      <div>
+        <p className="font-bold text-green-900">
+          ✅ Check your email!
+        </p>
+        <p className="text-sm text-green-700 mt-1">
+          We sent a confirmation link to <strong>{email}</strong>
+        </p>
+        <p className="text-xs text-green-600 mt-2">
+          💡 Check your spam folder if you don't see it in 2 minutes
+        </p>
+      </div>
+    </div>
+  </div>
+)}
+
+// Keep message visible until user leaves page
+// No auto-dismiss
+```
+
+**Impact:** 🔴🔴🔴 CRITICAL - Users get confused
+**Time:** 2 hours (update all pages)
+
+**Pages to fix:**
+- ✅ Signup (email confirmation)
+- ✅ Forgot password (email sent)
+- ✅ Create request (success)
+- ✅ Send invitations (sent count)
+- ✅ Delete request (confirmation)
+
+---
+
+## Summary: Critical Fixes
+
+| Fix | Priority | Time | Status |
+|-----|----------|------|--------|
+| CRITICAL-1: Sticky header/button | 🔴🔴🔴 | 30 min | ⏳ TODO |
+| CRITICAL-2: AI progress feedback | 🔴🔴🔴 | 1 hour | ⏳ TODO |
+| CRITICAL-3: Single Review button | 🔴🔴 | 15 min | ⏳ TODO |
+| CRITICAL-4: Mobile responsive | 🔴🔴🔴 | 3-4 hours | ⏳ TODO |
+| CRITICAL-5: Inline messages | 🔴🔴🔴 | 2 hours | ⏳ TODO |
+
+**Total time:** 7-8 hours
+**Impact:** Fixes core UX blockers before MVP
+
+---
+
 ## A. Quick Wins (30 min - 1h each)
 
 ### A1. Dashboard - Add Summary Statistics
