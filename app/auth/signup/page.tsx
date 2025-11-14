@@ -23,11 +23,6 @@ export default function SignUpPage() {
       return
     }
 
-    if (accountType === "business") {
-      alert("Business accounts coming soon! Please use individual account for now.")
-      return
-    }
-
     setLoading(true)
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
