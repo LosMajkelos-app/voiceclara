@@ -22,9 +22,19 @@ export default function CreatePage() {
   const [title, setTitle] = useState("")
   const [questions, setQuestions] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
+  const [aiProgressMessage, setAiProgressMessage] = useState("")
+  const [aiProgressStep, setAiProgressStep] = useState(0)
 
   // Get pre-translated templates for selected language (instant, no API call)
   const templates = getTemplatesForLanguage(language)
+
+  // AI Progress messages
+  const AI_PROGRESS_MESSAGES = [
+    { time: 0, text: "🤖 AI is thinking...", subtext: "Analyzing your request" },
+    { time: 3000, text: "💭 Generating questions...", subtext: "This may take 10-20 seconds" },
+    { time: 8000, text: "✨ Almost there...", subtext: "Polishing the final questions" },
+    { time: 15000, text: "⏳ Still working...", subtext: "AI is being extra thorough" }
+  ]
 
   useEffect(() => {
     if (user) {
@@ -62,8 +72,18 @@ export default function CreatePage() {
     }
 
     if (templateType === "custom") {
-      // Real AI generation
+      // Real AI generation with progress feedback
       setLoading(true)
+      setAiProgressStep(0)
+
+      // Start progress timer
+      const progressTimers: NodeJS.Timeout[] = []
+      AI_PROGRESS_MESSAGES.forEach((msg, index) => {
+        const timer = setTimeout(() => {
+          setAiProgressStep(index)
+        }, msg.time)
+        progressTimers.push(timer)
+      })
 
       try {
         const response = await fetch('/api/generate-questions', {
@@ -74,22 +94,30 @@ export default function CreatePage() {
 
         const data = await response.json()
 
+        // Clear all progress timers
+        progressTimers.forEach(timer => clearTimeout(timer))
+
         if (response.ok && data.questions) {
           setTitle("AI-Generated Feedback Request")
           setQuestions(data.questions)
         } else {
           alert("AI generation failed: " + (data.error || "Unknown error"))
           setLoading(false)
+          setAiProgressStep(0)
           return
         }
       } catch (error) {
         console.error('AI generation error:', error)
         alert("Failed to generate questions. Please try again.")
         setLoading(false)
+        setAiProgressStep(0)
+        // Clear all progress timers
+        progressTimers.forEach(timer => clearTimeout(timer))
         return
       }
 
       setLoading(false)
+      setAiProgressStep(0)
     }
 
     setStep(2)
@@ -346,13 +374,32 @@ export default function CreatePage() {
           {/* Sticky Button */}
           <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white to-transparent p-4 border-t border-gray-200 md:relative md:bg-none md:border-none md:p-0 md:mt-4">
             <div className="max-w-2xl mx-auto">
-              <button
-                onClick={proceedToQuestions}
-                disabled={loading}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
-              >
-                {loading ? "Generating..." : "Continue to Questions →"}
-              </button>
+              {loading && templateType === "custom" ? (
+                <div className="bg-indigo-600 text-white font-semibold py-4 px-6 rounded-xl shadow-lg">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <p className="text-base">{AI_PROGRESS_MESSAGES[aiProgressStep]?.text}</p>
+                    </div>
+                    <p className="text-xs opacity-80">{AI_PROGRESS_MESSAGES[aiProgressStep]?.subtext}</p>
+                    {/* Progress Bar */}
+                    <div className="w-full bg-indigo-800 rounded-full h-1.5 mt-1">
+                      <div
+                        className="bg-white h-1.5 rounded-full transition-all duration-500"
+                        style={{ width: `${((aiProgressStep + 1) / AI_PROGRESS_MESSAGES.length) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={proceedToQuestions}
+                  disabled={loading}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+                >
+                  {loading ? "Loading..." : "Continue to Questions →"}
+                </button>
+              )}
             </div>
           </div>
         </>
