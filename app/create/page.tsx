@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/lib/auth-context"
 import { FeedbackLayout } from "@/components/feedback-layout"
+import { getTemplatesForLanguage } from "@/lib/predefined-templates"
 import { Sparkles, Lightbulb, TrendingUp, Send, Plus, X, ArrowLeft } from "lucide-react"
 
 export default function CreatePage() {
@@ -17,22 +18,13 @@ export default function CreatePage() {
   const [language, setLanguage] = useState("en")
   const [templateType, setTemplateType] = useState<string | null>(null)
   const [customPrompt, setCustomPrompt] = useState("")
-  const [isTranslating, setIsTranslating] = useState(false)
 
   const [title, setTitle] = useState("")
   const [questions, setQuestions] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
 
-  // Base templates in English
-  const baseTemplates = [
-    { id: "360", name: "360 Review", icon: "🔄", questions: ["What am I doing well?", "What could I improve?", "What's my biggest blind spot?", "What should I start/stop/continue?", "Any other thoughts?"] },
-    { id: "manager", name: "Manager Feedback", icon: "👔", questions: ["How effective is my communication?", "Do I provide clear direction?", "How well do I support your growth?", "What could I improve as a manager?"] },
-    { id: "peer", name: "Peer Review", icon: "🤝", questions: ["How well do we collaborate?", "What do I bring to the team?", "Where could I be more helpful?", "Any suggestions for improvement?"] },
-    { id: "project", name: "Project Retrospective", icon: "📊", questions: ["What went well?", "What could be improved?", "What did we learn?", "What should we do differently next time?"] },
-    { id: "custom", name: "AI Generated", icon: "✨", questions: [] }
-  ]
-
-  const [templates, setTemplates] = useState(baseTemplates)
+  // Get pre-translated templates for selected language (instant, no API call)
+  const templates = getTemplatesForLanguage(language)
 
   useEffect(() => {
     if (user) {
@@ -40,56 +32,6 @@ export default function CreatePage() {
       setCreatorEmail(user.email || "")
     }
   }, [user])
-
-  // Translate templates when language changes
-  useEffect(() => {
-    const translateTemplates = async () => {
-      if (language === 'en') {
-        // Reset to English
-        setTemplates(baseTemplates)
-        return
-      }
-
-      setIsTranslating(true)
-
-      try {
-        const translatedTemplates = await Promise.all(
-          baseTemplates.map(async (template) => {
-            if (template.id === 'custom' || template.questions.length === 0) {
-              return template
-            }
-
-            // Translate questions for this template
-            const response = await fetch('/api/translate-template', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                questions: template.questions,
-                language
-              })
-            })
-
-            if (response.ok) {
-              const data = await response.json()
-              return { ...template, questions: data.questions }
-            }
-
-            return template
-          })
-        )
-
-        setTemplates(translatedTemplates)
-      } catch (error) {
-        console.error('Translation error:', error)
-        // Keep English on error
-        setTemplates(baseTemplates)
-      } finally {
-        setIsTranslating(false)
-      }
-    }
-
-    translateTemplates()
-  }, [language])
 
   const handleTemplateSelect = (template: typeof templates[0]) => {
     setTemplateType(template.id)
