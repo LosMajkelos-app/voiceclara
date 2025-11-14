@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/lib/auth-context"
+import { useOrganization } from "@/lib/organization-context"
 import { FeedbackLayout } from "@/components/feedback-layout"
 import { getTemplatesForLanguage } from "@/lib/predefined-templates"
 import { Sparkles, Lightbulb, TrendingUp, Send, Plus, X, ArrowLeft } from "lucide-react"
@@ -11,6 +12,7 @@ import { Sparkles, Lightbulb, TrendingUp, Send, Plus, X, ArrowLeft } from "lucid
 export default function CreatePage() {
   const router = useRouter()
   const { user } = useAuth()
+  const { currentOrganization } = useOrganization()
 
   const [step, setStep] = useState(1)
   const [creatorName, setCreatorName] = useState("")
@@ -164,6 +166,7 @@ export default function CreatePage() {
         creator_email: creatorEmail.trim(),
         user_id: user?.id || null,
         guest_email: !user ? creatorEmail.trim() : null,
+        organization_id: user && currentOrganization ? currentOrganization.id : null,
         share_token: crypto.randomUUID(),
         results_token: crypto.randomUUID()
       }
