@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { FeedbackLayout } from "@/components/feedback-layout"
+import { AlertMessage } from "@/components/ui/alert-message"
 import { Sparkles, Shield, TrendingUp, ArrowLeft, Building2, User as UserIcon, Mail } from "lucide-react"
 import Link from "next/link"
 
@@ -16,17 +17,19 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
   const [submittedEmail, setSubmittedEmail] = useState("")
+  const [error, setError] = useState("")
 
   const handleSignUp = async () => {
     if (!email || !password || !fullName) {
-      alert("Please fill in all fields")
+      setError("Please fill in all fields")
       return
     }
 
     setLoading(true)
+    setError("")
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -38,8 +41,8 @@ export default function SignUpPage() {
       }
     })
 
-    if (error) {
-      alert("Sign up failed: " + error.message)
+    if (authError) {
+      setError(authError.message)
       setLoading(false)
       return
     }
@@ -51,9 +54,10 @@ export default function SignUpPage() {
 
   const handleGoogleSignUp = async () => {
     setLoading(true)
+    setError("")
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error: authError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${siteUrl}/auth/callback`,
@@ -64,8 +68,8 @@ export default function SignUpPage() {
       },
     })
 
-    if (error) {
-      alert("Google sign up failed: " + error.message)
+    if (authError) {
+      setError(authError.message)
       setLoading(false)
     }
   }
@@ -131,6 +135,16 @@ export default function SignUpPage() {
             Get started with VoiceClara today
           </p>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <AlertMessage
+            type="error"
+            title="Sign Up Failed"
+            message={error}
+            onClose={() => setError("")}
+          />
+        )}
 
         {/* Email Sent Success Message */}
         {emailSent && (
