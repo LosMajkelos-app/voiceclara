@@ -193,6 +193,7 @@ export default function CreatePage() {
 
   return (
     <FeedbackLayout
+      centerContent={false}
       rightPanel={
         <>
           <div className="mb-6">
