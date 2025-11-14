@@ -38,6 +38,9 @@ export default function Navbar() {
                     <Link href="/contact">
                       <Button variant="ghost" size="sm">Contact</Button>
                     </Link>
+                    <Link href="/team">
+                      <Button variant="ghost" size="sm">Team</Button>
+                    </Link>
                     <Link href="/create">
                       <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
                         Create Request
@@ -120,6 +123,11 @@ export default function Navbar() {
                     <Link href="/contact" onClick={() => setMobileMenuOpen(false)}>
                       <Button variant="ghost" size="sm" className="w-full justify-start">
                         Contact
+                      </Button>
+                    </Link>
+                    <Link href="/team" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="ghost" size="sm" className="w-full justify-start">
+                        Team
                       </Button>
                     </Link>
                     <Link href="/create" onClick={() => setMobileMenuOpen(false)}>
