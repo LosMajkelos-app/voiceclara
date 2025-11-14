@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth-context"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { BarChart3, MessageSquare, Plus, Trash2, Bell } from "lucide-react"
+import { BarChart3, MessageSquare, Plus, Trash2, Bell, X, Check } from "lucide-react"
 import { toast } from "sonner"
 import DashboardSidebar from "@/app/components/dashboard-sidebar"
 import AccountSettingsModal from "@/app/components/account-settings-modal"
@@ -30,17 +30,29 @@ function DashboardContent() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [showAccountSettings, setShowAccountSettings] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
+  const [showConfirmedBanner, setShowConfirmedBanner] = useState(false)
   const hasFetched = useRef(false)
 
   // Show linked success message
   const linkedCount = searchParams.get('linked')
-  
+  const confirmed = searchParams.get('confirmed')
+
   useEffect(() => {
     if (linkedCount) {
       toast.success(`Found ${linkedCount} previous request(s)! Added to your dashboard.`)
       router.replace('/dashboard')
     }
   }, [linkedCount, router])
+
+  useEffect(() => {
+    if (confirmed === 'true') {
+      setShowConfirmedBanner(true)
+      // Clean URL without reloading
+      const url = new URL(window.location.href)
+      url.searchParams.delete('confirmed')
+      window.history.replaceState({}, '', url.toString())
+    }
+  }, [confirmed])
 
   useEffect(() => {
     async function fetchRequests() {
@@ -239,6 +251,33 @@ function DashboardContent() {
           {/* Main Content Area */}
           <main className="flex-1 overflow-y-auto pb-20">
             <div className="px-4 sm:px-6 lg:px-8 py-4">
+
+              {/* Account Confirmed Banner */}
+              {showConfirmedBanner && (
+                <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 mb-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0">
+                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <Check className="h-6 w-6 text-green-600" />
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-green-900 mb-1 text-base">
+                        🎉 Welcome to VoiceClara!
+                      </h3>
+                      <p className="text-sm text-green-800 leading-relaxed">
+                        Your account has been confirmed successfully. You can now create feedback requests and start collecting honest, anonymous feedback from your team.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowConfirmedBanner(false)}
+                      className="flex-shrink-0 p-1 hover:bg-green-100 rounded-full transition-colors"
+                    >
+                      <X className="h-5 w-5 text-green-700" />
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Stats Cards - More Compact */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
