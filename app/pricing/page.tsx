@@ -1,6 +1,7 @@
 import Link from "next/link"
 import type { Metadata } from "next"
 import Navbar from "@/app/components/navbar"
+import { AnalyticsWrapper } from "@/app/components/analytics-wrapper"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Check, Sparkles, Zap, Building2 } from "lucide-react"
@@ -81,6 +82,7 @@ export default function PricingPage() {
 
   return (
     <>
+      <AnalyticsWrapper />
       <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
