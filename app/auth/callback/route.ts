@@ -24,9 +24,28 @@ export async function GET(request: NextRequest) {
 
       console.log('✅ Email confirmed, user logged in:', data.user?.email)
 
-      // Check if this is a new signup (user just confirmed email)
-      const isNewSignup = data.user?.created_at &&
-        new Date(data.user.created_at).getTime() > Date.now() - 300000 // Within last 5 minutes
+      // Check if this is a new signup (first login after email confirmation)
+      // Method 1: Compare last_sign_in_at with created_at - if very close, it's first login
+      const user = data.user
+      const createdRecently = user?.created_at && user?.last_sign_in_at &&
+        Math.abs(new Date(user.created_at).getTime() - new Date(user.last_sign_in_at).getTime()) < 60000 // Within 1 minute
+
+      // Method 2: Check if email was confirmed recently (within last 2 minutes)
+      const emailConfirmedRecently = user?.email_confirmed_at &&
+        Date.now() - new Date(user.email_confirmed_at).getTime() < 120000 // Within 2 minutes
+
+      const isNewSignup = createdRecently || emailConfirmedRecently
+
+      console.log('🔍 Signup detection:', {
+        created_at: user?.created_at,
+        last_sign_in_at: user?.last_sign_in_at,
+        email_confirmed_at: user?.email_confirmed_at,
+        createdRecently,
+        emailConfirmedRecently,
+        isNewSignup,
+        timeDiff: user?.created_at && user?.last_sign_in_at ?
+          Math.abs(new Date(user.created_at).getTime() - new Date(user.last_sign_in_at).getTime()) : null
+      })
 
       // Link guest requests after email confirmation
       if (data.user && data.session) {
@@ -48,6 +67,7 @@ export async function GET(request: NextRequest) {
             const redirectUrl = new URL(`${next}?linked=${linkData.linked}`, requestUrl.origin)
             if (isNewSignup) {
               redirectUrl.searchParams.append('confirmed', 'true')
+              console.log('✅ Adding confirmed=true to redirect (with linked requests)')
             }
             return NextResponse.redirect(redirectUrl)
           }
@@ -58,9 +78,11 @@ export async function GET(request: NextRequest) {
 
       // Redirect with confirmation message if new signup
       if (isNewSignup) {
+        console.log('✅ Adding confirmed=true to redirect')
         return NextResponse.redirect(new URL(`${next}?confirmed=true`, requestUrl.origin))
       }
 
+      console.log('ℹ️ Regular login, no confirmed banner')
       return NextResponse.redirect(new URL(next, requestUrl.origin))
     } catch (error) {
       console.error('❌ Unexpected error:', error)
