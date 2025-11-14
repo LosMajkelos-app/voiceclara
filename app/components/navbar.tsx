@@ -32,6 +32,12 @@ export default function Navbar() {
               <>
                 {user ? (
                   <>
+                    <Link href="/pricing">
+                      <Button variant="ghost" size="sm">Pricing</Button>
+                    </Link>
+                    <Link href="/contact">
+                      <Button variant="ghost" size="sm">Contact</Button>
+                    </Link>
                     <Link href="/create">
                       <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
                         Create Request
@@ -106,6 +112,16 @@ export default function Navbar() {
               <div className="flex flex-col gap-2">
                 {user ? (
                   <>
+                    <Link href="/pricing" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="ghost" size="sm" className="w-full justify-start">
+                        Pricing
+                      </Button>
+                    </Link>
+                    <Link href="/contact" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="ghost" size="sm" className="w-full justify-start">
+                        Contact
+                      </Button>
+                    </Link>
                     <Link href="/create" onClick={() => setMobileMenuOpen(false)}>
                       <Button size="sm" className="w-full bg-indigo-600 hover:bg-indigo-700">
                         Create Request
