@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Script from "next/script"
 
 /**
@@ -13,13 +14,27 @@ import Script from "next/script"
  * - etc.
  *
  * This component is loaded on all public pages (before login).
+ * Respects cookie consent - only loads when user has accepted cookies.
  */
 
 export function Analytics() {
+  const [hasConsent, setHasConsent] = useState(false)
+
+  useEffect(() => {
+    // Check cookie consent
+    const consent = localStorage.getItem("cookie-consent")
+    setHasConsent(consent === "accepted")
+  }, [])
+
   // Get analytics IDs from environment variables
   const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
   const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID
   const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
+
+  // Only load analytics if user has consented
+  if (!hasConsent) {
+    return null
+  }
 
   return (
     <>
