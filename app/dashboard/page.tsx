@@ -4,13 +4,21 @@ import { useEffect, useState, useRef, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { useAuth } from "@/lib/auth-context"
+import { useOrganization } from "@/lib/organization-context"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { BarChart3, MessageSquare, Plus, Trash2, Bell, X, Check } from "lucide-react"
+import { BarChart3, MessageSquare, Plus, Trash2, Bell, X, Check, Building2 } from "lucide-react"
 import { toast } from "sonner"
 import DashboardSidebar from "@/app/components/dashboard-sidebar"
 import AccountSettingsModal from "@/app/components/account-settings-modal"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface FeedbackRequest {
   id: string
@@ -25,6 +33,7 @@ function DashboardContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, loading: authLoading } = useAuth()
+  const { currentOrganization, organizations, setCurrentOrganization } = useOrganization()
   const [requests, setRequests] = useState<FeedbackRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -56,19 +65,29 @@ function DashboardContent() {
 
   useEffect(() => {
     async function fetchRequests() {
-      if (!user || hasFetched.current) {
+      if (!user) {
         return
       }
 
-      hasFetched.current = true
       setLoading(true)
+      hasFetched.current = true
 
       try {
-        const { data, error } = await supabase
+        // Build query based on organization filter
+        let query = supabase
           .from('feedback_requests')
           .select('*')
-          .eq('user_id', user.id)
           .order('created_at', { ascending: false })
+
+        if (currentOrganization) {
+          // Show requests for current organization OR personal requests (null organization_id)
+          query = query.or(`organization_id.eq.${currentOrganization.id},and(organization_id.is.null,user_id.eq.${user.id})`)
+        } else {
+          // Fallback: show user's personal requests only
+          query = query.eq('user_id', user.id).is('organization_id', null)
+        }
+
+        const { data, error } = await query
 
         if (error) {
           console.error('❌ Supabase error:', error)
@@ -84,7 +103,7 @@ function DashboardContent() {
               .from('responses')
               .select('*', { count: 'exact', head: true })
               .eq('feedback_request_id', req.id)
-            
+
             return {
               ...req,
               response_count: count || 0
@@ -102,12 +121,12 @@ function DashboardContent() {
       }
     }
 
-    if (user?.id) {
+    if (user?.id && currentOrganization) {
       fetchRequests()
-    } else {
+    } else if (user?.id && !currentOrganization) {
       setLoading(false)
     }
-  }, [user?.id])
+  }, [user?.id, currentOrganization?.id])
 
   // Auto-link guest requests on dashboard load
   useEffect(() => {
@@ -220,9 +239,37 @@ function DashboardContent() {
           <header className="bg-white border-b border-gray-200">
             <div className="px-4 sm:px-6 lg:px-8 py-3">
               <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
-                  <p className="text-xs text-gray-500 mt-0.5">Welcome back, {user.user_metadata?.full_name || user.email?.split('@')[0]}!</p>
+                <div className="flex items-center gap-4">
+                  <div>
+                    <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
+                    <p className="text-xs text-gray-500 mt-0.5">Welcome back, {user.user_metadata?.full_name || user.email?.split('@')[0]}!</p>
+                  </div>
+                  {/* Organization Switcher */}
+                  {organizations.length > 1 && (
+                    <div className="hidden md:block">
+                      <Select
+                        value={currentOrganization?.id || ''}
+                        onValueChange={(orgId) => {
+                          const org = organizations.find(o => o.id === orgId)
+                          if (org) setCurrentOrganization(org)
+                        }}
+                      >
+                        <SelectTrigger className="w-48 h-8">
+                          <div className="flex items-center gap-2">
+                            <Building2 className="h-3.5 w-3.5 text-gray-500" />
+                            <SelectValue />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {organizations.map((org) => (
+                            <SelectItem key={org.id} value={org.id}>
+                              {org.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-3">
                   <Button
