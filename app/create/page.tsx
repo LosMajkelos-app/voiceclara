@@ -235,8 +235,8 @@ export default function CreatePage() {
         {step === 2 ? 'Back to Info' : user ? 'Back to Dashboard' : 'Back to Homepage'}
       </button>
 
-      {/* Fixed Header */}
-      <div className="mb-6">
+      {/* Sticky Header */}
+      <div className="sticky top-0 bg-gradient-to-br from-blue-50 to-indigo-50 z-10 pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 pt-2">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           Create Feedback Request
         </h1>
@@ -247,203 +247,223 @@ export default function CreatePage() {
 
       {/* STEP 1 */}
       {step === 1 && (
-        <div className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Your Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={creatorName}
-              onChange={(e) => setCreatorName(e.target.value)}
-              placeholder="John Doe"
-              className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
+        <>
+          {/* Scrollable Content */}
+          <div className="overflow-y-auto max-h-[calc(100vh-280px)] pr-2 mb-20">
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Your Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={creatorName}
+                  onChange={(e) => setCreatorName(e.target.value)}
+                  placeholder="John Doe"
+                  className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Your Email <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="email"
-              value={creatorEmail}
-              onChange={(e) => setCreatorEmail(e.target.value)}
-              placeholder="john@example.com"
-              className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            />
-            <p className="text-xs text-gray-500 mt-1">We'll send you a link to view responses</p>
-          </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Your Email <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  value={creatorEmail}
+                  onChange={(e) => setCreatorEmail(e.target.value)}
+                  placeholder="john@example.com"
+                  className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">We'll send you a link to view responses</p>
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Feedback Language <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option value="en">🇬🇧 English</option>
-              <option value="es">🇪🇸 Español (Spanish)</option>
-              <option value="fr">🇫🇷 Français (French)</option>
-              <option value="de">🇩🇪 Deutsch (German)</option>
-              <option value="pl">🇵🇱 Polski (Polish)</option>
-              <option value="pt">🇵🇹 Português (Portuguese)</option>
-              <option value="it">🇮🇹 Italiano (Italian)</option>
-              <option value="nl">🇳🇱 Nederlands (Dutch)</option>
-              <option value="cs">🇨🇿 Čeština (Czech)</option>
-              <option value="sv">🇸🇪 Svenska (Swedish)</option>
-              <option value="da">🇩🇰 Dansk (Danish)</option>
-              <option value="no">🇳🇴 Norsk (Norwegian)</option>
-            </select>
-            <p className="text-xs text-gray-500 mt-1">
-              AI will generate questions and analyze responses in this language. Respondents can reply in any language.
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Choose Template <span className="text-red-500">*</span>
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              {templates.map((template) => (
-                <button
-                  key={template.id}
-                  onClick={() => handleTemplateSelect(template)}
-                  className={`p-4 border-2 rounded-lg text-left transition-all ${
-                    templateType === template.id
-                      ? 'border-indigo-500 bg-indigo-50'
-                      : 'border-gray-200 bg-white hover:border-indigo-300'
-                  }`}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Feedback Language <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 >
-                  <div className="text-2xl mb-2">{template.icon}</div>
-                  <p className="font-semibold text-sm">{template.name}</p>
-                </button>
-              ))}
+                  <option value="en">🇬🇧 English</option>
+                  <option value="es">🇪🇸 Español (Spanish)</option>
+                  <option value="fr">🇫🇷 Français (French)</option>
+                  <option value="de">🇩🇪 Deutsch (German)</option>
+                  <option value="pl">🇵🇱 Polski (Polish)</option>
+                  <option value="pt">🇵🇹 Português (Portuguese)</option>
+                  <option value="it">🇮🇹 Italiano (Italian)</option>
+                  <option value="nl">🇳🇱 Nederlands (Dutch)</option>
+                  <option value="cs">🇨🇿 Čeština (Czech)</option>
+                  <option value="sv">🇸🇪 Svenska (Swedish)</option>
+                  <option value="da">🇩🇰 Dansk (Danish)</option>
+                  <option value="no">🇳🇴 Norsk (Norwegian)</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  AI will generate questions and analyze responses in this language. Respondents can reply in any language.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Choose Template <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {templates.map((template) => (
+                    <button
+                      key={template.id}
+                      onClick={() => handleTemplateSelect(template)}
+                      className={`p-4 border-2 rounded-lg text-left transition-all ${
+                        templateType === template.id
+                          ? 'border-indigo-500 bg-indigo-50'
+                          : 'border-gray-200 bg-white hover:border-indigo-300'
+                      }`}
+                    >
+                      <div className="text-2xl mb-2">{template.icon}</div>
+                      <p className="font-semibold text-sm">{template.name}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {templateType === "custom" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Describe what feedback you need
+                  </label>
+                  <textarea
+                    value={customPrompt}
+                    onChange={(e) => setCustomPrompt(e.target.value)}
+                    placeholder="E.g., I need feedback on my presentation skills"
+                    className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 min-h-[100px]"
+                  />
+                </div>
+              )}
             </div>
           </div>
 
-          {templateType === "custom" && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Describe what feedback you need
-              </label>
-              <textarea
-                value={customPrompt}
-                onChange={(e) => setCustomPrompt(e.target.value)}
-                placeholder="E.g., I need feedback on my presentation skills"
-                className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 min-h-[100px]"
-              />
+          {/* Sticky Button */}
+          <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white to-transparent p-4 border-t border-gray-200 md:relative md:bg-none md:border-none md:p-0 md:mt-4">
+            <div className="max-w-2xl mx-auto">
+              <button
+                onClick={proceedToQuestions}
+                disabled={loading}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+              >
+                {loading ? "Generating..." : "Continue to Questions →"}
+              </button>
             </div>
-          )}
-
-          <button
-            onClick={proceedToQuestions}
-            disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
-          >
-            {loading ? "Generating..." : "Continue to Questions →"}
-          </button>
-        </div>
+          </div>
+        </>
       )}
 
       {/* STEP 2 */}
       {step === 2 && (
-        <div className="space-y-5 max-h-[60vh] overflow-y-auto pr-2">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Request Title <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="360 Review - Q1 2025"
-              className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Questions ({questions.length}/10)
-            </label>
-            <div className="space-y-2">
-              {questions.map((q, index) => (
-                <div key={index} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={q}
-                    onChange={(e) => updateQuestion(index, e.target.value)}
-                    placeholder={`Question ${index + 1}`}
-                    className="flex-1 px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
-                  />
-                  {questions.length > 1 && (
-                    <button
-                      onClick={() => removeQuestion(index)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-            {questions.length < 10 && (
-              <button
-                onClick={addQuestion}
-                className="mt-2 flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
-              >
-                <Plus className="h-4 w-4" />
-                Add Question
-              </button>
-            )}
-          </div>
-
-          {/* Guest Login Banner */}
-          {!user && (
-            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-4 mb-4">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                    <Sparkles className="h-4 w-4 text-indigo-600" />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-indigo-900 mb-1">
-                    💡 Create an account to unlock more features
-                  </p>
-                  <p className="text-xs text-indigo-700 mb-3">
-                    Save this request to your dashboard, get AI insights, and track responses over time. It's free forever!
-                  </p>
-                  <div className="flex gap-2">
-                    <a
-                      href="/auth/signup"
-                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 underline"
-                    >
-                      Create Account
-                    </a>
-                    <span className="text-xs text-gray-400">•</span>
-                    <a
-                      href="/auth/login"
-                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 underline"
-                    >
-                      Sign In
-                    </a>
-                  </div>
-                </div>
+        <>
+          {/* Scrollable Content */}
+          <div className="overflow-y-auto max-h-[calc(100vh-280px)] pr-2 mb-20">
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Request Title <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="360 Review - Q1 2025"
+                  className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                />
               </div>
-            </div>
-          )}
 
-          <button
-            onClick={handleCreate}
-            disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 sticky bottom-0"
-          >
-            {loading ? "Creating..." : "Create Feedback Request 🚀"}
-          </button>
-        </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Questions ({questions.length}/10)
+                </label>
+                <div className="space-y-2">
+                  {questions.map((q, index) => (
+                    <div key={index} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={q}
+                        onChange={(e) => updateQuestion(index, e.target.value)}
+                        placeholder={`Question ${index + 1}`}
+                        className="flex-1 px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                      />
+                      {questions.length > 1 && (
+                        <button
+                          onClick={() => removeQuestion(index)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {questions.length < 10 && (
+                  <button
+                    onClick={addQuestion}
+                    className="mt-2 flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Question
+                  </button>
+                )}
+              </div>
+
+              {/* Guest Login Banner */}
+              {!user && (
+                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-4 mb-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                        <Sparkles className="h-4 w-4 text-indigo-600" />
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-indigo-900 mb-1">
+                        💡 Create an account to unlock more features
+                      </p>
+                      <p className="text-xs text-indigo-700 mb-3">
+                        Save this request to your dashboard, get AI insights, and track responses over time. It's free forever!
+                      </p>
+                      <div className="flex gap-2">
+                        <a
+                          href="/auth/signup"
+                          className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 underline"
+                        >
+                          Create Account
+                        </a>
+                        <span className="text-xs text-gray-400">•</span>
+                        <a
+                          href="/auth/login"
+                          className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 underline"
+                        >
+                          Sign In
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Sticky Button */}
+          <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white to-transparent p-4 border-t border-gray-200 md:relative md:bg-none md:border-none md:p-0 md:mt-4">
+            <div className="max-w-2xl mx-auto">
+              <button
+                onClick={handleCreate}
+                disabled={loading}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+              >
+                {loading ? "Creating..." : "Create Feedback Request 🚀"}
+              </button>
+            </div>
+          </div>
+        </>
       )}
     </FeedbackLayout>
   )
