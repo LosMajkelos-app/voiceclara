@@ -7,18 +7,19 @@ interface FeedbackLayoutProps {
   children: ReactNode
   rightPanel: ReactNode
   showFooter?: boolean
+  centerContent?: boolean // Default true for backward compatibility
 }
 
-export function FeedbackLayout({ children, rightPanel, showFooter = true }: FeedbackLayoutProps) {
+export function FeedbackLayout({ children, rightPanel, showFooter = true, centerContent = true }: FeedbackLayoutProps) {
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50">
-      
+    <div className={`${centerContent ? 'h-screen' : 'min-h-screen'} flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50`}>
+
       {/* MAIN CONTENT */}
       <div className="flex-1 flex overflow-hidden">
 
         {/* LEFT: Content (75%) */}
-        <div className="w-full lg:w-3/4 flex items-center justify-center p-4 md:p-6 lg:p-12 overflow-y-auto">
-          <div className="w-full max-w-2xl">
+        <div className={`w-full lg:w-3/4 flex ${centerContent ? 'items-center' : 'items-start'} justify-center p-4 md:p-6 lg:p-12 overflow-y-auto`}>
+          <div className={`w-full max-w-2xl ${centerContent ? '' : 'py-4 md:py-8'}`}>
             {children}
           </div>
         </div>
