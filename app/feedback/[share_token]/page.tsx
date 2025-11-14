@@ -88,7 +88,7 @@ export default function FeedbackFormPage() {
 
   const analyzeWithAI = async () => {
   setAnalyzingAI(true)
-  
+
   try {
     // REAL OpenAI API Call
     const formattedAnswers = request.questions.map((q: string, i: number) => ({
@@ -107,28 +107,103 @@ export default function FeedbackFormPage() {
     setAiScore(aiResult)
   } catch (error) {
     console.error('AI analysis error:', error)
-    // Fallback to mock if API fails
+    // Fallback to mock if API fails - with language support
+    const lang = request.language || 'en'
+    const fallbackSuggestions: Record<string, string[]> = {
+      'en': [
+        "Try to be more specific in your responses",
+        "Consider adding concrete examples",
+        "Balance positive and constructive feedback"
+      ],
+      'es': [
+        "Intenta ser más específico en tus respuestas",
+        "Considera agregar ejemplos concretos",
+        "Equilibra comentarios positivos y constructivos"
+      ],
+      'fr': [
+        "Essayez d'être plus précis dans vos réponses",
+        "Envisagez d'ajouter des exemples concrets",
+        "Équilibrez les retours positifs et constructifs"
+      ],
+      'de': [
+        "Versuchen Sie, in Ihren Antworten spezifischer zu sein",
+        "Erwägen Sie, konkrete Beispiele hinzuzufügen",
+        "Balancieren Sie positives und konstruktives Feedback"
+      ],
+      'pl': [
+        "Staraj się być bardziej konkretny w swoich odpowiedziach",
+        "Rozważ dodanie konkretnych przykładów",
+        "Zrównoważ pozytywne i konstruktywne opinie"
+      ],
+      'pt': [
+        "Tente ser mais específico em suas respostas",
+        "Considere adicionar exemplos concretos",
+        "Equilibre feedback positivo e construtivo"
+      ],
+      'it': [
+        "Cerca di essere più specifico nelle tue risposte",
+        "Considera di aggiungere esempi concreti",
+        "Bilancia feedback positivi e costruttivi"
+      ],
+      'nl': [
+        "Probeer specifieker te zijn in je antwoorden",
+        "Overweeg concrete voorbeelden toe te voegen",
+        "Balanceer positieve en constructieve feedback"
+      ],
+      'cs': [
+        "Zkuste být konkrétnější ve svých odpovědích",
+        "Zvažte přidání konkrétních příkladů",
+        "Vyvažte pozitivní a konstruktivní zpětnou vazbu"
+      ],
+      'sv': [
+        "Försök vara mer specifik i dina svar",
+        "Överväg att lägga till konkreta exempel",
+        "Balansera positiv och konstruktiv feedback"
+      ],
+      'da': [
+        "Prøv at være mere specifik i dine svar",
+        "Overvej at tilføje konkrete eksempler",
+        "Balancer positiv og konstruktiv feedback"
+      ],
+      'no': [
+        "Prøv å være mer spesifikk i svarene dine",
+        "Vurder å legge til konkrete eksempler",
+        "Balanser positiv og konstruktiv tilbakemelding"
+      ]
+    }
+
+    const fallbackFeedback: Record<string, string> = {
+      'en': "This answer could be more specific. Try adding concrete examples.",
+      'es': "Esta respuesta podría ser más específica. Intenta agregar ejemplos concretos.",
+      'fr': "Cette réponse pourrait être plus précise. Essayez d'ajouter des exemples concrets.",
+      'de': "Diese Antwort könnte spezifischer sein. Versuchen Sie, konkrete Beispiele hinzuzufügen.",
+      'pl': "Ta odpowiedź mogłaby być bardziej konkretna. Spróbuj dodać konkretne przykłady.",
+      'pt': "Esta resposta poderia ser mais específica. Tente adicionar exemplos concretos.",
+      'it': "Questa risposta potrebbe essere più specifica. Prova ad aggiungere esempi concreti.",
+      'nl': "Dit antwoord zou specifieker kunnen zijn. Probeer concrete voorbeelden toe te voegen.",
+      'cs': "Tato odpověď by mohla být konkrétnější. Zkuste přidat konkrétní příklady.",
+      'sv': "Detta svar kunde vara mer specifikt. Försök lägga till konkreta exempel.",
+      'da': "Dette svar kunne være mere specifikt. Prøv at tilføje konkrete eksempler.",
+      'no': "Dette svaret kunne vært mer spesifikt. Prøv å legge til konkrete eksempler."
+    }
+
     const mockScore = {
       overall: Math.floor(Math.random() * 30) + 60, // 60-90
       specificity: Math.floor(Math.random() * 30) + 60,
       constructiveness: Math.floor(Math.random() * 30) + 60,
       clarity: Math.floor(Math.random() * 30) + 60,
-      suggestions: [
-        "Try to be more specific in your responses",
-        "Consider adding concrete examples",
-        "Balance positive and constructive feedback"
-      ],
+      suggestions: fallbackSuggestions[lang] || fallbackSuggestions['en'],
       per_answer_feedback: request.questions.map((q: string, i: number) => ({
         question: q,
         original: answers[i],
         score: Math.floor(Math.random() * 30) + 60,
-        feedback: "This answer could be more specific. Try adding concrete examples.",
+        feedback: fallbackFeedback[lang] || fallbackFeedback['en'],
         improved: answers[i] + " (improved version would go here)"
       }))
     }
     setAiScore(mockScore)
   }
-  
+
   setAnalyzingAI(false)
 }
 
