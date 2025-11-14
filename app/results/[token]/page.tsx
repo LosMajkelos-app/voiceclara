@@ -35,6 +35,15 @@ interface Response {
   submitted_at: string
 }
 
+interface Invitation {
+  id: string
+  recipient_email: string
+  recipient_name: string | null
+  status: string
+  sent_at: string
+  opened_at: string | null
+}
+
 export default function ResultsPage() {
   const params = useParams()
   const router = useRouter()
@@ -45,6 +54,7 @@ export default function ResultsPage() {
 
   const [request, setRequest] = useState<FeedbackRequest | null>(null)
   const [responses, setResponses] = useState<Response[]>([])
+  const [invitations, setInvitations] = useState<Invitation[]>([])
   const [loading, setLoading] = useState(true)
   const [aiAnalysis, setAiAnalysis] = useState<any>(null)
   const [analyzingAI, setAnalyzingAI] = useState(false)
@@ -108,6 +118,19 @@ export default function ResultsPage() {
           console.error("Error fetching responses:", responsesError)
         } else {
           setResponses(responsesData || [])
+        }
+
+        // Fetch email invitations
+        const { data: invitationsData, error: invitationsError } = await supabase
+          .from("email_invitations")
+          .select("*")
+          .eq("feedback_request_id", requestData.id)
+          .order("sent_at", { ascending: false })
+
+        if (invitationsError) {
+          console.error("Error fetching invitations:", invitationsError)
+        } else {
+          setInvitations(invitationsData || [])
         }
 
         // Load cached AI analysis if available
@@ -623,6 +646,54 @@ export default function ResultsPage() {
                 </Card>
               )}
 
+              {/* Invitation History Section */}
+              {invitations.length > 0 && (
+                <Card className="p-4 bg-white">
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-indigo-600" />
+                      Invitation History ({invitations.length})
+                    </h2>
+                  </div>
+
+                  <div className="space-y-2">
+                    {invitations.map((invitation) => (
+                      <div
+                        key={invitation.id}
+                        className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg border border-gray-200"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                              {invitation.recipient_name || invitation.recipient_email}
+                            </p>
+                            <span className={`flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-medium border ${
+                              invitation.status === 'responded' ? 'bg-green-100 text-green-700 border-green-200' :
+                              invitation.status === 'opened' ? 'bg-blue-100 text-blue-700 border-blue-200' :
+                              'bg-gray-100 text-gray-700 border-gray-200'
+                            }`}>
+                              {invitation.status === 'responded' ? '✓ Responded' :
+                               invitation.status === 'opened' ? '👁 Opened' :
+                               '📧 Sent'}
+                            </span>
+                          </div>
+                          {invitation.recipient_name && (
+                            <p className="text-xs text-gray-500 truncate">{invitation.recipient_email}</p>
+                          )}
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            Sent {new Date(invitation.sent_at).toLocaleDateString()} at {new Date(invitation.sent_at).toLocaleTimeString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="text-xs text-gray-500 mt-3 text-center">
+                    💡 Track who you've invited and their response status
+                  </p>
+                </Card>
+              )}
+
               {/* Analytics Charts Section */}
               {responses.length > 0 && (
                 <div className="space-y-3">
@@ -903,7 +974,18 @@ export default function ResultsPage() {
         <EmailInvitationModal
           feedbackRequestId={request.id}
           requestTitle={request.title}
-          onClose={() => setShowEmailModal(false)}
+          onClose={async () => {
+            setShowEmailModal(false)
+            // Refresh invitations list
+            const { data: invitationsData } = await supabase
+              .from("email_invitations")
+              .select("*")
+              .eq("feedback_request_id", request.id)
+              .order("sent_at", { ascending: false })
+            if (invitationsData) {
+              setInvitations(invitationsData)
+            }
+          }}
         />
       )}
     </div>
