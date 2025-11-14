@@ -15,9 +15,9 @@ export function FeedbackLayout({ children, rightPanel, showFooter = true }: Feed
       
       {/* MAIN CONTENT */}
       <div className="flex-1 flex overflow-hidden">
-        
+
         {/* LEFT: Content (75%) */}
-        <div className="w-full lg:w-3/4 flex items-center justify-center p-6 lg:p-12 overflow-y-auto">
+        <div className="w-full lg:w-3/4 flex items-center justify-center p-4 md:p-6 lg:p-12 overflow-y-auto">
           <div className="w-full max-w-2xl">
             {children}
           </div>

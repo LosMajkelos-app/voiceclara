@@ -26,6 +26,8 @@ export default function EmailInvitationModal({
   const [sending, setSending] = useState(false)
   const [bulkEmails, setBulkEmails] = useState('')
   const [showBulkInput, setShowBulkInput] = useState(false)
+  const [sentCount, setSentCount] = useState<number | null>(null)
+  const [failedCount, setFailedCount] = useState<number | null>(null)
 
   const addRecipient = () => {
     setRecipients([...recipients, { email: '', name: '' }])
@@ -85,11 +87,9 @@ export default function EmailInvitationModal({
       const data = await response.json()
 
       if (response.ok) {
-        toast.success(`Successfully sent ${data.sent} invitation${data.sent !== 1 ? 's' : ''}! 🎉`)
-        if (data.failed > 0) {
-          toast.warning(`${data.failed} email${data.failed !== 1 ? 's' : ''} failed to send`)
-        }
-        onClose()
+        setSentCount(data.sent)
+        setFailedCount(data.failed || 0)
+        // Don't close immediately - show success message
       } else {
         toast.error(data.error || 'Failed to send invitations')
       }
@@ -129,6 +129,34 @@ export default function EmailInvitationModal({
               <X className="h-5 w-5 text-gray-500" />
             </button>
           </div>
+
+          {/* Success Message */}
+          {sentCount !== null && (
+            <div className={`${failedCount && failedCount > 0 ? 'bg-yellow-50 border-yellow-200' : 'bg-green-50 border-green-200'} border-2 rounded-xl p-4 mb-6`}>
+              <div className="flex items-start gap-3">
+                <Mail className={`h-6 w-6 ${failedCount && failedCount > 0 ? 'text-yellow-600' : 'text-green-600'} flex-shrink-0 mt-0.5`} />
+                <div className="flex-1">
+                  <p className={`font-bold ${failedCount && failedCount > 0 ? 'text-yellow-900' : 'text-green-900'} text-base`}>
+                    {failedCount && failedCount > 0 ? '⚠️ ' : '✅ '}Invitations {failedCount && failedCount > 0 ? 'Partially ' : ''}Sent!
+                  </p>
+                  <p className={`text-sm ${failedCount && failedCount > 0 ? 'text-yellow-700' : 'text-green-700'} mt-1`}>
+                    Successfully sent <strong>{sentCount} invitation{sentCount !== 1 ? 's' : ''}</strong>
+                  </p>
+                  {failedCount !== null && failedCount > 0 && (
+                    <p className="text-sm text-yellow-700 mt-1">
+                      ⚠️ <strong>{failedCount} email{failedCount !== 1 ? 's' : ''}</strong> failed to send
+                    </p>
+                  )}
+                  <button
+                    onClick={onClose}
+                    className={`text-xs ${failedCount && failedCount > 0 ? 'text-yellow-700' : 'text-green-700'} underline hover:no-underline font-semibold mt-3 inline-block`}
+                  >
+                    Close and return to results →
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Bulk Input Toggle */}
           <div className="mb-4">

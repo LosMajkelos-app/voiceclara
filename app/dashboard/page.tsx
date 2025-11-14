@@ -316,32 +316,33 @@ function DashboardContent() {
                               {new Date(request.created_at).toLocaleDateString()} • {request.response_count || 0} responses
                             </p>
                           </div>
-                          <div className="flex gap-1.5 flex-shrink-0">
+                          <div className="flex gap-1.5 flex-shrink-0 flex-wrap sm:flex-nowrap">
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-7 px-3 text-xs"
+                              className="h-8 md:h-7 px-2 md:px-3 text-xs min-h-[32px]"
                               onClick={() => {
                                 const shareLink = `${window.location.origin}/feedback/${request.share_token}`
                                 navigator.clipboard.writeText(shareLink)
                                 toast.success("Link copied! 📋")
                               }}
                             >
-                              Copy link to share
+                              <span className="hidden sm:inline">Copy link to share</span>
+                              <span className="sm:hidden">Copy</span>
                             </Button>
                             <Link href={`/results/${request.results_token}`}>
-                              <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 h-7 px-2 text-xs">
+                              <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 h-8 md:h-7 px-3 md:px-2 text-xs min-h-[32px]">
                                 View
                               </Button>
                             </Link>
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-7 px-2 text-red-600 hover:bg-red-50 border-red-200"
+                              className="h-8 md:h-7 px-2 text-red-600 hover:bg-red-50 border-red-200 min-h-[32px]"
                               onClick={() => handleDeleteRequest(request.id, request.title)}
                               disabled={deletingId === request.id}
                             >
-                              <Trash2 className="h-3 w-3" />
+                              <Trash2 className="h-3.5 w-3.5 md:h-3 md:w-3" />
                             </Button>
                           </div>
                         </div>

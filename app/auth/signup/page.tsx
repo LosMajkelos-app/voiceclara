@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { FeedbackLayout } from "@/components/feedback-layout"
-import { Sparkles, Shield, TrendingUp, ArrowLeft, Building2, User as UserIcon } from "lucide-react"
+import { Sparkles, Shield, TrendingUp, ArrowLeft, Building2, User as UserIcon, Mail } from "lucide-react"
 import Link from "next/link"
 
 export default function SignUpPage() {
@@ -14,6 +14,8 @@ export default function SignUpPage() {
   const [fullName, setFullName] = useState("")
   const [accountType, setAccountType] = useState<"individual" | "business">("individual")
   const [loading, setLoading] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
+  const [submittedEmail, setSubmittedEmail] = useState("")
 
   const handleSignUp = async () => {
     if (!email || !password || !fullName) {
@@ -47,8 +49,9 @@ export default function SignUpPage() {
       return
     }
 
-    alert("Check your email to confirm your account!")
-    router.push('/auth/login')
+    setSubmittedEmail(email)
+    setEmailSent(true)
+    setLoading(false)
   }
 
   const handleGoogleSignUp = async () => {
@@ -133,6 +136,32 @@ export default function SignUpPage() {
             Get started with VoiceClara today
           </p>
         </div>
+
+        {/* Email Sent Success Message */}
+        {emailSent && (
+          <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 mb-6">
+            <div className="flex items-center gap-3">
+              <Mail className="h-6 w-6 text-green-600 flex-shrink-0" />
+              <div>
+                <p className="font-bold text-green-900 text-base">
+                  ✅ Check your email!
+                </p>
+                <p className="text-sm text-green-700 mt-1">
+                  We sent a confirmation link to <strong>{submittedEmail}</strong>
+                </p>
+                <p className="text-xs text-green-600 mt-2">
+                  💡 Check your spam folder if you don't see it in 2 minutes
+                </p>
+                <Link
+                  href="/auth/login"
+                  className="text-xs text-green-700 underline hover:text-green-800 font-semibold mt-2 inline-block"
+                >
+                  Go to Sign In →
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-4">
           {/* Google Sign Up */}
