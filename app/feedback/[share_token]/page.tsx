@@ -317,12 +317,12 @@ export default function FeedbackFormPage() {
           </div>
         }
       >
-        <div className="space-y-6">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="space-y-4 md:space-y-6">
+          <div className="mb-4 md:mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
               Review Your Feedback
             </h1>
-            <p className="text-sm text-gray-600">
+            <p className="text-xs md:text-sm text-gray-600">
               AI has analyzed your responses. Review and submit!
             </p>
           </div>
@@ -335,17 +335,17 @@ export default function FeedbackFormPage() {
           ) : (
             <>
               {/* All Answers Review with AI Feedback */}
-              <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2">
+              <div className="space-y-3 md:space-y-4 max-h-[50vh] overflow-y-auto pr-2">
                 {request.questions.map((q: string, i: number) => {
                   const perAnswerFeedback = aiScore?.per_answer_feedback?.[i]
                   return (
-                    <div key={i} className="bg-white border-2 border-gray-200 rounded-xl p-4">
-                      <div className="flex items-start justify-between mb-2">
-                        <p className="font-semibold text-sm text-gray-900">
+                    <div key={i} className="bg-white border-2 border-gray-200 rounded-xl p-3 md:p-4">
+                      <div className="flex items-start justify-between mb-2 gap-2">
+                        <p className="font-semibold text-xs md:text-sm text-gray-900">
                           {i + 1}. {q}
                         </p>
                         {perAnswerFeedback && (
-                          <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-bold ${
+                          <span className={`flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-bold ${
                             perAnswerFeedback.score >= 80 ? 'bg-green-100 text-green-700' :
                             perAnswerFeedback.score >= 60 ? 'bg-blue-100 text-blue-700' :
                             perAnswerFeedback.score >= 40 ? 'bg-yellow-100 text-yellow-700' :
@@ -355,7 +355,7 @@ export default function FeedbackFormPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap mb-3">
+                      <p className="text-xs md:text-sm text-gray-700 whitespace-pre-wrap mb-3">
                         {answers[i]}
                       </p>
 
@@ -400,27 +400,27 @@ export default function FeedbackFormPage() {
               </div>
 
               {/* Final Anonymity Reminder */}
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4 mb-4">
-                <div className="flex items-center gap-3">
-                  <Shield className="h-5 w-5 text-green-600 flex-shrink-0" />
-                  <p className="text-sm text-green-800">
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-3 md:p-4 mb-4">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <Shield className="h-4 w-4 md:h-5 md:w-5 text-green-600 flex-shrink-0" />
+                  <p className="text-xs md:text-sm text-green-800">
                     <strong className="font-bold">One last reminder:</strong> Your feedback is 100% anonymous. No one will ever know it came from you.
                   </p>
                 </div>
               </div>
 
               {/* Submit Buttons */}
-              <div className="flex gap-3">
+              <div className="flex gap-2 md:gap-3">
                 <button
                   onClick={() => setShowReview(false)}
-                  className="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold py-3 rounded-xl transition-all"
+                  className="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold py-3 rounded-xl transition-all text-sm md:text-base min-h-[44px]"
                 >
                   ← Go Back
                 </button>
                 <button
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 text-sm md:text-base min-h-[44px]"
                 >
                   {submitting ? "Submitting..." : "Submit Feedback 🚀"}
                 </button>
@@ -501,18 +501,18 @@ export default function FeedbackFormPage() {
     >
       {/* Anonymity Banner - Shown on first question */}
       {currentStep === 0 && (
-        <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-4">
-          <div className="flex items-start gap-3">
+        <div className="mb-4 md:mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-3 md:p-4">
+          <div className="flex items-start gap-2 md:gap-3">
             <div className="flex-shrink-0">
-              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                <Shield className="h-5 w-5 text-green-600" />
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-green-100 rounded-full flex items-center justify-center">
+                <Shield className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-green-900 mb-1">
+              <h3 className="font-bold text-green-900 mb-1 text-sm md:text-base">
                 🔒 Your Anonymity is Protected
               </h3>
-              <p className="text-sm text-green-800 leading-relaxed">
+              <p className="text-xs md:text-sm text-green-800 leading-relaxed">
                 Be honest and direct. Your identity is completely hidden—no email, no IP address, no tracking. The recipient will never know who you are.
               </p>
             </div>
@@ -521,12 +521,12 @@ export default function FeedbackFormPage() {
       )}
 
       {/* Progress Bar (Only Left Side) */}
-      <div className="mb-6">
+      <div className="mb-4 md:mb-6">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-sm text-gray-600">
+          <p className="text-xs md:text-sm text-gray-600">
             Question {currentStep + 1} of {totalQuestions}
           </p>
-          <p className="text-sm font-semibold text-indigo-600">
+          <p className="text-xs md:text-sm font-semibold text-indigo-600">
             {Math.round(((currentStep + 1) / totalQuestions) * 100)}%
           </p>
         </div>
@@ -539,8 +539,8 @@ export default function FeedbackFormPage() {
       </div>
 
       {/* Feedback for X */}
-      <div className="mb-6">
-        <p className="text-sm text-indigo-600 font-semibold mb-1">
+      <div className="mb-4 md:mb-6">
+        <p className="text-xs md:text-sm text-indigo-600 font-semibold mb-1">
           Feedback for {request.creator_name}
         </p>
         {request.language && request.language !== 'en' && (
@@ -553,10 +553,10 @@ export default function FeedbackFormPage() {
             💬 You can respond in any language — AI understands all languages!
           </p>
         )}
-        <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 md:mb-3">
           {currentQuestion}
         </h2>
-        <p className="text-gray-600">
+        <p className="text-sm md:text-base text-gray-600">
           Take your time. Your honest feedback helps them grow.
         </p>
       </div>
@@ -566,43 +566,44 @@ export default function FeedbackFormPage() {
         value={answers[currentStep] || ""}
         onChange={(e) => setAnswers({ ...answers, [currentStep]: e.target.value })}
         placeholder="Write your thoughts here..."
-        className="w-full p-6 bg-white border-2 border-indigo-200 rounded-2xl text-lg resize-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm min-h-[250px] mb-2"
+        className="w-full p-4 md:p-6 bg-white border-2 border-indigo-200 rounded-2xl text-base md:text-lg resize-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm min-h-[200px] md:min-h-[250px] mb-2"
         autoFocus
       />
 
       {/* Anonymity Reminder */}
-      <div className="flex items-center gap-2 text-xs text-gray-500 mb-6">
+      <div className="flex items-center gap-2 text-xs text-gray-500 mb-4 md:mb-6">
         <Shield className="h-3.5 w-3.5 text-green-600" />
         <span>Your response is completely anonymous</span>
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <button
           onClick={handleBack}
           disabled={currentStep === 0}
-          className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-30 transition-all"
+          className="flex items-center gap-2 px-3 md:px-4 py-3 md:py-2 text-sm md:text-base text-gray-600 hover:text-gray-900 disabled:opacity-30 transition-all min-h-[44px]"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back
+          <span className="hidden sm:inline">Back</span>
         </button>
 
         {isLastQuestion ? (
           <button
             onClick={handleReviewWithAI}
             disabled={submitting}
-            className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl"
+            className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold px-4 md:px-6 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl text-sm md:text-base min-h-[44px]"
           >
             <Sparkles className="h-5 w-5" />
-            Review with AI →
+            <span>Review with AI →</span>
           </button>
         ) : (
           <button
             onClick={handleNext}
             disabled={submitting}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl"
+            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 md:px-8 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl text-sm md:text-base min-h-[44px]"
           >
-            Next Question <ArrowRight className="h-5 w-5" />
+            <span>Next Question</span>
+            <ArrowRight className="h-5 w-5" />
           </button>
         )}
       </div>
