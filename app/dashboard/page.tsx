@@ -344,15 +344,31 @@ function DashboardContent() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {requests.map((request) => (
+                    {requests.map((request) => {
+                      const responseCount = request.response_count || 0
+                      const badgeColor =
+                        responseCount === 0 ? 'bg-amber-100 text-amber-700 border-amber-200' :
+                        responseCount >= 6 ? 'bg-blue-100 text-blue-700 border-blue-200' :
+                        'bg-green-100 text-green-700 border-green-200'
+                      const badgeText =
+                        responseCount === 0 ? 'Pending' :
+                        responseCount >= 6 ? `${responseCount} responses` :
+                        `${responseCount} response${responseCount !== 1 ? 's' : ''}`
+
+                      return (
                       <Card key={request.id} className="p-3 hover:shadow-md transition-shadow border border-gray-200">
                         <div className="flex justify-between items-start gap-3">
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-sm text-gray-900 mb-0.5 truncate">
-                              {request.title}
-                            </h4>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-semibold text-sm text-gray-900 truncate">
+                                {request.title}
+                              </h4>
+                              <span className={`flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-medium border ${badgeColor}`}>
+                                {badgeText}
+                              </span>
+                            </div>
                             <p className="text-xs text-gray-500">
-                              {new Date(request.created_at).toLocaleDateString()} • {request.response_count || 0} responses
+                              {new Date(request.created_at).toLocaleDateString()}
                             </p>
                           </div>
                           <div className="flex gap-1.5 flex-shrink-0 flex-wrap sm:flex-nowrap">
@@ -386,7 +402,8 @@ function DashboardContent() {
                           </div>
                         </div>
                       </Card>
-                    ))}
+                      )
+                    })}
                   </div>
                 )}
               </Card>
