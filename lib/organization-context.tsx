@@ -46,6 +46,15 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
     }
 
     try {
+      // Check if we have a valid session before calling API
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        setOrganizations([])
+        setCurrentOrganization(null)
+        setLoading(false)
+        return
+      }
+
       const response = await fetch('/api/organizations')
 
       // If organizations API fails (e.g., migrations not run), gracefully handle
