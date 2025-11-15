@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({
@@ -22,7 +24,37 @@ const LANGUAGE_NAMES: Record<string, string> = {
 
 export async function POST(request: NextRequest) {
   try {
-    const { answers, language = 'en' } = await request.json()
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+
+    const { answers, language = 'en', shareToken } = await request.json()
+
+    // Verify authorization: either logged in user OR valid share token
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user && !shareToken) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please provide a valid session or share token.' },
+        { status: 401 }
+      )
+    }
+
+    // If share token provided, verify it exists
+    if (shareToken) {
+      const { data: feedbackRequest, error } = await supabase
+        .from('feedback_requests')
+        .select('id')
+        .eq('share_token', shareToken)
+        .single()
+
+      if (error || !feedbackRequest) {
+        return NextResponse.json(
+          { error: 'Invalid share token' },
+          { status: 403 }
+        )
+      }
+    }
+
     const languageName = LANGUAGE_NAMES[language] || 'English'
 
     const prompt = `You are an expert feedback quality analyzer. Analyze these responses and score them 0-100 based on:

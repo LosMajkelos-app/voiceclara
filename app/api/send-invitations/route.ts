@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 import { Resend } from 'resend'
 import { render } from '@react-email/render'
 import FeedbackInvitationEmail from '@/emails/feedback-invitation'
-import { supabase } from '@/lib/supabase'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_key_for_build')
 
@@ -13,6 +14,15 @@ interface InviteRecipient {
 
 export async function POST(request: NextRequest) {
   try {
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+
+    // Verify authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { feedbackRequestId, recipients } = await request.json()
 
     // Validate input
@@ -33,7 +43,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Fetch feedback request details
+    // Fetch feedback request details and verify ownership
     const { data: feedbackRequest, error: fetchError } = await supabase
       .from('feedback_requests')
       .select('*')
@@ -45,6 +55,11 @@ export async function POST(request: NextRequest) {
         { error: 'Feedback request not found' },
         { status: 404 }
       )
+    }
+
+    // Verify ownership
+    if (feedbackRequest.user_id !== user.id) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
     const feedbackUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://voiceclara.com'}/feedback/${feedbackRequest.share_token}`

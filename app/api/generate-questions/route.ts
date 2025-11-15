@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({
@@ -7,7 +9,7 @@ const openai = new OpenAI({
 
 // Malicious prompt detection
 const BLOCKED_KEYWORDS = [
-  'hack', 'exploit', 'virus', 'malware', 'illegal', 'drugs', 
+  'hack', 'exploit', 'virus', 'malware', 'illegal', 'drugs',
   'violence', 'harm', 'suicide', 'weapon', 'bomb'
 ]
 
@@ -33,6 +35,15 @@ const LANGUAGE_NAMES: Record<string, string> = {
 
 export async function POST(request: NextRequest) {
   try {
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+
+    // Verify authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { prompt, language = 'en' } = await request.json()
 
     // Validate prompt

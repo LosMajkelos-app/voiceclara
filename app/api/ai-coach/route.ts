@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({
@@ -13,13 +15,42 @@ interface AnswerToAnalyze {
 
 export async function POST(request: NextRequest) {
   try {
-    const { answers, questions } = await request.json()
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+
+    const { answers, questions, shareToken } = await request.json()
 
     if (!answers || !questions) {
       return NextResponse.json(
         { error: 'Answers and questions are required' },
         { status: 400 }
       )
+    }
+
+    // Verify authorization: either logged in user OR valid share token
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user && !shareToken) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please provide a valid session or share token.' },
+        { status: 401 }
+      )
+    }
+
+    // If share token provided, verify it exists
+    if (shareToken) {
+      const { data: feedbackRequest, error } = await supabase
+        .from('feedback_requests')
+        .select('id')
+        .eq('share_token', shareToken)
+        .single()
+
+      if (error || !feedbackRequest) {
+        return NextResponse.json(
+          { error: 'Invalid share token' },
+          { status: 403 }
+        )
+      }
     }
 
     console.log('🤖 AI Coach analyzing feedback...')

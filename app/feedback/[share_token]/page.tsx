@@ -99,7 +99,11 @@ export default function FeedbackFormPage() {
     const response = await fetch('/api/analyze-feedback', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ answers: formattedAnswers, language: request.language || 'en' })
+      body: JSON.stringify({
+        answers: formattedAnswers,
+        language: request.language || 'en',
+        shareToken: shareToken
+      })
     })
 
     const aiResult = await response.json()
