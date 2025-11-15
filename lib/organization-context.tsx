@@ -47,6 +47,16 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
 
     try {
       const response = await fetch('/api/organizations')
+
+      // If organizations API fails (e.g., migrations not run), gracefully handle
+      if (!response.ok) {
+        console.log('Organizations API not available yet - skipping organization features')
+        setOrganizations([])
+        setCurrentOrganization(null)
+        setLoading(false)
+        return
+      }
+
       const data = await response.json()
 
       if (data.organizations) {
@@ -62,7 +72,9 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
         }
       }
     } catch (error) {
-      console.error('Error fetching organizations:', error)
+      console.log('Organizations feature not ready yet:', error)
+      setOrganizations([])
+      setCurrentOrganization(null)
     } finally {
       setLoading(false)
     }

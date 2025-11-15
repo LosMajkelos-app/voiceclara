@@ -166,7 +166,6 @@ export default function CreatePage() {
         creator_email: creatorEmail.trim(),
         user_id: user?.id || null,
         guest_email: !user ? creatorEmail.trim() : null,
-        organization_id: user && currentOrganization ? currentOrganization.id : null,
         share_token: crypto.randomUUID(),
         results_token: crypto.randomUUID()
       }

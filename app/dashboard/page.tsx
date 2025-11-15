@@ -73,21 +73,12 @@ function DashboardContent() {
       hasFetched.current = true
 
       try {
-        // Build query based on organization filter
-        let query = supabase
+        // Simple query - just get user's requests (backward compatible)
+        const { data, error } = await supabase
           .from('feedback_requests')
           .select('*')
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false })
-
-        if (currentOrganization) {
-          // Show requests for current organization OR personal requests (null organization_id)
-          query = query.or(`organization_id.eq.${currentOrganization.id},and(organization_id.is.null,user_id.eq.${user.id})`)
-        } else {
-          // Fallback: show user's personal requests only
-          query = query.eq('user_id', user.id).is('organization_id', null)
-        }
-
-        const { data, error } = await query
 
         if (error) {
           console.error('❌ Supabase error:', error)
@@ -121,12 +112,12 @@ function DashboardContent() {
       }
     }
 
-    if (user?.id && currentOrganization) {
+    if (user?.id) {
       fetchRequests()
-    } else if (user?.id && !currentOrganization) {
+    } else {
       setLoading(false)
     }
-  }, [user?.id, currentOrganization?.id])
+  }, [user?.id])
 
   // Auto-link guest requests on dashboard load
   useEffect(() => {
