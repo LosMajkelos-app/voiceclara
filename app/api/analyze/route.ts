@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 import { analyzeThemes, analyzeSentiment, generateSummary, filterLowQualityResponses } from '@/lib/ai'
 
 export async function POST(request: NextRequest) {
   try {
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+
+    // Verify authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { feedbackRequestId } = await request.json()
 
     if (!feedbackRequestId) {
@@ -11,6 +21,21 @@ export async function POST(request: NextRequest) {
         { error: 'feedbackRequestId is required' },
         { status: 400 }
       )
+    }
+
+    // Verify ownership of the feedback request
+    const { data: feedbackRequest, error: requestError } = await supabase
+      .from('feedback_requests')
+      .select('user_id')
+      .eq('id', feedbackRequestId)
+      .single()
+
+    if (requestError || !feedbackRequest) {
+      return NextResponse.json({ error: 'Feedback request not found' }, { status: 404 })
+    }
+
+    if (feedbackRequest.user_id !== user.id) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
     // Fetch all responses

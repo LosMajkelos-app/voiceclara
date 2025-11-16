@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({
@@ -22,7 +24,38 @@ const LANGUAGE_NAMES: Record<string, string> = {
 
 export async function POST(request: NextRequest) {
   try {
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+
+    // Verify authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { requestId, responses, language = 'en' } = await request.json()
+
+    if (!requestId) {
+      return NextResponse.json(
+        { error: 'requestId is required' },
+        { status: 400 }
+      )
+    }
+
+    // Verify ownership of the feedback request
+    const { data: feedbackRequest, error: requestError } = await supabase
+      .from('feedback_requests')
+      .select('user_id')
+      .eq('id', requestId)
+      .single()
+
+    if (requestError || !feedbackRequest) {
+      return NextResponse.json({ error: 'Feedback request not found' }, { status: 404 })
+    }
+
+    if (feedbackRequest.user_id !== user.id) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+    }
 
     if (!responses || responses.length < 3) {
       return NextResponse.json(
