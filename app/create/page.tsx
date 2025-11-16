@@ -170,7 +170,7 @@ export default function CreatePage() {
         results_token: crypto.randomUUID()
       }
 
-      console.log('Inserting:', insertData)
+      console.log('Inserting feedback request with', insertData.questions.length, 'questions')
 
       const { data, error } = await supabase
         .from("feedback_requests")
@@ -179,7 +179,7 @@ export default function CreatePage() {
         .single()
 
       if (error) {
-        console.error('Supabase error:', error)
+        console.error('Supabase error:', error?.message || 'Unknown error')
         alert("Failed to create: " + error.message)
         setLoading(false)
         return

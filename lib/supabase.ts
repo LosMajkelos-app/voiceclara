@@ -20,11 +20,3 @@ export const supabase = createClient(
     },
   }
 )
-
-// Make available globally for debugging (browser only)
-if (typeof window !== 'undefined') {
-  (window as any).supabase = supabase
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn('⚠️ Supabase client initialized with placeholder credentials. Check your environment variables.')
-  }
-}

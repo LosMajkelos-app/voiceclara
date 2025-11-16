@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { Resend } from 'resend'
 import { render } from '@react-email/render'
 import FeedbackInvitationEmail from '@/emails/feedback-invitation'
+import { rateLimit, RATE_LIMITS, getRateLimitIdentifier, getClientIp } from '@/lib/rate-limit'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_key_for_build')
 
@@ -21,6 +22,28 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Rate limiting - prevent email spam
+    const ip = getClientIp(request)
+    const identifier = getRateLimitIdentifier(user.id, ip, 'send-invitations')
+    const rateLimitResult = await rateLimit(identifier, RATE_LIMITS.SEND_INVITATION)
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          error: 'Too many invitation requests. Please try again later.',
+          retryAfter: Math.ceil((rateLimitResult.reset - Date.now()) / 1000)
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+            'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+          }
+        }
+      )
     }
 
     const { feedbackRequestId, recipients } = await request.json()
@@ -120,7 +143,7 @@ export async function POST(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Send invitations error:', error)
+    console.error('Send invitations error:', error instanceof Error ? error.message : 'Unknown error')
     return NextResponse.json(
       { error: 'Failed to send invitations', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

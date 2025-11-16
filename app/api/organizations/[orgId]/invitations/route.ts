@@ -172,7 +172,7 @@ export async function POST(
       .single()
 
     if (inviteError) {
-      console.error('Error creating invitation:', inviteError)
+      console.error('Error creating invitation:', inviteError?.message || 'Unknown error')
       return NextResponse.json({ error: inviteError.message }, { status: 500 })
     }
 
@@ -202,15 +202,15 @@ export async function POST(
         `,
       })
 
-      console.log('✅ Invitation email sent to:', email)
+      console.log('✅ Invitation email sent successfully')
     } catch (emailError) {
-      console.error('❌ Error sending invitation email:', emailError)
+      console.error('❌ Error sending invitation email:', emailError?.message || 'Unknown error')
       // Don't fail the request - invitation is created
     }
 
     return NextResponse.json({ invitation }, { status: 201 })
-  } catch (error) {
-    console.error('Unexpected error:', error)
+  } catch (error: any) {
+    console.error('Unexpected error:', error?.message || 'Unknown error')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
