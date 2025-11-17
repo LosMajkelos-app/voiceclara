@@ -203,7 +203,7 @@ export async function POST(
       })
 
       console.log('✅ Invitation email sent successfully')
-    } catch (emailError) {
+    } catch (emailError: any) {
       console.error('❌ Error sending invitation email:', emailError?.message || 'Unknown error')
       // Don't fail the request - invitation is created
     }

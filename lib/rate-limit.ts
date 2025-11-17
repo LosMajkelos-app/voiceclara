@@ -64,14 +64,13 @@ export async function rateLimit(
   const windowStart = now - config.window * 1000
 
   try {
-    // Get current count for this window
-    const requests = await kv.zrangebyscore(key, windowStart, now)
-    const currentCount = requests.length
+    // Simple counter-based approach with Vercel KV
+    const currentCount = await kv.get<number>(key) || 0
 
     if (currentCount >= config.limit) {
       // Rate limit exceeded
-      const oldestRequest = requests[0] as number
-      const resetTime = oldestRequest + config.window * 1000
+      const ttl = await kv.ttl(key)
+      const resetTime = now + (ttl > 0 ? ttl * 1000 : config.window * 1000)
 
       return {
         success: false,
@@ -81,12 +80,14 @@ export async function rateLimit(
       }
     }
 
-    // Add current request to the sorted set
-    await kv.zadd(key, { score: now, member: `${now}-${Math.random()}` })
-
-    // Clean up old entries and set expiration
-    await kv.zremrangebyscore(key, 0, windowStart)
-    await kv.expire(key, config.window)
+    // Increment counter
+    if (currentCount === 0) {
+      // First request in window - set counter with expiration
+      await kv.set(key, 1, { ex: config.window })
+    } else {
+      // Increment existing counter
+      await kv.incr(key)
+    }
 
     return {
       success: true,
