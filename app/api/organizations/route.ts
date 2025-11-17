@@ -8,11 +8,21 @@ export async function GET(request: NextRequest) {
     const cookieStore = cookies()
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Try to get session first
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (sessionError) {
+      console.log('[Organizations API] Session error:', sessionError.message)
+      return NextResponse.json({ organizations: [] })
     }
+
+    if (!session?.user) {
+      console.log('[Organizations API] No user session found')
+      return NextResponse.json({ organizations: [] })
+    }
+
+    const user = session.user
+    console.log('[Organizations API] User authenticated:', user.id)
 
     // Get organizations where user is owner
     const { data: ownedOrgs, error: ownedError } = await supabase
@@ -84,11 +94,13 @@ export async function POST(request: NextRequest) {
     const cookieStore = cookies()
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
-    if (authError || !user) {
+    if (sessionError || !session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const user = session.user
 
     const body = await request.json()
     const { name, slug } = body
