@@ -12,6 +12,7 @@ import { BarChart3, MessageSquare, Plus, Trash2, Bell, X, Check, Building2 } fro
 import { toast } from "sonner"
 import DashboardSidebar from "@/app/components/dashboard-sidebar"
 import AccountSettingsModal from "@/app/components/account-settings-modal"
+import WelcomeModal from "@/app/components/welcome-modal"
 import {
   Select,
   SelectContent,
@@ -217,6 +218,9 @@ function DashboardContent() {
 
   return (
     <>
+      {/* Welcome Modal for new users */}
+      <WelcomeModal userName={user.user_metadata?.full_name} />
+
       <div className="min-h-screen flex bg-gray-50">
         {/* Unified Sidebar */}
         <DashboardSidebar
@@ -371,13 +375,23 @@ function DashboardContent() {
                 </div>
 
                 {requests.length === 0 ? (
-                  <div className="text-center py-8">
-                    <div className="text-5xl mb-3">🎯</div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1.5">
-                      No requests yet
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">🎯</div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      Ready to get honest feedback?
                     </h3>
-                    <p className="text-sm text-gray-600">
-                      Click "New Request" above to create your first feedback request!
+                    <p className="text-sm text-gray-600 mb-6 max-w-md mx-auto">
+                      Create your first anonymous feedback request in just 2 minutes.
+                      Get AI-powered insights and identify blind spots in your professional growth.
+                    </p>
+                    <Link href="/create">
+                      <Button className="bg-indigo-600 hover:bg-indigo-700">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Your First Request
+                      </Button>
+                    </Link>
+                    <p className="text-xs text-gray-500 mt-4">
+                      💡 Tip: You can customize questions or let AI generate them for you
                     </p>
                   </div>
                 ) : (
