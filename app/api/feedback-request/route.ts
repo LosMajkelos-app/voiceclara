@@ -19,12 +19,11 @@ export async function POST(request: NextRequest) {
       results_token 
     } = body
 
-    console.log('📝 Creating feedback request:', { 
-      creator_email, 
-      guest_email, 
-      user_id,
+    console.log('📝 Creating feedback request:', {
       is_guest: !!guest_email,
-      title 
+      has_creator_email: !!creator_email,
+      has_user_id: !!user_id,
+      title
     })
 
     // Validate required fields
@@ -70,7 +69,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('❌ Database error:', error)
+      console.error('❌ Database error:', error?.message || 'Unknown error')
       return NextResponse.json(
         { error: error.message },
         { status: 500 }
@@ -85,7 +84,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('❌ Unexpected error:', error)
+    console.error('❌ Unexpected error:', error?.message || 'Unknown error')
     return NextResponse.json(
       { error: error.message || 'Unknown error' },
       { status: 500 }
@@ -117,20 +116,20 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('❌ Fetch error:', error)
+      console.error('❌ Fetch error:', error?.message || 'Unknown error')
       return NextResponse.json(
         { error: error.message },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      data 
+      data
     })
 
   } catch (error: any) {
-    console.error('❌ Unexpected error:', error)
+    console.error('❌ Unexpected error:', error?.message || 'Unknown error')
     return NextResponse.json(
       { error: error.message },
       { status: 500 }

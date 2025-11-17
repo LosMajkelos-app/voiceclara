@@ -14,6 +14,7 @@ import DashboardSidebar from "@/app/components/dashboard-sidebar"
 import AccountSettingsModal from "@/app/components/account-settings-modal"
 import AnalyticsCharts from "@/app/components/analytics-charts"
 import EmailInvitationModal from "@/app/components/email-invitation-modal"
+import InvitationHistory from "@/app/components/invitation-history"
 import { exportToEnhancedCSV, exportToPDF } from "@/lib/export-utils"
 
 interface FeedbackRequest {
@@ -74,8 +75,8 @@ export default function ResultsPage() {
 
   useEffect(() => {
     async function fetchData() {
-      console.log('🔍 Results token from URL:', token)
-    console.log('👤 Current user:', user?.id)
+      console.log('🔍 Results token received:', token ? 'present' : 'missing')
+      console.log('👤 Current user authenticated:', !!user)
       try {
         // Fetch request
         const { data: requestData, error: requestError } = await supabase
@@ -84,7 +85,10 @@ export default function ResultsPage() {
           .eq("results_token", token)
           .single()
 
-          console.log('📊 Query result:', { requestData, requestError })
+        console.log('📊 Query result:', {
+          hasData: !!requestData,
+          error: requestError?.message
+        })
 
         if (requestError || !requestData) {
           toast.error("Results not found")
@@ -454,6 +458,9 @@ export default function ResultsPage() {
                   ))}
                 </div>
               </Card>
+
+              {/* Invitation History */}
+              <InvitationHistory feedbackRequestId={request.id} />
 
               {/* AI Analysis Progress */}
               {responses.length < 3 && (

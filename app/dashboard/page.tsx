@@ -81,7 +81,7 @@ function DashboardContent() {
           .order('created_at', { ascending: false })
 
         if (error) {
-          console.error('❌ Supabase error:', error)
+          console.error('❌ Supabase error:', error?.message || 'Unknown error')
           setRequests([])
           setLoading(false)
           return
