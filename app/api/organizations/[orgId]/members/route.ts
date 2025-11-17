@@ -145,7 +145,7 @@ export async function DELETE(
   }
 }
 
-// PATCH /api/organizations/[orgId]/members - Update member role
+// PATCH /api/organizations/[orgId]/members - Update member role, manager, department, job_title
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ orgId: string }> }
@@ -162,50 +162,117 @@ export async function PATCH(
 
     const { orgId } = await params
     const body = await request.json()
-    const { userId, role } = body
+    const { userId, role, manager_id, department, job_title } = body
 
-    if (!userId || !role) {
+    if (!userId) {
       return NextResponse.json(
-        { error: 'userId and role are required' },
+        { error: 'userId is required' },
         { status: 400 }
       )
     }
 
-    // Validate role
-    const validRoles = ['owner', 'admin', 'member', 'viewer']
-    if (!validRoles.includes(role)) {
-      return NextResponse.json(
-        { error: 'Invalid role. Must be: owner, admin, member, or viewer' },
-        { status: 400 }
-      )
+    // Validate role if provided
+    if (role) {
+      const validRoles = ['owner', 'admin', 'manager', 'member', 'viewer']
+      if (!validRoles.includes(role)) {
+        return NextResponse.json(
+          { error: 'Invalid role. Must be: owner, admin, manager, member, or viewer' },
+          { status: 400 }
+        )
+      }
     }
 
     // Check if current user is admin/owner
     const { data: membership } = await supabase
       .from('organization_members')
-      .select('role')
+      .select('role, id')
       .eq('organization_id', orgId)
       .eq('user_id', user.id)
       .single()
 
     if (membership?.role !== 'owner' && membership?.role !== 'admin') {
       return NextResponse.json(
-        { error: 'Only admins can update member roles' },
+        { error: 'Only admins can update member information' },
         { status: 403 }
       )
     }
 
-    // Update member role
+    // Get target member id
+    const { data: targetMember } = await supabase
+      .from('organization_members')
+      .select('id')
+      .eq('organization_id', orgId)
+      .eq('user_id', userId)
+      .single()
+
+    if (!targetMember) {
+      return NextResponse.json(
+        { error: 'Member not found' },
+        { status: 404 }
+      )
+    }
+
+    // Validate manager assignment (prevent circular relationships)
+    if (manager_id !== undefined) {
+      // manager_id can be null (no manager) or a valid member id
+      if (manager_id !== null) {
+        // Check if manager exists in the organization
+        const { data: managerExists } = await supabase
+          .from('organization_members')
+          .select('id')
+          .eq('organization_id', orgId)
+          .eq('id', manager_id)
+          .single()
+
+        if (!managerExists) {
+          return NextResponse.json(
+            { error: 'Manager not found in organization' },
+            { status: 400 }
+          )
+        }
+
+        // Prevent self-management
+        if (manager_id === targetMember.id) {
+          return NextResponse.json(
+            { error: 'A member cannot be their own manager' },
+            { status: 400 }
+          )
+        }
+
+        // Check for circular relationship using is_manager_of function
+        const { data: wouldCreateCircular } = await supabase
+          .rpc('is_manager_of', {
+            manager_id: targetMember.id,
+            employee_id: manager_id
+          })
+
+        if (wouldCreateCircular) {
+          return NextResponse.json(
+            { error: 'This would create a circular management relationship' },
+            { status: 400 }
+          )
+        }
+      }
+    }
+
+    // Build update object with only provided fields
+    const updateData: any = {}
+    if (role !== undefined) updateData.role = role
+    if (manager_id !== undefined) updateData.manager_id = manager_id
+    if (department !== undefined) updateData.department = department
+    if (job_title !== undefined) updateData.job_title = job_title
+
+    // Update member
     const { data, error } = await supabase
       .from('organization_members')
-      .update({ role })
+      .update(updateData)
       .eq('organization_id', orgId)
       .eq('user_id', userId)
       .select()
       .single()
 
     if (error) {
-      console.error('Error updating member role:', error)
+      console.error('Error updating member:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 

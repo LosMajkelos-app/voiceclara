@@ -7,9 +7,25 @@ import { supabase } from '@/lib/supabase'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { Users, Plus, Mail, Trash2, Edit, ChevronDown, ChevronRight, Building2 } from 'lucide-react'
+import { Users, Plus, Mail, Trash2, Edit, ChevronDown, ChevronRight, Building2, UserCog } from 'lucide-react'
 import DashboardSidebar from '@/app/components/dashboard-sidebar'
 import Link from 'next/link'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 interface TeamMember {
   id: string
@@ -28,8 +44,12 @@ export default function TeamManagementPage() {
   const { user } = useAuth()
   const { currentOrganization, loading: orgLoading } = useOrganization()
   const [members, setMembers] = useState<TeamMember[]>([])
+  const [allMembers, setAllMembers] = useState<TeamMember[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedMembers, setExpandedMembers] = useState<Set<string>>(new Set())
+  const [editingMember, setEditingMember] = useState<TeamMember | null>(null)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     // Wait for organization context to load
@@ -57,10 +77,12 @@ export default function TeamManagementPage() {
         console.error('Failed to fetch team members:', error?.message || 'Unknown error')
         toast.error('Failed to load team members')
         setMembers([])
+        setAllMembers([])
       } else {
         // Build hierarchy tree
         const membersMap = new Map<string, TeamMember>()
         const rootMembers: TeamMember[] = []
+        const flatMembers: TeamMember[] = []
 
         // First pass: create all members
         data.forEach((member: any) => {
@@ -77,6 +99,7 @@ export default function TeamManagementPage() {
             subordinates: []
           }
           membersMap.set(member.id, teamMember)
+          flatMembers.push(teamMember)
         })
 
         // Second pass: build hierarchy
@@ -97,6 +120,7 @@ export default function TeamManagementPage() {
         })
 
         setMembers(rootMembers)
+        setAllMembers(flatMembers)
       }
     } catch (err) {
       console.error('Error loading team:', err)
@@ -115,6 +139,81 @@ export default function TeamManagementPage() {
       newExpanded.add(memberId)
     }
     setExpandedMembers(newExpanded)
+  }
+
+  const handleEditMember = (member: TeamMember) => {
+    setEditingMember(member)
+    setEditDialogOpen(true)
+  }
+
+  const handleUpdateMember = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!currentOrganization || !editingMember) return
+
+    setSubmitting(true)
+    try {
+      const formData = new FormData(e.currentTarget)
+      const role = formData.get('role') as string
+      const manager_id = formData.get('manager_id') as string
+      const department = formData.get('department') as string
+      const job_title = formData.get('job_title') as string
+
+      const res = await fetch(`/api/organizations/${currentOrganization.id}/members`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: editingMember.user_id,
+          role: role || undefined,
+          manager_id: manager_id === '' ? null : (manager_id || undefined),
+          department: department || undefined,
+          job_title: job_title || undefined,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        toast.success('Member updated successfully')
+        setEditDialogOpen(false)
+        setEditingMember(null)
+        fetchTeamMembers()
+      } else {
+        toast.error(data.error || 'Failed to update member')
+      }
+    } catch (error) {
+      console.error('Error updating member:', error)
+      toast.error('Failed to update member')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleRemoveMember = async (member: TeamMember) => {
+    if (!currentOrganization) return
+    if (member.role === 'owner') {
+      toast.error('Cannot remove the owner')
+      return
+    }
+
+    if (!confirm(`Remove ${member.full_name || member.email} from the team?`)) return
+
+    try {
+      const res = await fetch(
+        `/api/organizations/${currentOrganization.id}/members?userId=${member.user_id}`,
+        { method: 'DELETE' }
+      )
+
+      if (res.ok) {
+        toast.success('Member removed')
+        fetchTeamMembers()
+      } else {
+        const data = await res.json()
+        toast.error(data.error || 'Failed to remove member')
+      }
+    } catch (error) {
+      console.error('Error removing member:', error)
+      toast.error('Failed to remove member')
+    }
   }
 
   const getRoleBadge = (role: string) => {
@@ -186,7 +285,8 @@ export default function TeamManagementPage() {
               variant="ghost"
               size="sm"
               className="h-8 w-8 p-0"
-              onClick={() => toast.info('Edit member functionality coming soon')}
+              onClick={() => handleEditMember(member)}
+              title="Edit member"
             >
               <Edit className="h-4 w-4" />
             </Button>
@@ -195,7 +295,8 @@ export default function TeamManagementPage() {
                 variant="ghost"
                 size="sm"
                 className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                onClick={() => toast.info('Remove member functionality coming soon')}
+                onClick={() => handleRemoveMember(member)}
+                title="Remove member"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -259,10 +360,12 @@ export default function TeamManagementPage() {
                 Manage your team members and organizational hierarchy
               </p>
             </div>
-            <Button className="bg-indigo-600 hover:bg-indigo-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Invite Member
-            </Button>
+            <Link href="/dashboard/organization">
+              <Button className="bg-indigo-600 hover:bg-indigo-700">
+                <Plus className="h-4 w-4 mr-2" />
+                Invite Member
+              </Button>
+            </Link>
           </div>
 
           {/* Stats */}
@@ -272,7 +375,7 @@ export default function TeamManagementPage() {
                 <Users className="h-8 w-8 text-indigo-600" />
                 <div>
                   <p className="text-sm text-gray-600">Total Members</p>
-                  <p className="text-2xl font-bold text-gray-900">{members.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">{allMembers.length}</p>
                 </div>
               </div>
             </Card>
@@ -282,7 +385,7 @@ export default function TeamManagementPage() {
                 <div>
                   <p className="text-sm text-gray-600">Managers</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {members.filter(m => m.role === 'manager').length}
+                    {allMembers.filter(m => m.role === 'manager').length}
                   </p>
                 </div>
               </div>
@@ -293,7 +396,7 @@ export default function TeamManagementPage() {
                 <div>
                   <p className="text-sm text-gray-600">Active Members</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {members.filter(m => m.role === 'member').length}
+                    {allMembers.filter(m => m.role === 'member').length}
                   </p>
                 </div>
               </div>
@@ -304,7 +407,7 @@ export default function TeamManagementPage() {
                 <div>
                   <p className="text-sm text-gray-600">Departments</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {new Set(members.map(m => m.department).filter(Boolean)).size}
+                    {new Set(allMembers.map(m => m.department).filter(Boolean)).size}
                   </p>
                 </div>
               </div>
@@ -327,10 +430,12 @@ export default function TeamManagementPage() {
                 <p className="text-sm text-gray-600 mb-4">
                   Start building your team by inviting members
                 </p>
-                <Button className="bg-indigo-600 hover:bg-indigo-700">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Invite Your First Member
-                </Button>
+                <Link href="/dashboard/organization">
+                  <Button className="bg-indigo-600 hover:bg-indigo-700">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Invite Your First Member
+                  </Button>
+                </Link>
               </div>
             ) : (
               <div className="space-y-1">
@@ -339,6 +444,119 @@ export default function TeamManagementPage() {
             )}
           </Card>
         </div>
+
+        {/* Edit Member Dialog */}
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Team Member</DialogTitle>
+              <DialogDescription>
+                Update member information and assign manager
+              </DialogDescription>
+            </DialogHeader>
+            {editingMember && (
+              <form onSubmit={handleUpdateMember} className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">Member</Label>
+                  <p className="text-sm text-gray-900 mt-1">
+                    {editingMember.full_name || editingMember.email}
+                  </p>
+                  <p className="text-xs text-gray-500">{editingMember.email}</p>
+                </div>
+
+                <div>
+                  <Label htmlFor="role" className="text-sm font-medium text-gray-700">
+                    Role
+                  </Label>
+                  <Select name="role" defaultValue={editingMember.role}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="owner">Owner</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="member">Member</SelectItem>
+                      <SelectItem value="viewer">Viewer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="manager_id" className="text-sm font-medium text-gray-700">
+                    Reports To (Manager)
+                  </Label>
+                  <Select
+                    name="manager_id"
+                    defaultValue={editingMember.manager_id || ''}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="No manager (top level)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">No manager (top level)</SelectItem>
+                      {allMembers
+                        .filter(m => m.id !== editingMember.id)
+                        .map(m => (
+                          <SelectItem key={m.id} value={m.id}>
+                            {m.full_name || m.email} ({m.role})
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Select who this person reports to
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="department" className="text-sm font-medium text-gray-700">
+                    Department
+                  </Label>
+                  <Input
+                    id="department"
+                    name="department"
+                    defaultValue={editingMember.department || ''}
+                    placeholder="e.g., Engineering, Sales, Marketing"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="job_title" className="text-sm font-medium text-gray-700">
+                    Job Title
+                  </Label>
+                  <Input
+                    id="job_title"
+                    name="job_title"
+                    defaultValue={editingMember.job_title || ''}
+                    placeholder="e.g., Senior Developer, Account Manager"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setEditDialogOpen(false)}
+                    className="flex-1"
+                    disabled={submitting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                    disabled={submitting}
+                  >
+                    {submitting ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </div>
+              </form>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
