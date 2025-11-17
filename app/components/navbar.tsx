@@ -32,6 +32,9 @@ export default function Navbar() {
               <>
                 {user ? (
                   <>
+                    <Link href="/blog">
+                      <Button variant="ghost" size="sm">Blog</Button>
+                    </Link>
                     <Link href="/pricing">
                       <Button variant="ghost" size="sm">Pricing</Button>
                     </Link>
@@ -75,6 +78,9 @@ export default function Navbar() {
                   </>
                 ) : (
                   <>
+                    <Link href="/blog">
+                      <Button variant="ghost" size="sm">Blog</Button>
+                    </Link>
                     <Link href="/pricing">
                       <Button variant="ghost" size="sm">Pricing</Button>
                     </Link>
@@ -115,6 +121,11 @@ export default function Navbar() {
               <div className="flex flex-col gap-2">
                 {user ? (
                   <>
+                    <Link href="/blog" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="ghost" size="sm" className="w-full justify-start">
+                        Blog
+                      </Button>
+                    </Link>
                     <Link href="/pricing" onClick={() => setMobileMenuOpen(false)}>
                       <Button variant="ghost" size="sm" className="w-full justify-start">
                         Pricing
@@ -159,6 +170,11 @@ export default function Navbar() {
                   </>
                 ) : (
                   <>
+                    <Link href="/blog" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="ghost" size="sm" className="w-full justify-start">
+                        Blog
+                      </Button>
+                    </Link>
                     <Link href="/pricing" onClick={() => setMobileMenuOpen(false)}>
                       <Button variant="ghost" size="sm" className="w-full justify-start">
                         Pricing
