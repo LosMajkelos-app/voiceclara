@@ -15,23 +15,50 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all organizations the user owns or is a member of
-    const { data: organizations, error } = await supabase
+    const { data: ownedOrgs, error: ownedError } = await supabase
       .from('organizations')
-      .select(`
-        *,
-        organization_members!inner(role)
-      `)
-      .or(`owner_id.eq.${user.id},organization_members.user_id.eq.${user.id}`)
-      .order('created_at', { ascending: false })
+      .select('*')
+      .eq('owner_id', user.id)
 
-    if (error) {
-      console.error('Error fetching organizations:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    if (ownedError) {
+      console.error('Error fetching owned organizations:', ownedError?.message || 'Unknown error')
+      return NextResponse.json({ error: ownedError.message }, { status: 500 })
+    }
+
+    // Get organizations where user is a member
+    const { data: memberOrgs, error: memberError } = await supabase
+      .from('organization_members')
+      .select('organization_id, role, organizations(*)')
+      .eq('user_id', user.id)
+
+    if (memberError) {
+      console.error('Error fetching member organizations:', memberError?.message || 'Unknown error')
+      // Don't fail, just continue with owned orgs
+    }
+
+    // Combine and deduplicate
+    const allOrgs = [...(ownedOrgs || [])]
+    const ownedOrgIds = new Set(ownedOrgs?.map(o => o.id) || [])
+
+    // Add member orgs that aren't already in owned orgs
+    if (memberOrgs) {
+      memberOrgs.forEach((m: any) => {
+        if (m.organizations && typeof m.organizations === 'object' && !Array.isArray(m.organizations) && m.organizations.id && !ownedOrgIds.has(m.organizations.id)) {
+          allOrgs.push({
+            ...m.organizations,
+            role: m.role
+          })
+        }
+      })
+    }
+
+    if (!allOrgs || allOrgs.length === 0) {
+      return NextResponse.json({ organizations: [] })
     }
 
     // Get member counts for each organization
     const orgsWithCounts = await Promise.all(
-      (organizations || []).map(async (org) => {
+      allOrgs.map(async (org) => {
         const { count } = await supabase
           .from('organization_members')
           .select('*', { count: 'exact', head: true })
@@ -45,8 +72,8 @@ export async function GET(request: NextRequest) {
     )
 
     return NextResponse.json({ organizations: orgsWithCounts })
-  } catch (error) {
-    console.error('Unexpected error:', error)
+  } catch (error: any) {
+    console.error('Unexpected error:', error?.message || 'Unknown error')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -127,8 +154,8 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ organization }, { status: 201 })
-  } catch (error) {
-    console.error('Unexpected error:', error)
+  } catch (error: any) {
+    console.error('Unexpected error:', error?.message || 'Unknown error')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

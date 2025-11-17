@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase"
 import Navbar from "@/app/components/navbar"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { User, Mail, Shield, Trash2, AlertTriangle } from "lucide-react"
+import { User, Mail, Shield, Trash2, AlertTriangle, Building2, ArrowUpCircle } from "lucide-react"
 import { toast } from "sonner"
 
 export default function ProfilePage() {
@@ -28,7 +28,7 @@ export default function ProfilePage() {
     if (user) {
       setFullName(user.user_metadata?.full_name || "")
       setEmail(user.email || "")
-      setAccountType(user.user_metadata?.account_type || "individual")
+      setAccountType(user.user_metadata?.account_type || "personal")
     }
   }, [user, authLoading, router])
 
@@ -163,19 +163,59 @@ export default function ProfilePage() {
                 </p>
               </div>
 
-              {/* Account Type (Read-only for now) */}
+              {/* Account Type */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Account Type
                 </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={accountType === "individual" ? "Individual" : "Business"}
-                    disabled
-                    className="flex-1 px-3 py-2 bg-gray-50 border-2 border-gray-200 rounded-lg text-gray-500 cursor-not-allowed"
-                  />
-                  <Shield className="h-5 w-5 text-gray-400" />
+                <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {accountType === "personal" ? (
+                        <div className="p-2 bg-white rounded-lg">
+                          <User className="h-5 w-5 text-indigo-600" />
+                        </div>
+                      ) : (
+                        <div className="p-2 bg-white rounded-lg">
+                          <Building2 className="h-5 w-5 text-indigo-600" />
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-semibold text-gray-900">
+                          {accountType === "personal" ? "Personal Account" : "Business Account"}
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          {accountType === "personal"
+                            ? "For individual use"
+                            : "Company account with invoicing"}
+                        </p>
+                      </div>
+                    </div>
+                    {accountType === "personal" && (
+                      <div>
+                        <Button
+                          onClick={() => {
+                            setAccountType("business")
+                            toast.info("Account type updated to Business. Save changes to apply.")
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
+                        >
+                          <ArrowUpCircle className="h-4 w-4 mr-1" />
+                          Upgrade to Business
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  {accountType === "personal" && (
+                    <div className="mt-3 p-3 bg-white rounded-lg border border-indigo-200">
+                      <p className="text-xs text-gray-600">
+                        ✨ <strong>Business accounts</strong> include: Company details, Tax ID (NIP),
+                        Invoicing, Team management, and Priority support
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
