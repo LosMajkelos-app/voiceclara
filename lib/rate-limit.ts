@@ -61,14 +61,13 @@ export async function rateLimit(
 
   const key = `rate_limit:${identifier}`
   const now = Date.now()
-  const windowStart = now - config.window * 1000
 
   try {
     // Simple counter-based approach with Vercel KV
     const currentCount = await kv.get<number>(key) || 0
 
     if (currentCount >= config.limit) {
-      // Rate limit exceeded
+      // Rate limit exceeded - get TTL to calculate reset time
       const ttl = await kv.ttl(key)
       const resetTime = now + (ttl > 0 ? ttl * 1000 : config.window * 1000)
 

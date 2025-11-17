@@ -13,7 +13,7 @@ export default function SignUpPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [fullName, setFullName] = useState("")
-  const [accountType, setAccountType] = useState<"individual" | "business">("individual")
+  const [accountType, setAccountType] = useState<"personal" | "business">("personal")
   const [loading, setLoading] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
   const [submittedEmail, setSubmittedEmail] = useState("")
@@ -205,26 +205,31 @@ export default function SignUpPage() {
             </label>
             <div className="grid grid-cols-2 gap-3">
               <button
-                onClick={() => setAccountType("individual")}
+                type="button"
+                onClick={() => setAccountType("personal")}
                 className={`p-3 border-2 rounded-lg transition-all ${
-                  accountType === "individual"
+                  accountType === "personal"
                     ? 'border-indigo-500 bg-indigo-50'
                     : 'border-gray-200 bg-white hover:border-indigo-300'
                 }`}
               >
-                <UserIcon className="h-5 w-5 mx-auto mb-2 text-indigo-600" />
-                <p className="font-semibold text-sm">Individual</p>
-                <p className="text-xs text-gray-500 mt-1">Personal feedback</p>
+                <UserIcon className={`h-5 w-5 mx-auto mb-2 ${accountType === "personal" ? 'text-indigo-600' : 'text-gray-600'}`} />
+                <p className="font-semibold text-sm">Personal</p>
+                <p className="text-xs text-gray-500 mt-1">Individual use</p>
               </button>
 
               <button
+                type="button"
                 onClick={() => setAccountType("business")}
-                disabled
-                className="p-3 border-2 rounded-lg border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed"
+                className={`p-3 border-2 rounded-lg transition-all ${
+                  accountType === "business"
+                    ? 'border-indigo-500 bg-indigo-50'
+                    : 'border-gray-200 bg-white hover:border-indigo-300'
+                }`}
               >
-                <Building2 className="h-5 w-5 mx-auto mb-2 text-gray-400" />
-                <p className="font-semibold text-sm text-gray-400">Business</p>
-                <p className="text-xs text-gray-400 mt-1">Coming soon</p>
+                <Building2 className={`h-5 w-5 mx-auto mb-2 ${accountType === "business" ? 'text-indigo-600' : 'text-gray-600'}`} />
+                <p className="font-semibold text-sm">Business</p>
+                <p className="text-xs text-gray-500 mt-1">Company account</p>
               </button>
             </div>
           </div>
