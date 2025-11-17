@@ -14,6 +14,7 @@ import DashboardSidebar from "@/app/components/dashboard-sidebar"
 import AccountSettingsModal from "@/app/components/account-settings-modal"
 import AnalyticsCharts from "@/app/components/analytics-charts"
 import EmailInvitationModal from "@/app/components/email-invitation-modal"
+import InvitationHistory from "@/app/components/invitation-history"
 import { exportToEnhancedCSV, exportToPDF } from "@/lib/export-utils"
 
 interface FeedbackRequest {
@@ -457,6 +458,9 @@ export default function ResultsPage() {
                   ))}
                 </div>
               </Card>
+
+              {/* Invitation History */}
+              <InvitationHistory feedbackRequestId={request.id} />
 
               {/* AI Analysis Progress */}
               {responses.length < 3 && (
