@@ -47,6 +47,41 @@ export async function GET(request: NextRequest) {
           Math.abs(new Date(user.created_at).getTime() - new Date(user.last_sign_in_at).getTime()) : null
       })
 
+      // Create organization for new Business accounts
+      if (user && isNewSignup && data.session) {
+        const accountType = user.user_metadata?.account_type
+        if (accountType === 'business') {
+          try {
+            console.log('🏢 Creating organization for new Business account...')
+
+            // Create organization slug from email
+            const emailPrefix = user.email?.split('@')[0] || 'business'
+            const slug = `${emailPrefix}-${user.id.substring(0, 8)}`.toLowerCase().replace(/[^a-z0-9-]/g, '-')
+
+            const orgRes = await fetch(`${requestUrl.origin}/api/organizations`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${data.session.access_token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                name: `${user.user_metadata?.full_name || user.email}'s Organization`,
+                slug: slug
+              })
+            })
+
+            if (orgRes.ok) {
+              const orgData = await orgRes.json()
+              console.log('✅ Organization created:', orgData.organization?.id)
+            } else {
+              console.error('❌ Failed to create organization:', await orgRes.text())
+            }
+          } catch (err) {
+            console.error('❌ Error creating organization:', err)
+          }
+        }
+      }
+
       // Link guest requests after email confirmation
       if (data.user && data.session) {
         try {

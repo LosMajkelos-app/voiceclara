@@ -26,16 +26,22 @@ interface TeamMember {
 
 export default function TeamManagementPage() {
   const { user } = useAuth()
-  const { currentOrganization } = useOrganization()
+  const { currentOrganization, loading: orgLoading } = useOrganization()
   const [members, setMembers] = useState<TeamMember[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedMembers, setExpandedMembers] = useState<Set<string>>(new Set())
 
   useEffect(() => {
+    // Wait for organization context to load
+    if (orgLoading) return
+
     if (currentOrganization) {
       fetchTeamMembers()
+    } else {
+      // No organization, stop loading
+      setLoading(false)
     }
-  }, [currentOrganization])
+  }, [currentOrganization, orgLoading])
 
   async function fetchTeamMembers() {
     if (!currentOrganization) return
