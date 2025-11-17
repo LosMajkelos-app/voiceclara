@@ -70,13 +70,21 @@ export default function DashboardSidebar({ user, onAccountSettingsClick }: Dashb
             Create Request
           </Link>
 
+          <Link
+            href="/dashboard/team"
+            className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg ${
+              isActive('/dashboard/team')
+                ? 'text-indigo-600 bg-indigo-50'
+                : 'text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <Users className="h-4 w-4" />
+            Team Management
+          </Link>
+
           {/* Coming Soon Features */}
           <div className="pt-4 mt-4 border-t border-gray-200">
             <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Coming Soon</p>
-            <button disabled className="w-full flex items-center gap-3 px-3 py-2 mt-2 text-sm font-medium text-gray-400 cursor-not-allowed opacity-60" title="Coming Soon">
-              <Users className="h-4 w-4" />
-              Teams
-            </button>
             <button disabled className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed opacity-60" title="Coming Soon">
               <Zap className="h-4 w-4" />
               Integrations
