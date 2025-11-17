@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, Plus, Users, Zap, FileText, BarChart3, User, LogOut } from "lucide-react"
+import { Home, Plus, Users, Zap, FileText, BarChart3, User, LogOut, Building2 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
@@ -68,6 +68,18 @@ export default function DashboardSidebar({ user, onAccountSettingsClick }: Dashb
           >
             <Plus className="h-4 w-4" />
             Create Request
+          </Link>
+
+          <Link
+            href="/dashboard/organization"
+            className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg ${
+              isActive('/dashboard/organization')
+                ? 'text-indigo-600 bg-indigo-50'
+                : 'text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <Building2 className="h-4 w-4" />
+            Organization
           </Link>
 
           <Link

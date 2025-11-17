@@ -3,8 +3,19 @@ import { getAllPosts } from '@/lib/blog'
 import { ArrowLeft, Calendar, User, ArrowRight } from 'lucide-react'
 
 export const metadata = {
-  title: 'Blog - VoiceClara',
-  description: 'Learn about anonymous feedback, professional growth, and AI-powered insights'
+  title: 'Blog - VoiceClara | Anonymous Feedback Tips & Insights',
+  description: 'Learn about anonymous feedback, professional growth, and AI-powered insights. Discover best practices for collecting honest team feedback.',
+  openGraph: {
+    title: 'VoiceClara Blog - Feedback & Growth Insights',
+    description: 'Learn about anonymous feedback, professional growth, and AI-powered insights',
+    type: 'website',
+    url: 'https://voiceclara.com/blog',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'VoiceClara Blog - Feedback & Growth Insights',
+    description: 'Learn about anonymous feedback, professional growth, and AI-powered insights',
+  },
 }
 
 export default function BlogPage() {

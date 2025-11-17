@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { FeedbackLayout } from "@/components/feedback-layout"
@@ -25,6 +25,21 @@ export default function SignUpPage() {
   const [companyAddress, setCompanyAddress] = useState("")
   const [companyCity, setCompanyCity] = useState("")
   const [companyCountry, setCompanyCountry] = useState("Poland")
+
+  // Ref for scrolling to business fields
+  const businessFieldsRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll when switching to Business account
+  useEffect(() => {
+    if (accountType === "business" && businessFieldsRef.current) {
+      setTimeout(() => {
+        businessFieldsRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest"
+        })
+      }, 100)
+    }
+  }, [accountType])
 
   const handleSignUp = async () => {
     if (!email || !password || !fullName) {
@@ -278,7 +293,7 @@ export default function SignUpPage() {
 
           {/* Business Account Fields */}
           {accountType === "business" && (
-            <>
+            <div ref={businessFieldsRef} className="space-y-4">
               {/* Company Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -361,7 +376,7 @@ export default function SignUpPage() {
                   </select>
                 </div>
               </div>
-            </>
+            </div>
           )}
 
           {/* Email */}
