@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get all organizations the user owns or is a member of
+    // Get organizations where user is owner
     const { data: ownedOrgs, error: ownedError } = await supabase
       .from('organizations')
       .select('*')
