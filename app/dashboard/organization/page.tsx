@@ -40,6 +40,23 @@ export default function OrganizationPage() {
   async function fetchMembers() {
     if (!currentOrganization) return
 
+    // Demo mode - show sample data
+    if (currentOrganization.id === 'demo-org-id') {
+      const demoMembers: Member[] = [
+        { id: '1', user_id: 'demo-1', email: 'ceo@democompany.com', full_name: 'Sarah Johnson', role: 'owner', created_at: new Date().toISOString() },
+        { id: '2', user_id: 'demo-2', email: 'cto@democompany.com', full_name: 'Michael Chen', role: 'admin', created_at: new Date().toISOString() },
+        { id: '3', user_id: 'demo-3', email: 'cmo@democompany.com', full_name: 'Emily Rodriguez', role: 'manager', created_at: new Date().toISOString() },
+        { id: '4', user_id: 'demo-4', email: 'john.dev@democompany.com', full_name: 'John Smith', role: 'member', created_at: new Date().toISOString() },
+        { id: '5', user_id: 'demo-5', email: 'anna.dev@democompany.com', full_name: 'Anna Williams', role: 'member', created_at: new Date().toISOString() },
+        { id: '6', user_id: 'demo-6', email: 'lisa.marketing@democompany.com', full_name: 'Lisa Thompson', role: 'member', created_at: new Date().toISOString() },
+        { id: '7', user_id: 'demo-7', email: 'david.social@democompany.com', full_name: 'David Brown', role: 'member', created_at: new Date().toISOString() },
+        { id: '8', user_id: 'demo-8', email: 'intern@democompany.com', full_name: 'Alex Lee', role: 'viewer', created_at: new Date().toISOString() },
+      ]
+      setMembers(demoMembers)
+      setLoading(false)
+      return
+    }
+
     try {
       const { data, error } = await supabase
         .from('organization_members')
@@ -85,6 +102,11 @@ export default function OrganizationPage() {
 
     if (!currentOrganization || !inviteEmail) return
 
+    if (currentOrganization.id === 'demo-org-id') {
+      toast.info('This is demo data. Create your own organization to invite members!')
+      return
+    }
+
     setInviting(true)
 
     try {
@@ -116,6 +138,11 @@ export default function OrganizationPage() {
 
   async function handleRemoveMember(memberId: string, memberEmail: string) {
     if (!currentOrganization) return
+
+    if (currentOrganization.id === 'demo-org-id') {
+      toast.info('This is demo data. Create your own organization to manage members!')
+      return
+    }
 
     if (!confirm(`Remove ${memberEmail} from the organization?`)) return
 
@@ -218,6 +245,28 @@ export default function OrganizationPage() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Organization Settings</h1>
             <p className="text-gray-600">{currentOrganization.name}</p>
           </div>
+
+          {/* Demo Mode Banner */}
+          {currentOrganization.id === 'demo-org-id' && (
+            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-amber-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-amber-800 mb-1">
+                    📊 Demo Mode - Sample Organization
+                  </h3>
+                  <p className="text-sm text-amber-700">
+                    You're viewing a sample organization with 8 team members. This is example data to showcase VoiceClara's team management features.
+                    Create your own organization to start inviting real team members!
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Content */}

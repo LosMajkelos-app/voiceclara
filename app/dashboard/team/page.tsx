@@ -40,6 +40,132 @@ interface TeamMember {
   subordinates?: TeamMember[]
 }
 
+function createDemoMembers() {
+  const ceoId = 'demo-ceo'
+  const ctoId = 'demo-cto'
+  const cmoId = 'demo-cmo'
+  const dev1Id = 'demo-dev1'
+  const dev2Id = 'demo-dev2'
+  const marketing1Id = 'demo-marketing1'
+  const marketing2Id = 'demo-marketing2'
+  const internId = 'demo-intern'
+
+  const ceo: TeamMember = {
+    id: ceoId,
+    user_id: 'demo-user-ceo',
+    role: 'owner',
+    manager_id: null,
+    department: 'Executive',
+    job_title: 'CEO',
+    level: 0,
+    email: 'ceo@democompany.com',
+    full_name: 'Sarah Johnson',
+    subordinates: []
+  }
+
+  const cto: TeamMember = {
+    id: ctoId,
+    user_id: 'demo-user-cto',
+    role: 'admin',
+    manager_id: ceoId,
+    department: 'Engineering',
+    job_title: 'CTO',
+    level: 1,
+    email: 'cto@democompany.com',
+    full_name: 'Michael Chen',
+    subordinates: []
+  }
+
+  const cmo: TeamMember = {
+    id: cmoId,
+    user_id: 'demo-user-cmo',
+    role: 'manager',
+    manager_id: ceoId,
+    department: 'Marketing',
+    job_title: 'Chief Marketing Officer',
+    level: 1,
+    email: 'cmo@democompany.com',
+    full_name: 'Emily Rodriguez',
+    subordinates: []
+  }
+
+  const dev1: TeamMember = {
+    id: dev1Id,
+    user_id: 'demo-user-dev1',
+    role: 'member',
+    manager_id: ctoId,
+    department: 'Engineering',
+    job_title: 'Senior Software Engineer',
+    level: 2,
+    email: 'john.dev@democompany.com',
+    full_name: 'John Smith',
+    subordinates: []
+  }
+
+  const dev2: TeamMember = {
+    id: dev2Id,
+    user_id: 'demo-user-dev2',
+    role: 'member',
+    manager_id: ctoId,
+    department: 'Engineering',
+    job_title: 'Frontend Developer',
+    level: 2,
+    email: 'anna.dev@democompany.com',
+    full_name: 'Anna Williams',
+    subordinates: []
+  }
+
+  const marketing1: TeamMember = {
+    id: marketing1Id,
+    user_id: 'demo-user-marketing1',
+    role: 'member',
+    manager_id: cmoId,
+    department: 'Marketing',
+    job_title: 'Content Marketing Manager',
+    level: 2,
+    email: 'lisa.marketing@democompany.com',
+    full_name: 'Lisa Thompson',
+    subordinates: []
+  }
+
+  const marketing2: TeamMember = {
+    id: marketing2Id,
+    user_id: 'demo-user-marketing2',
+    role: 'member',
+    manager_id: cmoId,
+    department: 'Marketing',
+    job_title: 'Social Media Specialist',
+    level: 2,
+    email: 'david.social@democompany.com',
+    full_name: 'David Brown',
+    subordinates: []
+  }
+
+  const intern: TeamMember = {
+    id: internId,
+    user_id: 'demo-user-intern',
+    role: 'viewer',
+    manager_id: dev1Id,
+    department: 'Engineering',
+    job_title: 'Engineering Intern',
+    level: 3,
+    email: 'intern@democompany.com',
+    full_name: 'Alex Lee',
+    subordinates: []
+  }
+
+  // Build hierarchy
+  dev1.subordinates = [intern]
+  cto.subordinates = [dev1, dev2]
+  cmo.subordinates = [marketing1, marketing2]
+  ceo.subordinates = [cto, cmo]
+
+  const allMembers = [ceo, cto, cmo, dev1, dev2, marketing1, marketing2, intern]
+  const rootMembers = [ceo]
+
+  return { allMembers, rootMembers }
+}
+
 export default function TeamManagementPage() {
   const { user } = useAuth()
   const { currentOrganization, loading: orgLoading } = useOrganization()
@@ -50,6 +176,7 @@ export default function TeamManagementPage() {
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const isDemoMode = currentOrganization?.id === 'demo-org-id'
 
   useEffect(() => {
     // Wait for organization context to load
@@ -65,6 +192,15 @@ export default function TeamManagementPage() {
 
   async function fetchTeamMembers() {
     if (!currentOrganization) return
+
+    // Demo mode - show sample data
+    if (currentOrganization.id === 'demo-org-id') {
+      const demoMembers = createDemoMembers()
+      setMembers(demoMembers.rootMembers)
+      setAllMembers(demoMembers.allMembers)
+      setLoading(false)
+      return
+    }
 
     try {
       const { data, error } = await supabase
@@ -142,6 +278,10 @@ export default function TeamManagementPage() {
   }
 
   const handleEditMember = (member: TeamMember) => {
+    if (isDemoMode) {
+      toast.info('This is demo data. Sign up to manage your own team!')
+      return
+    }
     setEditingMember(member)
     setEditDialogOpen(true)
   }
@@ -190,6 +330,10 @@ export default function TeamManagementPage() {
 
   const handleRemoveMember = async (member: TeamMember) => {
     if (!currentOrganization) return
+    if (isDemoMode) {
+      toast.info('This is demo data. Sign up to manage your own team!')
+      return
+    }
     if (member.role === 'owner') {
       toast.error('Cannot remove the owner')
       return
@@ -367,6 +511,28 @@ export default function TeamManagementPage() {
               </Button>
             </Link>
           </div>
+
+          {/* Demo Mode Banner */}
+          {isDemoMode && (
+            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-amber-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-amber-800 mb-1">
+                    📊 Demo Mode - Sample Data
+                  </h3>
+                  <p className="text-sm text-amber-700">
+                    You're viewing example team hierarchy with 8 members across Engineering and Marketing departments.
+                    This demonstrates how VoiceClara helps you visualize organizational structure and manage reporting relationships.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">

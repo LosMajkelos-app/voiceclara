@@ -91,19 +91,21 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
       if (data.organizations) {
         // Auto-create personal workspace if user has no organizations
         if (data.organizations.length === 0) {
-          console.log('No organizations found - creating personal workspace')
-          await createPersonalWorkspace()
-          // Refetch after creating
-          const retry = await fetch('/api/organizations')
-          if (retry.ok) {
-            const retryData = await retry.json()
-            if (retryData.organizations) {
-              setOrganizations(retryData.organizations)
-              if (retryData.organizations.length > 0) {
-                setCurrentOrganization(retryData.organizations[0])
-              }
-            }
+          console.log('No organizations found - using demo mode')
+          // Use demo organization for testing
+          const demoOrg: Organization = {
+            id: 'demo-org-id',
+            name: 'Demo Company (Sample Data)',
+            slug: 'demo-company',
+            owner_id: user?.id || 'demo-user',
+            plan_type: 'business',
+            member_count: 8,
+            role: 'owner',
+            created_at: new Date().toISOString(),
           }
+          setOrganizations([demoOrg])
+          setCurrentOrganization(demoOrg)
+          setLoading(false)
           return
         }
 
