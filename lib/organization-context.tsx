@@ -37,6 +37,26 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
   const [currentOrganization, setCurrentOrganization] = useState<Organization | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const createPersonalWorkspace = async () => {
+    if (!user) return
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user) return
+
+      const fullName = session.user.user_metadata?.full_name || 'My Workspace'
+      const slug = `personal-${user.id}`
+
+      await fetch('/api/organizations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: fullName, slug }),
+      })
+    } catch (error) {
+      console.error('Failed to create personal workspace:', error)
+    }
+  }
+
   const fetchOrganizations = async () => {
     if (!user) {
       setOrganizations([])
@@ -69,6 +89,24 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
       const data = await response.json()
 
       if (data.organizations) {
+        // Auto-create personal workspace if user has no organizations
+        if (data.organizations.length === 0) {
+          console.log('No organizations found - creating personal workspace')
+          await createPersonalWorkspace()
+          // Refetch after creating
+          const retry = await fetch('/api/organizations')
+          if (retry.ok) {
+            const retryData = await retry.json()
+            if (retryData.organizations) {
+              setOrganizations(retryData.organizations)
+              if (retryData.organizations.length > 0) {
+                setCurrentOrganization(retryData.organizations[0])
+              }
+            }
+          }
+          return
+        }
+
         setOrganizations(data.organizations)
 
         // Set current organization to first one if not already set
