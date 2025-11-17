@@ -19,25 +19,53 @@ export default function SignUpPage() {
   const [submittedEmail, setSubmittedEmail] = useState("")
   const [error, setError] = useState("")
 
+  // Business account fields
+  const [companyName, setCompanyName] = useState("")
+  const [taxId, setTaxId] = useState("") // NIP or other tax ID
+  const [companyAddress, setCompanyAddress] = useState("")
+  const [companyCity, setCompanyCity] = useState("")
+  const [companyCountry, setCompanyCountry] = useState("Poland")
+
   const handleSignUp = async () => {
     if (!email || !password || !fullName) {
       setError("Please fill in all fields")
       return
     }
 
+    // Additional validation for Business accounts
+    if (accountType === "business") {
+      if (!companyName || !taxId) {
+        setError("Please fill in company name and tax ID (NIP)")
+        return
+      }
+    }
+
     setLoading(true)
     setError("")
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
+
+    // Prepare user metadata
+    const userMetadata: any = {
+      full_name: fullName,
+      account_type: accountType
+    }
+
+    // Add business details if Business account
+    if (accountType === "business") {
+      userMetadata.company_name = companyName
+      userMetadata.tax_id = taxId
+      userMetadata.company_address = companyAddress
+      userMetadata.company_city = companyCity
+      userMetadata.company_country = companyCountry
+    }
+
     const { data, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${siteUrl}/auth/callback`,
-        data: {
-          full_name: fullName,
-          account_type: accountType
-        }
+        data: userMetadata
       }
     })
 
@@ -237,7 +265,7 @@ export default function SignUpPage() {
           {/* Full Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Full Name
+              {accountType === "business" ? "Contact Person Name" : "Full Name"}
             </label>
             <input
               type="text"
@@ -247,6 +275,94 @@ export default function SignUpPage() {
               className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
+
+          {/* Business Account Fields */}
+          {accountType === "business" && (
+            <>
+              {/* Company Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Company Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  placeholder="Acme Corporation"
+                  className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+
+              {/* Tax ID (NIP) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Tax ID / NIP <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={taxId}
+                  onChange={(e) => setTaxId(e.target.value)}
+                  placeholder="1234567890"
+                  className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">Required for invoicing</p>
+              </div>
+
+              {/* Company Address */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Company Address
+                </label>
+                <input
+                  type="text"
+                  value={companyAddress}
+                  onChange={(e) => setCompanyAddress(e.target.value)}
+                  placeholder="123 Main Street"
+                  className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+
+              {/* City and Country */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    value={companyCity}
+                    onChange={(e) => setCompanyCity(e.target.value)}
+                    placeholder="Warsaw"
+                    className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Country
+                  </label>
+                  <select
+                    value={companyCountry}
+                    onChange={(e) => setCompanyCountry(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="Poland">Poland</option>
+                    <option value="Germany">Germany</option>
+                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="France">France</option>
+                    <option value="Spain">Spain</option>
+                    <option value="Italy">Italy</option>
+                    <option value="Netherlands">Netherlands</option>
+                    <option value="Belgium">Belgium</option>
+                    <option value="Austria">Austria</option>
+                    <option value="Switzerland">Switzerland</option>
+                    <option value="United States">United States</option>
+                    <option value="Canada">Canada</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Email */}
           <div>
