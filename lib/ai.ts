@@ -65,6 +65,29 @@ function getLanguageInstruction(language: string): string {
   return instructions[language] || instructions['en']
 }
 
+/**
+ * Cleans markdown code blocks from JSON response
+ * OpenAI sometimes returns JSON wrapped in ```json ... ```
+ */
+function cleanJsonResponse(content: string): string {
+  // Remove markdown code blocks
+  let cleaned = content.trim()
+
+  // Remove ```json at the start
+  if (cleaned.startsWith('```json')) {
+    cleaned = cleaned.slice(7)
+  } else if (cleaned.startsWith('```')) {
+    cleaned = cleaned.slice(3)
+  }
+
+  // Remove ``` at the end
+  if (cleaned.endsWith('```')) {
+    cleaned = cleaned.slice(0, -3)
+  }
+
+  return cleaned.trim()
+}
+
 // Test/spam response detection patterns
 const TEST_PATTERNS = [
   /^(test|testing|test123|asdf|qwerty|abc|123|aaa+|zzz+|xxx+)$/i,
@@ -241,7 +264,8 @@ Return ONLY valid JSON, no other text.`
     })
 
     const content = completion.choices[0]?.message?.content || '{}'
-    const analysis = JSON.parse(content)
+    const cleanedContent = cleanJsonResponse(content)
+    const analysis = JSON.parse(cleanedContent)
 
     return {
       themes: analysis.themes || [],
@@ -308,7 +332,8 @@ Return as JSON:
     })
 
     const content = completion.choices[0]?.message?.content || '{}'
-    return JSON.parse(content)
+    const cleanedContent = cleanJsonResponse(content)
+    return JSON.parse(cleanedContent)
   } catch (error: any) {
     console.error('Sentiment analysis error:', error)
     const errorMessage = error?.message || 'Unknown error'
@@ -370,7 +395,8 @@ Return as JSON:
     })
 
     const content = completion.choices[0]?.message?.content || '{}'
-    return JSON.parse(content)
+    const cleanedContent = cleanJsonResponse(content)
+    return JSON.parse(cleanedContent)
   } catch (error: any) {
     console.error('Summary generation error:', error)
     const errorMessage = error?.message || 'Unknown error'
