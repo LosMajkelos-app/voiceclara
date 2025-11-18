@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
 
         // Send via Resend
         const { data, error } = await resend.emails.send({
-          from: 'VoiceClara <feedback@voiceclara.com>',
+          from: 'VoiceClara <hello@voiceclara.com>',
           to: recipient.email,
           subject: `${feedbackRequest.creator_name} is requesting your anonymous feedback`,
           html: emailHtml,

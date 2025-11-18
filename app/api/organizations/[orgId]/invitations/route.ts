@@ -181,7 +181,7 @@ export async function POST(
       const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/invite/${invitation.invitation_token}`
 
       await resend.emails.send({
-        from: 'VoiceClara <noreply@voiceclara.com>',
+        from: 'VoiceClara <hello@voiceclara.com>',
         to: email,
         subject: `You've been invited to join ${organization.name} on VoiceClara`,
         html: `
