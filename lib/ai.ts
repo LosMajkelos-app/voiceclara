@@ -1,7 +1,11 @@
 import OpenAI from 'openai'
 
+if (!process.env.OPENAI_API_KEY) {
+  console.error('OPENAI_API_KEY is not set!')
+}
+
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || 'dummy-key',
 })
 
 interface Response {
@@ -243,9 +247,13 @@ Return ONLY valid JSON, no other text.`
       themes: analysis.themes || [],
       tokensUsed: completion.usage?.total_tokens || 0,
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('AI analysis error:', error)
-    throw new Error('Failed to analyze themes')
+    // Provide more detailed error message
+    const errorMessage = error?.message || 'Unknown error'
+    const errorDetails = error?.response?.data || error?.error || ''
+    console.error('Error details:', { errorMessage, errorDetails })
+    throw new Error(`Failed to analyze themes: ${errorMessage}`)
   }
 }
 
@@ -301,8 +309,10 @@ Return as JSON:
 
     const content = completion.choices[0]?.message?.content || '{}'
     return JSON.parse(content)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Sentiment analysis error:', error)
+    const errorMessage = error?.message || 'Unknown error'
+    console.error('Sentiment error details:', { errorMessage, error: error?.error })
     return {
       sentiment: 'neutral',
       confidence: 0,
@@ -361,8 +371,11 @@ Return as JSON:
 
     const content = completion.choices[0]?.message?.content || '{}'
     return JSON.parse(content)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Summary generation error:', error)
-    throw new Error('Failed to generate summary')
+    const errorMessage = error?.message || 'Unknown error'
+    const errorDetails = error?.response?.data || error?.error || ''
+    console.error('Summary error details:', { errorMessage, errorDetails })
+    throw new Error(`Failed to generate summary: ${errorMessage}`)
   }
 }
