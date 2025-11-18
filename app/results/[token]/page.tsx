@@ -194,7 +194,7 @@ export default function ResultsPage() {
 
       if (response.ok) {
         setAiAnalysis(data)
-        setAiAnalysisResponseCount(responses.length)
+        setAiAnalysisResponseCount(data.response_count_at_analysis || responses.length)
 
         // Show warning if some responses were filtered
         if (data.warning) {
@@ -372,8 +372,17 @@ export default function ResultsPage() {
                     size="sm"
                     className="bg-indigo-600 hover:bg-indigo-700 flex items-center gap-1.5"
                   >
-                    <Sparkles className="h-4 w-4" />
-                    <span className="text-xs">{analyzingAI ? "Analyzing..." : "AI Analysis"}</span>
+                    {analyzingAI ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        <span className="text-xs">Analyzing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4" />
+                        <span className="text-xs">AI Analysis</span>
+                      </>
+                    )}
                   </Button>
                 )}
               </div>
@@ -449,71 +458,7 @@ export default function ResultsPage() {
                 </div>
               </Card>
 
-              {/* Questions List */}
-              <Card className="p-4 bg-white">
-                <h3 className="text-sm font-bold text-gray-900 mb-3">Questions ({request.questions.length})</h3>
-                <div className="space-y-2">
-                  {request.questions.map((q, i) => (
-                    <div key={i} className="flex gap-2 text-xs">
-                      <span className="font-semibold text-indigo-600 flex-shrink-0">{i + 1}.</span>
-                      <p className="text-gray-700">{q}</p>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              {/* Invitation History */}
-              <InvitationHistory feedbackRequestId={request.id} />
-
-              {/* AI Analysis Progress */}
-              {responses.length < 3 && (
-                <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200">
-                  <div className="flex items-start gap-3">
-                    <Sparkles className="h-6 w-6 text-purple-600 flex-shrink-0" />
-                    <div className="flex-1">
-                      <h3 className="text-sm font-bold text-gray-900 mb-1">AI Analysis Locked</h3>
-                      <p className="text-xs text-gray-600 mb-2">
-                        Collect {3 - responses.length} more response{3 - responses.length !== 1 ? 's' : ''} to unlock AI insights
-                      </p>
-                      <div className="w-full bg-purple-200 rounded-full h-1.5">
-                        <div
-                          className="bg-purple-600 h-1.5 rounded-full transition-all"
-                          style={{ width: `${(responses.length / 3) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              )}
-
-              {/* Guest Login Banner */}
-              {!user && (
-                <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200">
-                  <div className="flex items-start gap-2">
-                    <Sparkles className="h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                      <h3 className="text-sm font-bold text-indigo-900 mb-1">Save to Dashboard</h3>
-                      <p className="text-xs text-indigo-800 mb-2">
-                        Create a free account to track responses and get AI insights
-                      </p>
-                      <div className="flex gap-2">
-                        <Link href="/auth/signup">
-                          <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 h-7 text-xs">
-                            Sign Up
-                          </Button>
-                        </Link>
-                        <Link href="/auth/login">
-                          <Button variant="outline" size="sm" className="border-indigo-600 text-indigo-600 h-7 text-xs">
-                            Sign In
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              )}
-
-              {/* AI Analysis Results - in center column */}
+              {/* AI Analysis Results - Moved Higher */}
               {responses.length >= 3 && (
                 <div className="space-y-3">
                   {/* Quality Metrics Warning */}
@@ -538,7 +483,15 @@ export default function ResultsPage() {
                       <h3 className="text-sm font-bold text-gray-900">AI Summary</h3>
                     </div>
 
-                    {!aiAnalysis && !loadingCachedAnalysis && (
+                    {analyzingAI && (
+                      <div className="py-8 text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-200 border-t-purple-600 mx-auto mb-4"></div>
+                        <p className="text-sm font-semibold text-purple-600 mb-2">AI is analyzing your feedback...</p>
+                        <p className="text-xs text-gray-500">This may take 10-20 seconds</p>
+                      </div>
+                    )}
+
+                    {!analyzingAI && !aiAnalysis && !loadingCachedAnalysis && (
                       <div className="py-8 text-center">
                         <div className="text-4xl mb-3">🤖</div>
                         <p className="text-sm text-gray-600 mb-4">
@@ -547,14 +500,14 @@ export default function ResultsPage() {
                       </div>
                     )}
 
-                    {loadingCachedAnalysis && (
+                    {!analyzingAI && loadingCachedAnalysis && (
                       <div className="py-8 text-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-3"></div>
                         <p className="text-xs text-gray-600">Loading analysis...</p>
                       </div>
                     )}
 
-                    {aiAnalysis && (
+                    {!analyzingAI && aiAnalysis && (
                       <>
                         <p className="text-xs text-gray-700 mb-3">{aiAnalysis.summary?.summary}</p>
 
@@ -636,6 +589,70 @@ export default function ResultsPage() {
                     </Card>
                   )}
                 </div>
+              )}
+
+              {/* Questions List */}
+              <Card className="p-4 bg-white">
+                <h3 className="text-sm font-bold text-gray-900 mb-3">Questions ({request.questions.length})</h3>
+                <div className="space-y-2">
+                  {request.questions.map((q, i) => (
+                    <div key={i} className="flex gap-2 text-xs">
+                      <span className="font-semibold text-indigo-600 flex-shrink-0">{i + 1}.</span>
+                      <p className="text-gray-700">{q}</p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              {/* Invitation History */}
+              <InvitationHistory feedbackRequestId={request.id} />
+
+              {/* AI Analysis Progress */}
+              {responses.length < 3 && (
+                <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200">
+                  <div className="flex items-start gap-3">
+                    <Sparkles className="h-6 w-6 text-purple-600 flex-shrink-0" />
+                    <div className="flex-1">
+                      <h3 className="text-sm font-bold text-gray-900 mb-1">AI Analysis Locked</h3>
+                      <p className="text-xs text-gray-600 mb-2">
+                        Collect {3 - responses.length} more response{3 - responses.length !== 1 ? 's' : ''} to unlock AI insights
+                      </p>
+                      <div className="w-full bg-purple-200 rounded-full h-1.5">
+                        <div
+                          className="bg-purple-600 h-1.5 rounded-full transition-all"
+                          style={{ width: `${(responses.length / 3) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              )}
+
+              {/* Guest Login Banner */}
+              {!user && (
+                <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200">
+                  <div className="flex items-start gap-2">
+                    <Sparkles className="h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <h3 className="text-sm font-bold text-indigo-900 mb-1">Save to Dashboard</h3>
+                      <p className="text-xs text-indigo-800 mb-2">
+                        Create a free account to track responses and get AI insights
+                      </p>
+                      <div className="flex gap-2">
+                        <Link href="/auth/signup">
+                          <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 h-7 text-xs">
+                            Sign Up
+                          </Button>
+                        </Link>
+                        <Link href="/auth/login">
+                          <Button variant="outline" size="sm" className="border-indigo-600 text-indigo-600 h-7 text-xs">
+                            Sign In
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
               )}
             </div>
 
