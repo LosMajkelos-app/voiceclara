@@ -11,6 +11,56 @@ interface Response {
   }>
 }
 
+/**
+ * Detects the language of questions to match AI response language
+ * Returns language code: 'pl' for Polish, 'en' for English, etc.
+ */
+export function detectLanguage(questions: string[]): string {
+  if (!questions || questions.length === 0) return 'en'
+
+  const text = questions.join(' ').toLowerCase()
+
+  // Polish language indicators
+  const polishIndicators = [
+    'jakie', 'które', 'jaki', 'czy', 'jak', 'gdzie', 'kiedy', 'dlaczego',
+    'co', 'kto', 'ile', 'który', 'która', 'które',
+    'mógłby', 'mógłbyś', 'powiedz', 'opisz', 'wymień',
+    'ą', 'ć', 'ę', 'ł', 'ń', 'ó', 'ś', 'ź', 'ż'
+  ]
+
+  // English language indicators
+  const englishIndicators = [
+    'what', 'which', 'how', 'where', 'when', 'why',
+    'who', 'could', 'would', 'should', 'can',
+    'tell', 'describe', 'list', 'explain'
+  ]
+
+  let polishScore = 0
+  let englishScore = 0
+
+  polishIndicators.forEach(indicator => {
+    if (text.includes(indicator)) polishScore++
+  })
+
+  englishIndicators.forEach(indicator => {
+    if (text.includes(indicator)) englishScore++
+  })
+
+  // Default to English if unclear
+  return polishScore > englishScore ? 'pl' : 'en'
+}
+
+/**
+ * Returns language instruction for AI prompts
+ */
+function getLanguageInstruction(language: string): string {
+  const instructions: { [key: string]: string } = {
+    'pl': 'IMPORTANT: Respond in Polish language. All themes, descriptions, quotes, and analysis must be in Polish.',
+    'en': 'Respond in English language.',
+  }
+  return instructions[language] || instructions['en']
+}
+
 // Test/spam response detection patterns
 const TEST_PATTERNS = [
   /^(test|testing|test123|asdf|qwerty|abc|123|aaa+|zzz+|xxx+)$/i,
@@ -126,6 +176,11 @@ export function filterLowQualityResponses(responses: Response[], minQualityScore
 }
 
 export async function analyzeThemes(responses: Response[]) {
+  // Extract questions to detect language
+  const questions = responses.flatMap(r => r.answers.map(a => a.question))
+  const language = detectLanguage(questions)
+  const languageInstruction = getLanguageInstruction(language)
+
   // Prepare all responses as text
   const allText = responses
     .map((r, idx) => {
@@ -136,6 +191,8 @@ export async function analyzeThemes(responses: Response[]) {
     .join('\n\n---\n\n')
 
   const prompt = `You are an expert at analyzing feedback and identifying common themes.
+
+${languageInstruction}
 
 Below are ${responses.length} anonymous feedback responses. Analyze them and identify the top 3-5 recurring themes.
 
@@ -168,7 +225,7 @@ Return ONLY valid JSON, no other text.`
       messages: [
         {
           role: 'system',
-          content: 'You are an expert feedback analyst. Always respond with valid JSON only.',
+          content: `You are an expert feedback analyst. Always respond with valid JSON only. ${languageInstruction}`,
         },
         {
           role: 'user',
@@ -193,11 +250,18 @@ Return ONLY valid JSON, no other text.`
 }
 
 export async function analyzeSentiment(responses: Response[]) {
+  // Extract questions to detect language
+  const questions = responses.flatMap(r => r.answers.map(a => a.question))
+  const language = detectLanguage(questions)
+  const languageInstruction = getLanguageInstruction(language)
+
   const allText = responses
     .map(r => r.answers.map(a => a.answer).join(' '))
     .join(' ')
 
   const prompt = `Analyze the overall sentiment of this feedback.
+
+${languageInstruction}
 
 Categorize as:
 - "positive" (encouraging, praising, supportive)
@@ -224,7 +288,7 @@ Return as JSON:
       messages: [
         {
           role: 'system',
-          content: 'You are a sentiment analysis expert. Always respond with valid JSON only.',
+          content: `You are a sentiment analysis expert. Always respond with valid JSON only. ${languageInstruction}`,
         },
         {
           role: 'user',
@@ -248,9 +312,16 @@ Return as JSON:
 }
 
 export async function generateSummary(responses: Response[], themes: any[]) {
+  // Extract questions to detect language
+  const questions = responses.flatMap(r => r.answers.map(a => a.question))
+  const language = detectLanguage(questions)
+  const languageInstruction = getLanguageInstruction(language)
+
   const themesText = themes.map(t => `- ${t.name} (${t.count} mentions)`).join('\n')
 
   const prompt = `You are an executive coach analyzing feedback for a professional.
+
+${languageInstruction}
 
 Based on these ${responses.length} responses and identified themes:
 
@@ -277,7 +348,7 @@ Return as JSON:
       messages: [
         {
           role: 'system',
-          content: 'You are an experienced executive coach. Always respond with valid JSON only.',
+          content: `You are an experienced executive coach. Always respond with valid JSON only. ${languageInstruction}`,
         },
         {
           role: 'user',
