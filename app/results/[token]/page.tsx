@@ -184,7 +184,10 @@ export default function ResultsPage() {
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ feedbackRequestId: request.id })
+        body: JSON.stringify({
+          feedbackRequestId: request.id,
+          resultsToken: request.results_token
+        })
       })
 
       const data = await response.json()

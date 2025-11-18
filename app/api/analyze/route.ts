@@ -8,13 +8,8 @@ export async function POST(request: NextRequest) {
     const cookieStore = cookies()
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
 
-    // Verify authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { feedbackRequestId } = await request.json()
+    const body = await request.json()
+    const { feedbackRequestId, resultsToken } = body
 
     if (!feedbackRequestId) {
       return NextResponse.json(
@@ -23,19 +18,49 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verify ownership of the feedback request
-    const { data: feedbackRequest, error: requestError } = await supabase
-      .from('feedback_requests')
-      .select('user_id')
-      .eq('id', feedbackRequestId)
-      .single()
+    // Verify ownership - either by auth OR by results_token
+    let feedbackRequest: any = null
 
-    if (requestError || !feedbackRequest) {
-      return NextResponse.json({ error: 'Feedback request not found' }, { status: 404 })
-    }
+    // Try authentication first
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    if (feedbackRequest.user_id !== user.id) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+    if (user && !authError) {
+      // User is authenticated - verify ownership
+      const { data, error: requestError } = await supabase
+        .from('feedback_requests')
+        .select('user_id')
+        .eq('id', feedbackRequestId)
+        .single()
+
+      if (requestError || !data) {
+        return NextResponse.json({ error: 'Feedback request not found' }, { status: 404 })
+      }
+
+      if (data.user_id !== user.id) {
+        return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+      }
+
+      feedbackRequest = data
+    } else if (resultsToken) {
+      // User not authenticated - verify by results_token
+      const { data, error: requestError } = await supabase
+        .from('feedback_requests')
+        .select('user_id, results_token')
+        .eq('id', feedbackRequestId)
+        .single()
+
+      if (requestError || !data) {
+        return NextResponse.json({ error: 'Feedback request not found' }, { status: 404 })
+      }
+
+      if (data.results_token !== resultsToken) {
+        return NextResponse.json({ error: 'Invalid results token' }, { status: 403 })
+      }
+
+      feedbackRequest = data
+    } else {
+      // No auth and no results token
+      return NextResponse.json({ error: 'Unauthorized - login or provide results token' }, { status: 401 })
     }
 
     // Fetch all responses
