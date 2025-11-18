@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { analyzeThemes, analyzeSentiment, generateSummary, filterLowQualityResponses } from '@/lib/ai'
 
@@ -131,8 +132,23 @@ export async function POST(request: NextRequest) {
 
     const summary = await generateSummary(qualityCheck.validResponses, themesResult.themes)
 
-    // Save to database
-    const { error: saveError } = await supabase
+    // Save to database using service role to bypass RLS
+    // (we've already verified authorization above)
+    // Use service role if available, otherwise fall back to regular client
+    const supabaseForSave = process.env.SUPABASE_SERVICE_ROLE_KEY
+      ? createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY,
+          {
+            auth: {
+              autoRefreshToken: false,
+              persistSession: false
+            }
+          }
+        )
+      : supabase
+
+    const { error: saveError } = await supabaseForSave
       .from('ai_analysis')
       .upsert({
         feedback_request_id: feedbackRequestId,
