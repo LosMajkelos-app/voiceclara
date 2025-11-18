@@ -39,15 +39,16 @@ export async function POST(request: NextRequest) {
     const cookieStore = cookies()
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
 
-    // Verify authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // Try to get user (optional - works for both auth and guest users)
+    const { data: { user } } = await supabase.auth.getUser()
 
     // Rate limiting - prevent AI credit drain
+    // Use user ID if available, otherwise IP address for guests
     const ip = getClientIp(request)
-    const identifier = getRateLimitIdentifier(user.id, ip, 'generate-questions')
+    const identifier = user
+      ? getRateLimitIdentifier(user.id, ip, 'generate-questions')
+      : getRateLimitIdentifier(`guest-${ip}`, ip, 'generate-questions')
+
     const rateLimitResult = await rateLimit(identifier, RATE_LIMITS.AI_GENERATION)
 
     if (!rateLimitResult.success) {
