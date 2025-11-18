@@ -412,9 +412,11 @@ function DashboardContent() {
                         <div className="flex justify-between items-start gap-3">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-semibold text-sm text-gray-900 truncate">
-                                {request.title}
-                              </h4>
+                              <Link href={`/results/${request.results_token}`}>
+                                <h4 className="font-semibold text-sm text-gray-900 truncate hover:text-indigo-600 cursor-pointer transition-colors">
+                                  {request.title}
+                                </h4>
+                              </Link>
                               <span className={`flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-medium border ${badgeColor}`}>
                                 {badgeText}
                               </span>

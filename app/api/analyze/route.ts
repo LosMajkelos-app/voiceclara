@@ -153,6 +153,7 @@ export async function POST(request: NextRequest) {
       sentiment: sentiment,
       summary: summary,
       tokensUsed: themesResult.tokensUsed,
+      response_count_at_analysis: responses.length,
       quality: {
         totalResponses: responses.length,
         validResponses: qualityCheck.validResponses.length,
