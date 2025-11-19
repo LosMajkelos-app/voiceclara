@@ -6,8 +6,8 @@ import Script from "next/script"
 /**
  * Analytics Component
  *
- * GTM loads immediately with default consent denied
- * Other analytics load after user accepts cookies
+ * GTM is loaded in layout.tsx (must be in <head>)
+ * GA4 and other analytics load here after user accepts cookies
  */
 
 export function Analytics() {
@@ -31,44 +31,9 @@ export function Analytics() {
   // Get analytics IDs from environment variables
   const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
   const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID
-  const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
 
   return (
     <>
-      {/* Google Tag Manager - loads immediately with consent mode */}
-      {GTM_ID && (
-        <>
-          <Script id="gtm-consent-default" strategy="afterInteractive">
-            {`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('consent', 'default', {
-                'analytics_storage': 'denied',
-                'ad_storage': 'denied',
-                'wait_for_update': 500
-              });
-            `}
-          </Script>
-          <Script id="google-tag-manager" strategy="afterInteractive">
-            {`
-              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-              })(window,document,'script','dataLayer','${GTM_ID}');
-            `}
-          </Script>
-          <noscript>
-            <iframe
-              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
-              height="0"
-              width="0"
-              style={{ display: "none", visibility: "hidden" }}
-            />
-          </noscript>
-        </>
-      )}
-
       {/* Google Analytics (GA4) - only loads after consent */}
       {GA_MEASUREMENT_ID && hasConsent && (
         <>
