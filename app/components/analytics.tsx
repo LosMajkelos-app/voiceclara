@@ -6,15 +6,8 @@ import Script from "next/script"
 /**
  * Analytics Component
  *
- * Add your tracking codes here:
- * - Google Analytics (GA4)
- * - Meta Pixel (Facebook)
- * - Google Tag Manager
- * - LinkedIn Insight Tag
- * - etc.
- *
- * This component is loaded on all public pages (before login).
- * Respects cookie consent - only loads when user has accepted cookies.
+ * GTM loads immediately with default consent denied
+ * Other analytics load after user accepts cookies
  */
 
 export function Analytics() {
@@ -23,7 +16,16 @@ export function Analytics() {
   useEffect(() => {
     // Check cookie consent
     const consent = localStorage.getItem("cookie-consent")
-    setHasConsent(consent === "accepted")
+    const consentAccepted = consent === "accepted"
+    setHasConsent(consentAccepted)
+
+    // Update Google Consent Mode
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('consent', 'update', {
+        'analytics_storage': consentAccepted ? 'granted' : 'denied',
+        'ad_storage': consentAccepted ? 'granted' : 'denied',
+      })
+    }
   }, [])
 
   // Get analytics IDs from environment variables
@@ -31,52 +33,22 @@ export function Analytics() {
   const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID
   const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
 
-  // Only load analytics if user has consented
-  if (!hasConsent) {
-    return null
-  }
-
   return (
     <>
-      {/* Google Analytics (GA4) */}
-      {GA_MEASUREMENT_ID && (
+      {/* Google Tag Manager - loads immediately with consent mode */}
+      {GTM_ID && (
         <>
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-            strategy="afterInteractive"
-          />
-          <Script id="google-analytics" strategy="afterInteractive">
+          <Script id="gtm-consent-default" strategy="afterInteractive">
             {`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${GA_MEASUREMENT_ID}');
+              gtag('consent', 'default', {
+                'analytics_storage': 'denied',
+                'ad_storage': 'denied',
+                'wait_for_update': 500
+              });
             `}
           </Script>
-        </>
-      )}
-
-      {/* Meta Pixel (Facebook) */}
-      {META_PIXEL_ID && (
-        <Script id="meta-pixel" strategy="afterInteractive">
-          {`
-            !function(f,b,e,v,n,t,s)
-            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-            n.queue=[];t=b.createElement(e);t.async=!0;
-            t.src=v;s=b.getElementsByTagName(e)[0];
-            s.parentNode.insertBefore(t,s)}(window, document,'script',
-            'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '${META_PIXEL_ID}');
-            fbq('track', 'PageView');
-          `}
-        </Script>
-      )}
-
-      {/* Google Tag Manager */}
-      {GTM_ID && (
-        <>
           <Script id="google-tag-manager" strategy="afterInteractive">
             {`
               (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -97,14 +69,41 @@ export function Analytics() {
         </>
       )}
 
-      {/* Add more analytics services here as needed:
-       * - LinkedIn Insight Tag
-       * - Twitter/X Pixel
-       * - TikTok Pixel
-       * - Hotjar
-       * - Microsoft Clarity
-       * - etc.
-       */}
+      {/* Google Analytics (GA4) - only loads after consent */}
+      {GA_MEASUREMENT_ID && hasConsent && (
+        <>
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+            strategy="afterInteractive"
+          />
+          <Script id="google-analytics" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GA_MEASUREMENT_ID}');
+            `}
+          </Script>
+        </>
+      )}
+
+      {/* Meta Pixel (Facebook) - only loads after consent */}
+      {META_PIXEL_ID && hasConsent && (
+        <Script id="meta-pixel" strategy="afterInteractive">
+          {`
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '${META_PIXEL_ID}');
+            fbq('track', 'PageView');
+          `}
+        </Script>
+      )}
     </>
   )
 }
