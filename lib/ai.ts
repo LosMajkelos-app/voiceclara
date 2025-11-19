@@ -1,7 +1,11 @@
 import OpenAI from 'openai'
 
+if (!process.env.OPENAI_API_KEY) {
+  console.error('OPENAI_API_KEY is not set!')
+}
+
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || 'dummy-key',
 })
 
 interface Response {
@@ -59,6 +63,29 @@ function getLanguageInstruction(language: string): string {
     'en': 'Respond in English language.',
   }
   return instructions[language] || instructions['en']
+}
+
+/**
+ * Cleans markdown code blocks from JSON response
+ * OpenAI sometimes returns JSON wrapped in ```json ... ```
+ */
+function cleanJsonResponse(content: string): string {
+  // Remove markdown code blocks
+  let cleaned = content.trim()
+
+  // Remove ```json at the start
+  if (cleaned.startsWith('```json')) {
+    cleaned = cleaned.slice(7)
+  } else if (cleaned.startsWith('```')) {
+    cleaned = cleaned.slice(3)
+  }
+
+  // Remove ``` at the end
+  if (cleaned.endsWith('```')) {
+    cleaned = cleaned.slice(0, -3)
+  }
+
+  return cleaned.trim()
 }
 
 // Test/spam response detection patterns
@@ -237,15 +264,20 @@ Return ONLY valid JSON, no other text.`
     })
 
     const content = completion.choices[0]?.message?.content || '{}'
-    const analysis = JSON.parse(content)
+    const cleanedContent = cleanJsonResponse(content)
+    const analysis = JSON.parse(cleanedContent)
 
     return {
       themes: analysis.themes || [],
       tokensUsed: completion.usage?.total_tokens || 0,
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('AI analysis error:', error)
-    throw new Error('Failed to analyze themes')
+    // Provide more detailed error message
+    const errorMessage = error?.message || 'Unknown error'
+    const errorDetails = error?.response?.data || error?.error || ''
+    console.error('Error details:', { errorMessage, errorDetails })
+    throw new Error(`Failed to analyze themes: ${errorMessage}`)
   }
 }
 
@@ -300,9 +332,12 @@ Return as JSON:
     })
 
     const content = completion.choices[0]?.message?.content || '{}'
-    return JSON.parse(content)
-  } catch (error) {
+    const cleanedContent = cleanJsonResponse(content)
+    return JSON.parse(cleanedContent)
+  } catch (error: any) {
     console.error('Sentiment analysis error:', error)
+    const errorMessage = error?.message || 'Unknown error'
+    console.error('Sentiment error details:', { errorMessage, error: error?.error })
     return {
       sentiment: 'neutral',
       confidence: 0,
@@ -360,9 +395,13 @@ Return as JSON:
     })
 
     const content = completion.choices[0]?.message?.content || '{}'
-    return JSON.parse(content)
-  } catch (error) {
+    const cleanedContent = cleanJsonResponse(content)
+    return JSON.parse(cleanedContent)
+  } catch (error: any) {
     console.error('Summary generation error:', error)
-    throw new Error('Failed to generate summary')
+    const errorMessage = error?.message || 'Unknown error'
+    const errorDetails = error?.response?.data || error?.error || ''
+    console.error('Summary error details:', { errorMessage, errorDetails })
+    throw new Error(`Failed to generate summary: ${errorMessage}`)
   }
 }
