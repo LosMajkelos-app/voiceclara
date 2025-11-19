@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useAuth } from "@/lib/auth-context"
 import { Sparkles, Shield, TrendingUp, MessageSquare, ArrowRight, Check, Heart, Users, Zap, BarChart3 } from "lucide-react"
 import Navbar from "@/app/components/navbar"
@@ -58,14 +59,15 @@ export default function HomePage() {
 
           {/* Hero Image / Demo */}
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-2xl p-6 border border-gray-200">
-              <div className="aspect-video bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-4xl mb-2">🎯</div>
-                  <p className="text-base font-semibold text-gray-700">
-                    Product Demo Coming Soon
-                  </p>
-                </div>
+            <div className="bg-white rounded-2xl shadow-2xl p-6 border border-gray-200 overflow-hidden">
+              <div className="aspect-video relative rounded-xl overflow-hidden">
+                <Image
+                  src="/images/hero-bg.png"
+                  alt="VoiceClara - Anonymous Feedback Platform"
+                  fill
+                  className="object-cover"
+                  priority
+                />
               </div>
             </div>
           </div>
