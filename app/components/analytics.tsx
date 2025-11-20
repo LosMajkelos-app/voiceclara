@@ -6,8 +6,8 @@ import Script from "next/script"
 /**
  * Analytics Component
  *
- * GTM is loaded in layout.tsx (must be in <head>)
- * GA4 and other analytics load here after user accepts cookies
+ * GTM and GA4 are loaded in layout.tsx (must be in <head>)
+ * This component handles consent updates and additional analytics
  */
 
 export function Analytics() {
@@ -19,7 +19,7 @@ export function Analytics() {
     const consentAccepted = consent === "accepted"
     setHasConsent(consentAccepted)
 
-    // Update Google Consent Mode
+    // Update Google Consent Mode when consent changes
     if (typeof window !== 'undefined' && (window as any).gtag) {
       (window as any).gtag('consent', 'update', {
         'analytics_storage': consentAccepted ? 'granted' : 'denied',
@@ -29,29 +29,10 @@ export function Analytics() {
   }, [])
 
   // Get analytics IDs from environment variables
-  const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
   const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID
 
   return (
     <>
-      {/* Google Analytics (GA4) - only loads after consent */}
-      {GA_MEASUREMENT_ID && hasConsent && (
-        <>
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-            strategy="afterInteractive"
-          />
-          <Script id="google-analytics" strategy="afterInteractive">
-            {`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${GA_MEASUREMENT_ID}');
-            `}
-          </Script>
-        </>
-      )}
-
       {/* Meta Pixel (Facebook) - only loads after consent */}
       {META_PIXEL_ID && hasConsent && (
         <Script id="meta-pixel" strategy="afterInteractive">
