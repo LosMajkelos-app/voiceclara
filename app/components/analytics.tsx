@@ -1,40 +1,24 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import Script from "next/script"
 
 /**
  * Analytics Component
  *
  * GTM and GA4 are loaded in layout.tsx (must be in <head>)
- * This component handles consent updates and additional analytics
+ * This component handles additional analytics like Meta Pixel
+ *
+ * NOTE: Consent Mode temporarily disabled for Google verification
  */
 
 export function Analytics() {
-  const [hasConsent, setHasConsent] = useState(false)
-
-  useEffect(() => {
-    // Check cookie consent
-    const consent = localStorage.getItem("cookie-consent")
-    const consentAccepted = consent === "accepted"
-    setHasConsent(consentAccepted)
-
-    // Update Google Consent Mode when consent changes
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('consent', 'update', {
-        'analytics_storage': consentAccepted ? 'granted' : 'denied',
-        'ad_storage': consentAccepted ? 'granted' : 'denied',
-      })
-    }
-  }, [])
-
   // Get analytics IDs from environment variables
   const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID
 
   return (
     <>
-      {/* Meta Pixel (Facebook) - only loads after consent */}
-      {META_PIXEL_ID && hasConsent && (
+      {/* Meta Pixel (Facebook) */}
+      {META_PIXEL_ID && (
         <Script id="meta-pixel" strategy="afterInteractive">
           {`
             !function(f,b,e,v,n,t,s)

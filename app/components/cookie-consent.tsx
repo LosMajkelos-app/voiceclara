@@ -30,18 +30,7 @@ export function CookieConsent() {
 
   const handleAccept = () => {
     localStorage.setItem("cookie-consent", "accepted")
-
-    // Update Google Consent Mode
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('consent', 'update', {
-        'analytics_storage': 'granted',
-        'ad_storage': 'granted',
-      })
-    }
-
     setShowBanner(false)
-    // Reload page to activate analytics
-    window.location.reload()
   }
 
   const handleDecline = () => {
