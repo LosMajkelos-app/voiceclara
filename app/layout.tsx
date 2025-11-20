@@ -3,7 +3,6 @@ import { Toaster } from "sonner";
 import { AuthProvider } from "@/lib/auth-context";
 import { OrganizationProvider } from "@/lib/organization-context";
 import { Analytics } from "@/app/components/analytics";
-import { CookieConsent } from "@/app/components/cookie-consent";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -77,7 +76,6 @@ height="0" width="0" style={{display:'none',visibility:'hidden'}}></iframe></nos
             {children}
             <Toaster position="top-center" />
             <Analytics />
-            <CookieConsent />
           </OrganizationProvider>
         </AuthProvider>
       </body>
