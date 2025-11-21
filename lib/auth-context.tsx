@@ -27,11 +27,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        setSession(session)
+        setUser(session?.user ?? null)
+        setLoading(false)
+      })
+      .catch((error) => {
+        console.error('Supabase connection error:', error?.message || error)
+        // Set loading to false even on error to allow app to continue
+        setLoading(false)
+        setSession(null)
+        setUser(null)
+      })
 
     // Listen for auth changes
     const {
