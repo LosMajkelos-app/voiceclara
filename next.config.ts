@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
               "img-src 'self' data: https: blob:",
               "font-src 'self' data:",
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com https://api.resend.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://consent.cookiebot.com https://consentcdn.cookiebot.com",
-              "frame-src 'self' https://consent.cookiebot.com",
+              "frame-src 'self' https://consent.cookiebot.com https://consentcdn.cookiebot.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

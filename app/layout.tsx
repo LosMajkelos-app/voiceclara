@@ -47,17 +47,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Cookiebot - MUST be before GTM */}
-        <script
-          id="Cookiebot"
-          src="https://consent.cookiebot.com/uc.js"
-          data-cbid="3b478906-6d06-49ab-9f19-79bbc5ed8e1b"
-          data-blockingmode="auto"
-          type="text/javascript"
-        ></script>
-        {/* End Cookiebot */}
-
-        {/* Google Tag Manager - Loads after Cookiebot for consent mode */}
+        {/* Google Tag Manager - Includes Cookiebot via CMP tag */}
         <script dangerouslySetInnerHTML={{__html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
