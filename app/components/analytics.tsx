@@ -5,7 +5,10 @@ import Script from "next/script"
 /**
  * Analytics Component
  *
- * GTM and GA4 are loaded in layout.tsx (must be in <head>)
+ * GTM and GA4 are loaded in layout.tsx via environment variables:
+ * - NEXT_PUBLIC_GTM_ID: Google Tag Manager (includes Cookiebot via CMP tag)
+ * - NEXT_PUBLIC_GA_MEASUREMENT_ID: Google Analytics 4
+ *
  * This component handles additional analytics like Meta Pixel
  *
  * NOTE: Consent Mode temporarily disabled for Google verification
