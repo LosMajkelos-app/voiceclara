@@ -9,13 +9,14 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { toast } from "sonner"
 import Link from "next/link"
-import { Sparkles, ArrowLeft, Copy, CheckCircle, Calendar, MessageSquare, Search, Filter, Download, Eye, X, ChevronLeft, ChevronRight, Share2, Mail, FileText, FileDown, BarChart } from "lucide-react"
+import { Sparkles, ArrowLeft, Copy, CheckCircle, Calendar, MessageSquare, Search, Filter, Download, Eye, X, ChevronLeft, ChevronRight, Share2, Mail, FileText, FileDown, BarChart, Target, AlertCircle, Zap, TrendingUp } from "lucide-react"
 import DashboardSidebar from "@/app/components/dashboard-sidebar"
 import AccountSettingsModal from "@/app/components/account-settings-modal"
 import AnalyticsCharts from "@/app/components/analytics-charts"
 import EmailInvitationModal from "@/app/components/email-invitation-modal"
 import InvitationHistory from "@/app/components/invitation-history"
 import { exportToEnhancedCSV, exportToPDF } from "@/lib/export-utils"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 interface FeedbackRequest {
   id: string
@@ -458,7 +459,7 @@ export default function ResultsPage() {
                 </div>
               </Card>
 
-              {/* AI Analysis Results - Moved Higher */}
+              {/* AI Analysis Results - Dual Mode */}
               {responses.length >= 3 && (
                 <div className="space-y-3">
                   {/* Quality Metrics Warning */}
@@ -476,117 +477,257 @@ export default function ResultsPage() {
                     </Card>
                   )}
 
-                  {/* Summary */}
-                  <Card className="p-4 bg-white">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Sparkles className="h-5 w-5 text-purple-600" />
-                      <h3 className="text-sm font-bold text-gray-900">AI Summary</h3>
-                    </div>
-
-                    {analyzingAI && (
+                  {/* Loading/Empty States */}
+                  {analyzingAI && (
+                    <Card className="p-4 bg-white">
                       <div className="py-8 text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-200 border-t-purple-600 mx-auto mb-4"></div>
                         <p className="text-sm font-semibold text-purple-600 mb-2">AI is analyzing your feedback...</p>
                         <p className="text-xs text-gray-500">This may take 10-20 seconds</p>
                       </div>
-                    )}
+                    </Card>
+                  )}
 
-                    {!analyzingAI && !aiAnalysis && !loadingCachedAnalysis && (
+                  {!analyzingAI && !aiAnalysis && !loadingCachedAnalysis && (
+                    <Card className="p-4 bg-white">
                       <div className="py-8 text-center">
                         <div className="text-4xl mb-3">🤖</div>
                         <p className="text-sm text-gray-600 mb-4">
                           Click "AI Analysis" above to generate insights from your feedback
                         </p>
                       </div>
-                    )}
+                    </Card>
+                  )}
 
-                    {!analyzingAI && loadingCachedAnalysis && (
+                  {!analyzingAI && loadingCachedAnalysis && (
+                    <Card className="p-4 bg-white">
                       <div className="py-8 text-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-3"></div>
                         <p className="text-xs text-gray-600">Loading analysis...</p>
                       </div>
-                    )}
-
-                    {!analyzingAI && aiAnalysis && (
-                      <>
-                        <p className="text-xs text-gray-700 mb-3">{aiAnalysis.summary?.summary}</p>
-
-                    {aiAnalysis.summary?.strengths && (
-                      <div className="mb-3">
-                        <h4 className="text-xs font-semibold text-green-700 mb-1">Strengths:</h4>
-                        <ul className="list-disc pl-4 space-y-0.5">
-                          {aiAnalysis.summary.strengths.map((strength: string, i: number) => (
-                            <li key={i} className="text-xs text-gray-700">{strength}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {aiAnalysis.summary?.growthAreas && (
-                      <div className="mb-3">
-                        <h4 className="text-xs font-semibold text-orange-700 mb-1">Growth Areas:</h4>
-                        <ul className="list-disc pl-4 space-y-0.5">
-                          {aiAnalysis.summary.growthAreas.map((area: string, i: number) => (
-                            <li key={i} className="text-xs text-gray-700">{area}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                        {aiAnalysis.summary?.recommendations && (
-                          <div>
-                            <h4 className="text-xs font-semibold text-indigo-700 mb-1">Recommendations:</h4>
-                            <ul className="list-disc pl-4 space-y-0.5">
-                              {aiAnalysis.summary.recommendations.map((rec: string, i: number) => (
-                                <li key={i} className="text-xs text-gray-700">{rec}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </Card>
-
-                  {/* Sentiment */}
-                  {aiAnalysis?.sentiment && (
-                    <Card className="p-4 bg-white">
-                      <h3 className="text-sm font-bold text-gray-900 mb-2">Sentiment</h3>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl">
-                            {aiAnalysis.sentiment.sentiment === 'positive' && '😊'}
-                            {aiAnalysis.sentiment.sentiment === 'constructive' && '💡'}
-                            {aiAnalysis.sentiment.sentiment === 'neutral' && '😐'}
-                            {aiAnalysis.sentiment.sentiment === 'concerned' && '😟'}
-                          </span>
-                          <span className="text-sm font-semibold capitalize">{aiAnalysis.sentiment.sentiment}</span>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold text-indigo-600">{aiAnalysis.sentiment.confidence}%</p>
-                          <p className="text-xs text-gray-500">Confidence</p>
-                        </div>
-                      </div>
                     </Card>
                   )}
 
-                  {/* Themes */}
-                  {aiAnalysis?.themes && aiAnalysis.themes.length > 0 && (
-                    <Card className="p-4 bg-white">
-                      <h3 className="text-sm font-bold text-gray-900 mb-2">Key Themes</h3>
-                      <div className="space-y-3">
-                        {aiAnalysis.themes.map((theme: any, i: number) => (
-                          <div key={i} className="border-l-4 border-indigo-400 pl-3 py-1">
-                            <div className="flex items-center justify-between mb-1">
-                              <h4 className="text-xs font-semibold text-gray-900">{theme.name}</h4>
-                              <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs rounded-full">
-                                {theme.count}
-                              </span>
-                            </div>
-                            <p className="text-xs text-gray-600">{theme.description}</p>
+                  {/* Dual-Mode Analysis Tabs */}
+                  {!analyzingAI && aiAnalysis && (
+                    <Tabs defaultValue="raw" className="w-full">
+                      <TabsList className="w-full grid grid-cols-2">
+                        <TabsTrigger value="raw" className="flex items-center gap-1.5">
+                          <BarChart className="h-3.5 w-3.5" />
+                          <span className="text-xs">Raw Analysis</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="coach" className="flex items-center gap-1.5">
+                          <Target className="h-3.5 w-3.5" />
+                          <span className="text-xs">AI Coach</span>
+                        </TabsTrigger>
+                      </TabsList>
+
+                      {/* RAW ANALYSIS TAB */}
+                      <TabsContent value="raw" className="space-y-3 mt-3">
+                        {/* Summary */}
+                        <Card className="p-4 bg-white">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Sparkles className="h-5 w-5 text-purple-600" />
+                            <h3 className="text-sm font-bold text-gray-900">AI Summary</h3>
                           </div>
-                        ))}
-                      </div>
-                    </Card>
+                          <p className="text-xs text-gray-700 mb-3">{aiAnalysis.summary?.summary}</p>
+
+                          {aiAnalysis.summary?.strengths && (
+                            <div className="mb-3">
+                              <h4 className="text-xs font-semibold text-green-700 mb-1">Strengths:</h4>
+                              <ul className="list-disc pl-4 space-y-0.5">
+                                {aiAnalysis.summary.strengths.map((strength: string, i: number) => (
+                                  <li key={i} className="text-xs text-gray-700">{strength}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {aiAnalysis.summary?.growthAreas && (
+                            <div className="mb-3">
+                              <h4 className="text-xs font-semibold text-orange-700 mb-1">Growth Areas:</h4>
+                              <ul className="list-disc pl-4 space-y-0.5">
+                                {aiAnalysis.summary.growthAreas.map((area: string, i: number) => (
+                                  <li key={i} className="text-xs text-gray-700">{area}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {aiAnalysis.summary?.recommendations && (
+                            <div>
+                              <h4 className="text-xs font-semibold text-indigo-700 mb-1">Recommendations:</h4>
+                              <ul className="list-disc pl-4 space-y-0.5">
+                                {aiAnalysis.summary.recommendations.map((rec: string, i: number) => (
+                                  <li key={i} className="text-xs text-gray-700">{rec}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </Card>
+
+                        {/* Sentiment */}
+                        {aiAnalysis.sentiment && (
+                          <Card className="p-4 bg-white">
+                            <h3 className="text-sm font-bold text-gray-900 mb-2">Sentiment</h3>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className="text-2xl">
+                                  {aiAnalysis.sentiment.sentiment === 'positive' && '😊'}
+                                  {aiAnalysis.sentiment.sentiment === 'constructive' && '💡'}
+                                  {aiAnalysis.sentiment.sentiment === 'neutral' && '😐'}
+                                  {aiAnalysis.sentiment.sentiment === 'concerned' && '😟'}
+                                </span>
+                                <span className="text-sm font-semibold capitalize">{aiAnalysis.sentiment.sentiment}</span>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-lg font-bold text-indigo-600">{aiAnalysis.sentiment.confidence}%</p>
+                                <p className="text-xs text-gray-500">Confidence</p>
+                              </div>
+                            </div>
+                          </Card>
+                        )}
+
+                        {/* Themes */}
+                        {aiAnalysis.themes && aiAnalysis.themes.length > 0 && (
+                          <Card className="p-4 bg-white">
+                            <h3 className="text-sm font-bold text-gray-900 mb-2">Key Themes</h3>
+                            <div className="space-y-3">
+                              {aiAnalysis.themes.map((theme: any, i: number) => (
+                                <div key={i} className="border-l-4 border-indigo-400 pl-3 py-1">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <h4 className="text-xs font-semibold text-gray-900">{theme.name}</h4>
+                                    <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs rounded-full">
+                                      {theme.count}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-gray-600">{theme.description}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </Card>
+                        )}
+                      </TabsContent>
+
+                      {/* AI COACH TAB */}
+                      <TabsContent value="coach" className="space-y-3 mt-3">
+                        {/* Red Flags Alert */}
+                        {aiAnalysis.recommendations?.redFlags && aiAnalysis.recommendations.redFlags.length > 0 && (
+                          <Card className="p-4 bg-red-50 border-2 border-red-300">
+                            <div className="flex items-start gap-2">
+                              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1">
+                                <h3 className="text-sm font-bold text-red-900 mb-2">🚨 Critical Issues</h3>
+                                <ul className="space-y-1.5">
+                                  {aiAnalysis.recommendations.redFlags.map((flag: string, i: number) => (
+                                    <li key={i} className="text-xs text-red-800 flex items-start gap-1.5">
+                                      <span className="text-red-600 mt-0.5">•</span>
+                                      <span>{flag}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+                          </Card>
+                        )}
+
+                        {/* Quick Wins */}
+                        {aiAnalysis.recommendations?.quickWins && aiAnalysis.recommendations.quickWins.length > 0 && (
+                          <Card className="p-4 bg-green-50 border-2 border-green-300">
+                            <div className="flex items-start gap-2">
+                              <Zap className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1">
+                                <h3 className="text-sm font-bold text-green-900 mb-2">⚡ Quick Wins ({"<"}1 week)</h3>
+                                <ul className="space-y-1.5">
+                                  {aiAnalysis.recommendations.quickWins.map((win: string, i: number) => (
+                                    <li key={i} className="text-xs text-green-800 flex items-start gap-1.5">
+                                      <span className="text-green-600 mt-0.5">✓</span>
+                                      <span>{win}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+                          </Card>
+                        )}
+
+                        {/* Action Items */}
+                        {aiAnalysis.recommendations?.actionItems && aiAnalysis.recommendations.actionItems.length > 0 && (
+                          <Card className="p-4 bg-white">
+                            <div className="flex items-center gap-2 mb-3">
+                              <TrendingUp className="h-5 w-5 text-indigo-600" />
+                              <h3 className="text-sm font-bold text-gray-900">Prioritized Action Items</h3>
+                            </div>
+                            <div className="space-y-3">
+                              {aiAnalysis.recommendations.actionItems.map((item: any, i: number) => (
+                                <div
+                                  key={i}
+                                  className={`border-l-4 pl-3 py-2 ${
+                                    item.priority === 'HIGH'
+                                      ? 'border-red-500 bg-red-50'
+                                      : item.priority === 'MEDIUM'
+                                      ? 'border-orange-500 bg-orange-50'
+                                      : 'border-blue-500 bg-blue-50'
+                                  }`}
+                                >
+                                  <div className="flex items-start justify-between gap-2 mb-1">
+                                    <h4 className="text-xs font-bold text-gray-900">{item.action}</h4>
+                                    <span
+                                      className={`px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 ${
+                                        item.priority === 'HIGH'
+                                          ? 'bg-red-200 text-red-800'
+                                          : item.priority === 'MEDIUM'
+                                          ? 'bg-orange-200 text-orange-800'
+                                          : 'bg-blue-200 text-blue-800'
+                                      }`}
+                                    >
+                                      {item.priority}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-gray-700 mb-2">
+                                    <span className="font-semibold">Issue:</span> {item.issue}
+                                  </p>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                      <span className="font-semibold text-gray-700">Expected Impact:</span>
+                                      <p className="text-gray-600">{item.expectedImpact}</p>
+                                    </div>
+                                    <div>
+                                      <span className="font-semibold text-gray-700">Assign To:</span>
+                                      <p className="text-gray-600">{item.assignTo}</p>
+                                    </div>
+                                  </div>
+                                  <div className="mt-2 flex items-center gap-3 text-xs">
+                                    {item.category && (
+                                      <span className="px-2 py-0.5 bg-gray-200 text-gray-700 rounded">
+                                        {item.category}
+                                      </span>
+                                    )}
+                                    {item.timeline && (
+                                      <span className="text-gray-600">
+                                        ⏱ {item.timeline}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </Card>
+                        )}
+
+                        {/* Empty state for AI Coach */}
+                        {(!aiAnalysis.recommendations?.actionItems || aiAnalysis.recommendations.actionItems.length === 0) &&
+                         (!aiAnalysis.recommendations?.quickWins || aiAnalysis.recommendations.quickWins.length === 0) &&
+                         (!aiAnalysis.recommendations?.redFlags || aiAnalysis.recommendations.redFlags.length === 0) && (
+                          <Card className="p-8 bg-white text-center">
+                            <div className="text-4xl mb-3">🤖</div>
+                            <p className="text-sm text-gray-600">
+                              AI Coach recommendations will appear here after analysis
+                            </p>
+                          </Card>
+                        )}
+                      </TabsContent>
+                    </Tabs>
                   )}
                 </div>
               )}
