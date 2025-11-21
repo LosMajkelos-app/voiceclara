@@ -139,6 +139,12 @@ export async function POST(request: NextRequest) {
       sentiment
     )
 
+    console.log('📊 AI Coach recommendations generated:', {
+      hasActionItems: recommendations?.actionItems?.length > 0,
+      hasQuickWins: recommendations?.quickWins?.length > 0,
+      hasRedFlags: recommendations?.redFlags?.length > 0,
+    })
+
     // Save to database using service role to bypass RLS
     // (we've already verified authorization above)
     // Use service role if available, otherwise fall back to regular client
@@ -155,7 +161,8 @@ export async function POST(request: NextRequest) {
         )
       : supabase
 
-    const { error: saveError } = await supabaseForSave
+    console.log('💾 Saving AI analysis to database...')
+    const { data: savedData, error: saveError } = await supabaseForSave
       .from('ai_analysis')
       .upsert({
         feedback_request_id: feedbackRequestId,
@@ -166,9 +173,24 @@ export async function POST(request: NextRequest) {
         analyzed_at: new Date().toISOString(),
         response_count_at_analysis: responses.length,
       })
+      .select()
 
     if (saveError) {
-      console.error('Error saving analysis:', saveError)
+      console.error('❌ Error saving analysis to database:', saveError)
+      console.error('Error details:', {
+        message: saveError.message,
+        details: saveError.details,
+        hint: saveError.hint,
+        code: saveError.code
+      })
+      // Don't fail the request, but log the error prominently
+      // The analysis was successful, we just couldn't save it
+    } else {
+      console.log('✅ Analysis saved successfully to database')
+      console.log('Saved data:', {
+        hasRecommendations: savedData?.[0]?.recommendations ? 'yes' : 'no',
+        recommendationsKeys: savedData?.[0]?.recommendations ? Object.keys(savedData[0].recommendations) : []
+      })
     }
 
     // Build response with quality warnings if needed
