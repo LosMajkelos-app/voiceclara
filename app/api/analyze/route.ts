@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
-import { analyzeThemes, analyzeSentiment, generateSummary, filterLowQualityResponses } from '@/lib/ai'
+import { analyzeThemes, analyzeSentiment, generateSummary, generateActionableRecommendations, filterLowQualityResponses } from '@/lib/ai'
 
 export async function POST(request: NextRequest) {
   try {
@@ -132,6 +132,13 @@ export async function POST(request: NextRequest) {
 
     const summary = await generateSummary(qualityCheck.validResponses, themesResult.themes)
 
+    // Generate actionable recommendations (AI Coach mode)
+    const recommendations = await generateActionableRecommendations(
+      qualityCheck.validResponses,
+      themesResult.themes,
+      sentiment
+    )
+
     // Save to database using service role to bypass RLS
     // (we've already verified authorization above)
     // Use service role if available, otherwise fall back to regular client
@@ -155,6 +162,7 @@ export async function POST(request: NextRequest) {
         themes: themesResult.themes,
         sentiment: sentiment,
         summary: summary,
+        recommendations: recommendations,
         analyzed_at: new Date().toISOString(),
         response_count_at_analysis: responses.length,
       })
@@ -168,6 +176,7 @@ export async function POST(request: NextRequest) {
       themes: themesResult.themes,
       sentiment: sentiment,
       summary: summary,
+      recommendations: recommendations,
       tokensUsed: themesResult.tokensUsed,
       response_count_at_analysis: responses.length,
       quality: {

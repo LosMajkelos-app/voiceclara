@@ -405,3 +405,90 @@ Return as JSON:
     throw new Error(`Failed to generate summary: ${errorMessage}`)
   }
 }
+
+/**
+ * Generates actionable, prioritized recommendations based on feedback analysis
+ * This is the "AI Coach" mode that tells HR/managers exactly what to do
+ */
+export async function generateActionableRecommendations(
+  responses: Response[],
+  themes: any[],
+  sentiment: any
+) {
+  // Extract questions to detect language
+  const questions = responses.flatMap(r => r.answers.map(a => a.question))
+  const language = detectLanguage(questions)
+  const languageInstruction = getLanguageInstruction(language)
+
+  // Prepare context for AI
+  const themesText = themes.map(t => `- ${t.name}: ${t.count} mentions - ${t.description}`).join('\n')
+  const sentimentText = `Overall sentiment: ${sentiment.sentiment} (${sentiment.confidence}% confidence)`
+
+  const prompt = `You are an AI HR Coach analyzing team feedback. Your job is to provide SPECIFIC, ACTIONABLE recommendations that a manager can implement immediately.
+
+${languageInstruction}
+
+Context:
+- ${responses.length} anonymous feedback responses analyzed
+- ${sentimentText}
+- Key themes identified:
+${themesText}
+
+Your task: Generate 3-5 prioritized action items with:
+1. Clear priority level (HIGH/MEDIUM/LOW)
+2. Specific issue identified (with evidence from themes/data)
+3. Concrete action to take (not vague advice)
+4. Expected impact/outcome
+5. Suggested owner (e.g., "Team Manager", "HR", "Leadership")
+6. Timeline (e.g., "Implement in next 2 weeks")
+
+Focus on:
+- Issues mentioned by multiple people (use theme counts as evidence)
+- Problems that can be solved quickly (quick wins)
+- Systemic issues that need attention
+- Burnout/morale red flags
+
+Return as JSON:
+{
+  "actionItems": [
+    {
+      "priority": "HIGH",
+      "issue": "6 people mentioned lack of communication",
+      "action": "Introduce weekly 30-min team sync meetings",
+      "expectedImpact": "Improve alignment and reduce confusion by 30%",
+      "assignTo": "Team Manager",
+      "timeline": "Start next week",
+      "category": "Communication"
+    }
+  ],
+  "quickWins": ["Action that can be done in <1 week", "Another quick fix"],
+  "redFlags": ["Serious issue requiring immediate attention"] // Only if critical issues found
+}`
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: `You are an expert HR consultant and coach. Provide specific, actionable advice. Always respond with valid JSON only. ${languageInstruction}`,
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.4, // Lower temperature for more focused recommendations
+      max_tokens: 1200,
+    })
+
+    const content = completion.choices[0]?.message?.content || '{}'
+    const cleanedContent = cleanJsonResponse(content)
+    return JSON.parse(cleanedContent)
+  } catch (error: any) {
+    console.error('Actionable recommendations error:', error)
+    const errorMessage = error?.message || 'Unknown error'
+    console.error('Recommendations error details:', { errorMessage, error: error?.error })
+    throw new Error(`Failed to generate recommendations: ${errorMessage}`)
+  }
+}
