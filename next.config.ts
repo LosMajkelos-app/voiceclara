@@ -22,6 +22,7 @@ const nextConfig: NextConfig = {
               "font-src 'self' data: https://*.hotjar.com",
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com https://api.resend.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://consent.cookiebot.com https://consentcdn.cookiebot.com https://*.hotjar.com https://*.hotjar.io wss://*.hotjar.com https://*.contentsquare.net",
               "frame-src 'self' https://consent.cookiebot.com https://consentcdn.cookiebot.com https://*.hotjar.com",
+              "worker-src 'self' blob:",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
