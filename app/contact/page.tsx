@@ -125,44 +125,16 @@ function ContactForm() {
                     <MessageSquare className="h-6 w-6 text-purple-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Live Chat</h3>
+                    <h3 className="font-semibold text-gray-900">Contact us</h3>
                     <p className="text-sm text-gray-600">Mon-Fri, 9am-5pm EST</p>
                   </div>
                 </div>
-                <button className="text-purple-600 hover:text-purple-700 font-medium">
-                  Start a conversation →
-                </button>
+              
               </Card>
 
-              <Card className="p-5 bg-white/80 backdrop-blur-sm">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 bg-green-100 rounded-lg">
-                    <Phone className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">Phone</h3>
-                    <p className="text-sm text-gray-600">Enterprise customers</p>
-                  </div>
-                </div>
-                <p className="text-green-600 font-medium">+1 (555) 123-4567</p>
-              </Card>
+           
 
-              <Card className="p-5 bg-white/80 backdrop-blur-sm">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 bg-orange-100 rounded-lg">
-                    <MapPin className="h-6 w-6 text-orange-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">Office</h3>
-                    <p className="text-sm text-gray-600">Visit us in person</p>
-                  </div>
-                </div>
-                <p className="text-gray-700 text-sm">
-                  123 Feedback Street<br />
-                  San Francisco, CA 94102<br />
-                  United States
-                </p>
-              </Card>
+     
             </div>
 
             {/* Contact Form */}
