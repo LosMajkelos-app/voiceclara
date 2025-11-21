@@ -19,12 +19,18 @@ export default function HomePage() {
         {/* Hero Section */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10">
           <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-full text-sm font-bold mb-4 shadow-lg animate-pulse">
+            {/* Beta Testing Badge */}
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-5 py-2.5 rounded-full text-sm font-bold mb-3 shadow-lg hover:shadow-xl transition-shadow">
+              <Sparkles className="h-4 w-4 animate-pulse" />
+              BETA - Join Our Testing Community
+            </div>
+
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-full text-sm font-bold mb-4 shadow-lg">
               <Check className="h-4 w-4" />
               Free. Always. No Credit Card.
             </div>
 
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
               Hear Your Team.
               <br />
               <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
@@ -32,10 +38,17 @@ export default function HomePage() {
               </span>
             </h1>
 
-            <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-600 mb-4 max-w-2xl mx-auto">
               VoiceClara helps you collect honest, anonymous feedback—without stress, without filters.
               Get AI-powered insights that show what truly matters to your people.
             </p>
+
+            <div className="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-4 max-w-2xl mx-auto mb-6">
+              <p className="text-sm text-indigo-900 font-medium">
+                🚀 We're actively testing and improving VoiceClara. Your feedback shapes the future of anonymous workplace communication.
+                <span className="font-bold"> Join us in building something special!</span>
+              </p>
+            </div>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link href={user ? "/create" : "/create-auth"}>
@@ -475,23 +488,49 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* CTA Section */}
+        {/* CTA Section - Beta Testing Focus */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl p-8 text-center text-white">
-            <h2 className="text-3xl font-bold mb-3">
-              Take the First Step Toward a More Honest Workplace Culture
-            </h2>
-            <p className="text-lg mb-6 opacity-90">
-              Your team has a voice. Are you ready to truly hear it?
-            </p>
-            <Link href={user ? "/create" : "/create-auth"}>
-              <button className="bg-white text-indigo-600 hover:bg-gray-100 font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all inline-flex items-center gap-2">
-                ✨ Try VoiceClara for Free
-              </button>
-            </Link>
-            <p className="text-sm mt-4 opacity-90">
-              Your data is safe. And so is your team's voice.
-            </p>
+          <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-8 md:p-12 text-center text-white relative overflow-hidden">
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-bold mb-4">
+                <Sparkles className="h-4 w-4" />
+                Beta Testers Wanted
+              </div>
+
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Help Us Build the Future of Workplace Feedback
+              </h2>
+              <p className="text-lg md:text-xl mb-3 opacity-95 max-w-2xl mx-auto">
+                Your team has a voice. Are you ready to truly hear it?
+              </p>
+              <p className="text-base mb-6 opacity-90 max-w-2xl mx-auto">
+                Join our testing community and get lifetime early adopter benefits.
+                Shape how teams communicate honestly.
+              </p>
+
+              <Link href={user ? "/create" : "/create-auth"}>
+                <button className="bg-white text-indigo-600 hover:bg-gray-100 font-bold px-8 py-4 rounded-xl shadow-2xl hover:shadow-3xl transition-all inline-flex items-center gap-2 text-lg">
+                  <Sparkles className="h-5 w-5" />
+                  Start Testing - It's Free
+                </button>
+              </Link>
+
+              <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                  <div className="text-sm opacity-90">🔒 Your data is safe</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                  <div className="text-sm opacity-90">💬 Direct feedback channel</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                  <div className="text-sm opacity-90">🎁 Early adopter perks</div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 

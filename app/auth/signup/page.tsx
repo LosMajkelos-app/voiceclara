@@ -119,6 +119,7 @@ export default function SignUpPage() {
 
   return (
     <FeedbackLayout
+      centerContent={false}
       rightPanel={
         <>
           <div className="mb-6">
