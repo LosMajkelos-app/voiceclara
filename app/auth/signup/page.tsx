@@ -128,7 +128,7 @@ export default function SignUpPage() {
 
           <div className="space-y-4">
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-5 border border-white/20">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex gap-2 mb-2">
                 <Sparkles className="h-5 w-5" />
                 <p className="font-semibold">AI-Powered Insights</p>
               </div>
@@ -138,7 +138,7 @@ export default function SignUpPage() {
             </div>
 
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-5 border border-white/20">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex gap-2 mb-2">
                 <TrendingUp className="h-5 w-5" />
                 <p className="font-semibold">Personal Dashboard</p>
               </div>
@@ -148,7 +148,7 @@ export default function SignUpPage() {
             </div>
 
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-5 border border-white/20">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex gap-2 mb-2">
                 <Shield className="h-5 w-5" />
                 <p className="font-semibold">100% Anonymous</p>
               </div>
@@ -164,7 +164,7 @@ export default function SignUpPage() {
         </>
       }
     >
-      <Link href="/" className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-6">
+      <Link href="/" className="flex gap-2 text-sm text-gray-600 hover:text-gray-900 mb-6">
         <ArrowLeft className="h-4 w-4" />
         Back to Homepage
       </Link>
@@ -192,7 +192,7 @@ export default function SignUpPage() {
         {/* Email Sent Success Message */}
         {emailSent && (
           <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 mb-6">
-            <div className="flex items-center gap-3">
+            <div className="flex gap-3">
               <Mail className="h-6 w-6 text-green-600 flex-shrink-0" />
               <div>
                 <p className="font-bold text-green-900 text-base">
@@ -220,7 +220,7 @@ export default function SignUpPage() {
           <button
             onClick={handleGoogleSignUp}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 font-semibold py-2.5 rounded-xl border-2 border-gray-200 shadow-sm hover:shadow-md transition-all disabled:opacity-50"
+            className="w-full flex justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 font-semibold py-2.5 rounded-xl border-2 border-gray-200 shadow-sm hover:shadow-md transition-all disabled:opacity-50"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -233,7 +233,7 @@ export default function SignUpPage() {
 
           {/* Divider */}
           <div className="relative">
-            <div className="absolute inset-0 flex items-center">
+            <div className="absolute inset-0 flex">
               <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-sm">
