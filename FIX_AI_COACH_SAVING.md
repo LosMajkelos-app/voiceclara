@@ -3,12 +3,48 @@
 ## Problem
 Raw Analysis zapisuje się do bazy danych, ale AI Coach recommendations nie.
 
-## Przyczyna
-Kolumna `recommendations` może nie istnieć w tabeli `ai_analysis` w produkcyjnej bazie danych Supabase. Migracja `20250121_add_recommendations_column.sql` mogła nie zostać uruchomiona.
+## Przyczyny
+
+### 1. Brakuje SUPABASE_SERVICE_ROLE_KEY (GŁÓWNA PRZYCZYNA)
+Aplikacja używa Row Level Security (RLS) w Supabase, które blokuje zapis AI analysis dla niezalogowanych użytkowników (np. tych z results_token).
+
+**Kod w `app/api/analyze/route.ts` wymaga `SUPABASE_SERVICE_ROLE_KEY`** aby ominąć RLS i zapisać wyniki. Jeśli ten klucz nie jest ustawiony w Vercel, zapis nie działa.
+
+### 2. Kolumna `recommendations` może nie istnieć
+Migracja `20250121_add_recommendations_column.sql` mogła nie zostać uruchomiona w produkcyjnej bazie danych Supabase.
 
 ## Rozwiązanie
 
-### Opcja 1: Uruchom migrację przez Supabase Dashboard (Zalecane)
+### KROK 1: Ustaw SUPABASE_SERVICE_ROLE_KEY w Vercel (KRYTYCZNE!)
+
+**To jest NAJWAŻNIEJSZY krok!** Bez tego klucza AI Coach recommendations NIE będą się zapisywać.
+
+1. Przejdź do [Supabase Dashboard](https://supabase.com/dashboard)
+2. Wybierz projekt VoiceClara
+3. Przejdź do **Settings** → **API** w lewym menu
+4. Znajdź sekcję **Project API keys**
+5. Skopiuj **`service_role` key** (NIE `anon` key!)
+
+   ⚠️ **UWAGA:** Ten klucz jest BARDZO ważny - daje pełny dostęp do bazy! Nie udostępniaj go publicznie.
+
+6. Przejdź do [Vercel Dashboard](https://vercel.com/dashboard)
+7. Wybierz projekt VoiceClara
+8. Przejdź do **Settings** → **Environment Variables**
+9. Kliknij **Add New**
+10. Wprowadź:
+    - **Key:** `SUPABASE_SERVICE_ROLE_KEY`
+    - **Value:** [wklej skopiowany service_role key]
+    - **Environments:** Zaznacz **Production**, **Preview**, i **Development**
+11. Kliknij **Save**
+12. **REDEPLOY aplikację:** Przejdź do **Deployments** → kliknij trzy kropki przy ostatnim deployu → **Redeploy**
+
+✅ Po redeployu AI Coach recommendations powinny zacząć się zapisywać!
+
+---
+
+### KROK 2: Upewnij się że kolumna `recommendations` istnieje
+
+### Opcja A: Uruchom migrację przez Supabase Dashboard (Zalecane)
 
 1. Przejdź do [Supabase Dashboard](https://supabase.com/dashboard)
 2. Wybierz swój projekt VoiceClara
@@ -21,7 +57,7 @@ Kolumna `recommendations` może nie istnieć w tabeli `ai_analysis` w produkcyjn
    - Lub: `Column recommendations already exists in ai_analysis table` (jeśli kolumna już istniała)
 8. Sprawdź dane przykładowe w wynikach zapytania
 
-### Opcja 2: Ręczne dodanie kolumny (Szybkie rozwiązanie)
+### Opcja B: Ręczne dodanie kolumny (Szybkie rozwiązanie)
 
 Jeśli wolisz szybkie rozwiązanie, uruchom ten prosty SQL w **SQL Editor**:
 
@@ -40,9 +76,11 @@ WHERE table_name = 'ai_analysis'
 AND column_name = 'recommendations';
 ```
 
-### Opcja 3: Sprawdź logi serwera
+---
 
-Jeśli nadal masz problem, sprawdź logi Vercel:
+### KROK 3: Sprawdź logi Vercel (Diagnostyka)
+
+Jeśli po wykonaniu KROK 1 i 2 nadal masz problem, sprawdź logi Vercel:
 
 1. Przejdź do [Vercel Dashboard](https://vercel.com/dashboard)
 2. Wybierz projekt VoiceClara
@@ -145,6 +183,19 @@ Po naprawieniu:
    - **Raw Analysis** - powinny być: Summary, Sentiment, Themes
    - **AI Coach** - powinny być: Action Items, Quick Wins, Red Flags
 
+## Szybkie podsumowanie (TL;DR)
+
+**Najczęstsza przyczyna:** Brak `SUPABASE_SERVICE_ROLE_KEY` w Vercel.
+
+**Szybkie rozwiązanie:**
+1. Skopiuj `service_role` key z Supabase Dashboard → Settings → API
+2. Dodaj go w Vercel → Settings → Environment Variables jako `SUPABASE_SERVICE_ROLE_KEY`
+3. Redeploy aplikację w Vercel
+4. Uruchom SQL migrację w Supabase SQL Editor (plik: `20250121_fix_recommendations_column.sql`)
+5. Gotowe! 🎉
+
+---
+
 ## Wsparcie
 
 Jeśli problem nadal występuje:
@@ -152,8 +203,9 @@ Jeśli problem nadal występuje:
 1. Sprawdź logi Vercel (szczegółowe błędy)
 2. Sprawdź logi Supabase (problemy z bazą danych)
 3. Uruchom diagnostyczne SQL query powyżej
-4. Sprawdź czy `SUPABASE_SERVICE_ROLE_KEY` jest ustawiony w zmiennych środowiskowych Vercel
+4. Upewnij się że `SUPABASE_SERVICE_ROLE_KEY` jest poprawnie ustawiony w Vercel (bez spacji, z pełnym kluczem)
+5. Upewnij się że aplikacja została zredeploy'owana po dodaniu zmiennej
 
 ---
 
-**Ostatnia aktualizacja:** 2025-01-21
+**Ostatnia aktualizacja:** 2025-01-22
