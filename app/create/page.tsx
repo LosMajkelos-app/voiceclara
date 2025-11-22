@@ -341,11 +341,57 @@ export default function CreatePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
                   Choose Template <span className="text-red-500">*</span>
                 </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {templates.map((template) => (
+
+                {/* AI Generated - Hero Feature */}
+                {templates.find(t => t.id === "custom") && (
+                  <button
+                    onClick={() => handleTemplateSelect(templates.find(t => t.id === "custom")!)}
+                    className={`w-full mb-4 p-5 rounded-xl text-left transition-all relative overflow-hidden group ${
+                      templateType === "custom"
+                        ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-xl scale-[1.02]'
+                        : 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white hover:shadow-lg hover:scale-[1.01]'
+                    }`}
+                  >
+                    {/* Background sparkle animation */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+
+                    <div className="relative flex items-center gap-4">
+                      <div className="flex-shrink-0">
+                        <Sparkles className={`h-10 w-10 ${templateType === "custom" ? 'animate-pulse' : ''}`} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-bold text-lg">AI Generated Questions</p>
+                          <span className="bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-full text-xs font-semibold">
+                            Recommended
+                          </span>
+                        </div>
+                        <p className="text-sm opacity-90">
+                          Describe what you need and AI creates perfect questions in seconds
+                        </p>
+                      </div>
+                      <div className="flex-shrink-0">
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                          templateType === "custom"
+                            ? 'bg-white border-white'
+                            : 'border-white/50'
+                        }`}>
+                          {templateType === "custom" && (
+                            <div className="w-3 h-3 rounded-full bg-indigo-600"></div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                )}
+
+                {/* Standard Templates */}
+                <p className="text-xs text-gray-600 mb-2 font-medium">Or use a ready-made template:</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {templates.filter(t => t.id !== "custom").map((template) => (
                     <button
                       key={template.id}
                       onClick={() => handleTemplateSelect(template)}
