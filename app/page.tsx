@@ -546,6 +546,15 @@ export default function HomePage() {
                 <span>•</span>
                 <span>🔒 100% Anonymous</span>
               </div>
+              <div className="flex items-center gap-3">
+                <Link href="/privacy" className="hover:text-indigo-600 transition-colors">
+                  Privacy Policy
+                </Link>
+                <span>•</span>
+                <Link href="/terms" className="hover:text-indigo-600 transition-colors">
+                  Terms of Service
+                </Link>
+              </div>
               <div>
                 © 2025 <span className="font-semibold text-indigo-600">VoiceClara</span>
               </div>
