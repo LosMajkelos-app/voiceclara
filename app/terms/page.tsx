@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, AlertCircle } from "lucide-react"
 
 export const metadata = {
   title: "Terms of Service",
@@ -25,7 +25,8 @@ export default function TermsPage() {
           {/* Beta Notice */}
           <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-6 mb-8">
             <h3 className="font-bold text-amber-900 mb-2 flex items-center gap-2">
-              <span> </span> Beta Version Notice
+              <AlertCircle className="h-5 w-5" />
+              Beta Version Notice
             </h3>
             <p className="text-amber-900 text-sm">
               VoiceClara is currently in <strong>Beta</strong>. The service is provided "as is" and may contain bugs or limitations.
