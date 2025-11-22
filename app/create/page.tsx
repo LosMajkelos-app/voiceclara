@@ -349,38 +349,41 @@ export default function CreatePage() {
                 {templates.find(t => t.id === "custom") && (
                   <button
                     onClick={() => handleTemplateSelect(templates.find(t => t.id === "custom")!)}
-                    className={`w-full mb-4 p-5 rounded-xl text-left transition-all relative overflow-hidden group ${
+                    className={`w-full mb-4 p-5 rounded-xl text-left transition-all ${
                       templateType === "custom"
-                        ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-xl scale-[1.02]'
-                        : 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white hover:shadow-lg hover:scale-[1.01]'
+                        ? 'bg-white border-3 border-indigo-600 shadow-lg ring-2 ring-indigo-100'
+                        : 'bg-white border-3 border-indigo-400 hover:border-indigo-500 hover:shadow-md'
                     }`}
                   >
-                    {/* Background sparkle animation */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-
-                    <div className="relative flex items-center gap-4">
+                    <div className="flex items-center gap-4">
                       <div className="flex-shrink-0">
-                        <Sparkles className={`h-10 w-10 ${templateType === "custom" ? 'animate-pulse' : ''}`} />
+                        <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
+                          templateType === "custom"
+                            ? 'bg-gradient-to-br from-indigo-500 to-purple-500'
+                            : 'bg-gradient-to-br from-indigo-400 to-purple-400'
+                        }`}>
+                          <Sparkles className="h-7 w-7 text-white" />
+                        </div>
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="font-bold text-lg">AI Generated Questions</p>
-                          <span className="bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-full text-xs font-semibold">
+                          <p className="font-bold text-lg text-gray-900">AI Generated Questions</p>
+                          <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-2.5 py-0.5 rounded-full text-xs font-bold">
                             Recommended
                           </span>
                         </div>
-                        <p className="text-sm opacity-90">
+                        <p className="text-sm text-gray-600">
                           Describe what you need and AI creates perfect questions in seconds
                         </p>
                       </div>
                       <div className="flex-shrink-0">
-                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
                           templateType === "custom"
-                            ? 'bg-white border-white'
-                            : 'border-white/50'
+                            ? 'bg-indigo-600 border-indigo-600'
+                            : 'border-gray-300'
                         }`}>
                           {templateType === "custom" && (
-                            <div className="w-3 h-3 rounded-full bg-indigo-600"></div>
+                            <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
                           )}
                         </div>
                       </div>
