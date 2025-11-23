@@ -14,6 +14,15 @@ export function FeedbackLayout({ children, rightPanel, showFooter = true, center
   return (
     <div className={`${centerContent ? 'h-screen' : 'min-h-screen'} flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50`}>
 
+      {/* HEADER with Logo */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 py-3 px-4 flex-shrink-0">
+        <div className="max-w-7xl mx-auto">
+          <a href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity w-fit">
+            <img src="/logos/voiceclara-full.svg" alt="VoiceClara" className="h-7" />
+          </a>
+        </div>
+      </div>
+
       {/* MAIN CONTENT */}
       <div className="flex-1 flex overflow-hidden">
 
