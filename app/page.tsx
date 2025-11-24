@@ -397,10 +397,12 @@ export default function HomePage() {
           </div>
           
           <div className="text-center mt-12">
+            <Link href="/contact">
             <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-100">
               Book a Demo for HR Teams
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -542,7 +544,7 @@ export default function HomePage() {
                   </td>
                 </tr>
                 <tr className="bg-gray-50">
-                  <td className="px-6 py-4 text-gray-700">AI Insights</td>
+                  <td className="px-6 py-4 text-gray-700">HR AI Insights</td>
                   <td className="px-6 py-4 text-center">
                     <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
                   </td>
@@ -560,20 +562,12 @@ export default function HomePage() {
                   <td className="px-6 py-4 text-center text-gray-400">✗</td>
                 </tr>
                 <tr className="bg-gray-50">
-                  <td className="px-6 py-4 text-gray-700">AI Form Builder</td>
-                  <td className="px-6 py-4 text-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
-                  </td>
-                  <td className="px-6 py-4 text-center text-gray-400">✗</td>
-                  <td className="px-6 py-4 text-center text-gray-400">✗</td>
-                </tr>
-                <tr>
                   <td className="px-6 py-4 text-gray-700">Setup Time</td>
                   <td className="px-6 py-4 text-center font-semibold text-green-600">3 min</td>
                   <td className="px-6 py-4 text-center text-gray-600">2+ weeks</td>
                   <td className="px-6 py-4 text-center text-gray-600">10 min</td>
                 </tr>
-                <tr className="bg-gray-50">
+                <tr>
                   <td className="px-6 py-4 text-gray-700">Price (50 users)</td>
                   <td className="px-6 py-4 text-center font-semibold text-green-600">$49/mo</td>
                   <td className="px-6 py-4 text-center text-gray-600">$500+/mo</td>
