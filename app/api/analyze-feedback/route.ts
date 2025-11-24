@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     const cookieStore = cookies()
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
 
-    const { answers, language = 'en', shareToken } = await request.json()
+    const { answers, language = 'en', shareToken, anonymityScore, anonymityWarnings } = await request.json()
 
     // Verify authorization: either logged in user OR valid share token
     const { data: { user } } = await supabase.auth.getUser()
@@ -80,6 +80,16 @@ export async function POST(request: NextRequest) {
 
     const languageName = LANGUAGE_NAMES[language] || 'English'
 
+    const anonymitySection = anonymityScore !== undefined ? `
+
+ANONYMITY ANALYSIS:
+Current Anonymity Score: ${anonymityScore}/100
+${anonymityWarnings && anonymityWarnings.length > 0 ? `Detected Issues: ${anonymityWarnings.join(', ')}` : 'No anonymity issues detected'}
+
+IMPORTANT: Identify any text fragments that compromise anonymity (names, emails, phone numbers, addresses, self-identification phrases).
+For each answer, if there are non-anonymous elements, list them in "anonymity_issues" with the exact text that should be removed or changed.
+` : ''
+
     const prompt = `You are an expert feedback quality analyzer. Analyze these responses and score them 0-100 based on:
 
 IMPORTANT: The feedback language is ${languageName}. Provide your analysis, feedback, and suggestions in ${languageName}.
@@ -112,7 +122,7 @@ QUALITY LABEL:
 - 86-100: "Excellent" - Outstanding, actionable insights
 
 BE STRICT. Random text like "asdasd" or "sdfgsdfg" should score 0-10 in all categories.
-
+${anonymitySection}
 Responses to analyze:
 ${answers.map((a: any, i: number) => `Q${i + 1}: ${a.question}\nA: ${a.answer}`).join('\n\n')}
 
@@ -120,6 +130,7 @@ Return ONLY valid JSON with:
 1. Overall scores with quality label
 2. General suggestions for improvement
 3. Per-answer detailed feedback with specific tips
+4. Anonymity analysis for each answer (if anonymity issues exist)
 
 {
   "overall": number,
@@ -128,13 +139,16 @@ Return ONLY valid JSON with:
   "specificity": number,
   "constructiveness": number,
   "clarity": number,
+  "anonymity_score": ${anonymityScore || 100},
+  "anonymity_warnings": ${JSON.stringify(anonymityWarnings || [])},
   "suggestions": ["general suggestion 1", "general suggestion 2", "general suggestion 3"],
   "per_answer_feedback": [
     {
       "question": "question text",
       "score": number (0-100),
       "feedback": "specific feedback for this answer",
-      "tips": ["tip 1", "tip 2"]
+      "tips": ["tip 1", "tip 2"],
+      "anonymity_issues": ["exact text fragment 1 that compromises anonymity", "exact text fragment 2"] (only if issues found)
     }
   ]
 }`

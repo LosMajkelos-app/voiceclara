@@ -20,7 +20,7 @@ export default function FeedbackFormPage() {
   const [anonymityScore, setAnonymityScore] = useState(100)
   const [anonymityWarnings, setAnonymityWarnings] = useState<string[]>([])
 
-  // Calculate anonymity score based on answer content
+  // Calculate anonymity score based on answer content - Multi-language support
   const calculateAnonymityScore = (text: string): { score: number; warnings: string[] } => {
     if (!text) return { score: 100, warnings: [] }
 
@@ -34,7 +34,7 @@ export default function FeedbackFormPage() {
       deductions += 30
     }
 
-    // Check for phone numbers
+    // Check for phone numbers (international formats)
     const phoneRegex = /(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}|\d{9,}/g
     if (phoneRegex.test(text)) {
       warnings.push("Phone number detected")
@@ -42,7 +42,7 @@ export default function FeedbackFormPage() {
     }
 
     // Check for common name patterns (capitalized words that might be names)
-    const namePattern = /\b[A-Z][a-z]+\s+[A-Z][a-z]+\b/g
+    const namePattern = /\b[A-ZÀ-ÿ][a-zà-ÿ]+\s+[A-ZÀ-ÿ][a-zà-ÿ]+\b/g
     const potentialNames = text.match(namePattern)
     if (potentialNames && potentialNames.length > 0) {
       warnings.push("Possible name detected")
@@ -56,25 +56,71 @@ export default function FeedbackFormPage() {
       deductions += 10
     }
 
-    // Check for "I am [name]" or "My name is"
-    const selfIdentifyRegex = /(I am |my name is |I'm )[A-Z][a-z]+/gi
-    if (selfIdentifyRegex.test(text)) {
-      warnings.push("Self-identification detected")
-      deductions += 35
+    // Check for self-identification phrases (multi-language)
+    const selfIdentifyPatterns = [
+      // English
+      /(I am |my name is |I'm |I am called )[A-ZÀ-ÿ][a-zà-ÿ]+/gi,
+      // Polish
+      /(jestem |nazywam się |mam na imię |to ja |ja to )[A-ZÀ-ÿ][a-zà-ÿ]+/gi,
+      // Spanish
+      /(soy |me llamo |mi nombre es )[A-ZÀ-ÿ][a-zà-ÿ]+/gi,
+      // French
+      /(je suis |je m'appelle |mon nom est )[A-ZÀ-ÿ][a-zà-ÿ]+/gi,
+      // German
+      /(ich bin |ich heiße |mein name ist )[A-ZÀ-ÿ][a-zà-ÿ]+/gi,
+      // Portuguese
+      /(eu sou |meu nome é |me chamo )[A-ZÀ-ÿ][a-zà-ÿ]+/gi,
+      // Italian
+      /(sono |mi chiamo |il mio nome è )[A-ZÀ-ÿ][a-zà-ÿ]+/gi,
+    ]
+
+    for (const pattern of selfIdentifyPatterns) {
+      if (pattern.test(text)) {
+        warnings.push("Self-identification detected")
+        deductions += 35
+        break
+      }
     }
 
-    // Check for personal pronouns in excess (might reveal identity)
-    const personalPronouns = (text.match(/\b(I|me|my|mine)\b/gi) || []).length
-    if (personalPronouns > 10) {
+    // Check for personal pronouns in excess (multi-language)
+    const pronounPatterns = [
+      /\b(I|me|my|mine)\b/gi, // English
+      /\b(ja|mnie|mój|moja|moje)\b/gi, // Polish
+      /\b(yo|mi|mío|mía)\b/gi, // Spanish
+      /\b(je|moi|mon|ma|mes)\b/gi, // French
+      /\b(ich|mir|mein|meine)\b/gi, // German
+      /\b(eu|meu|minha)\b/gi, // Portuguese
+      /\b(io|mi|mio|mia)\b/gi, // Italian
+    ]
+
+    let totalPronouns = 0
+    for (const pattern of pronounPatterns) {
+      const matches = text.match(pattern) || []
+      totalPronouns += matches.length
+    }
+
+    if (totalPronouns > 15) {
       warnings.push("Heavy use of personal identifiers")
       deductions += 5
     }
 
-    // Check for specific location mentions (addresses)
-    const addressPattern = /\d+\s+[A-Z][a-z]+\s+(Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr)/gi
-    if (addressPattern.test(text)) {
-      warnings.push("Specific address mentioned")
-      deductions += 25
+    // Check for specific location mentions (multi-language street types)
+    const addressPatterns = [
+      /\d+\s+[A-ZÀ-ÿ][a-zà-ÿ]+\s+(Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr)/gi, // English
+      /\d+\s+[A-ZÀ-ÿ][a-zà-ÿ]+\s+(ulica|ul\.|aleja|al\.|plac|pl\.)/gi, // Polish
+      /\d+\s+[A-ZÀ-ÿ][a-zà-ÿ]+\s+(calle|avenida|plaza|paseo)/gi, // Spanish
+      /\d+\s+[A-ZÀ-ÿ][a-zà-ÿ]+\s+(rue|avenue|boulevard|place)/gi, // French
+      /\d+\s+[A-ZÀ-ÿ][a-zà-ÿ]+\s+(straße|strasse|allee|platz)/gi, // German
+      /\d+\s+[A-ZÀ-ÿ][a-zà-ÿ]+\s+(rua|avenida|praça)/gi, // Portuguese
+      /\d+\s+[A-ZÀ-ÿ][a-zà-ÿ]+\s+(via|viale|piazza|corso)/gi, // Italian
+    ]
+
+    for (const pattern of addressPatterns) {
+      if (pattern.test(text)) {
+        warnings.push("Specific address mentioned")
+        deductions += 25
+        break
+      }
     }
 
     const finalScore = Math.max(0, 100 - deductions)
@@ -88,6 +134,23 @@ export default function FeedbackFormPage() {
     setAnonymityScore(score)
     setAnonymityWarnings(warnings)
   }, [answers, currentStep])
+
+  // Helper function to highlight non-anonymous text fragments
+  const highlightAnonymityIssues = (text: string, issues?: string[]) => {
+    if (!issues || issues.length === 0) return text
+
+    let highlightedText = text
+    issues.forEach(issue => {
+      // Escape special regex characters
+      const escapedIssue = issue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const regex = new RegExp(`(${escapedIssue})`, 'gi')
+      highlightedText = highlightedText.replace(
+        regex,
+        '<span class="font-bold text-red-600 bg-red-100 px-1 rounded">$1</span>'
+      )
+    })
+    return highlightedText
+  }
 
   useEffect(() => {
     async function fetchRequest() {
@@ -169,7 +232,11 @@ export default function FeedbackFormPage() {
   setAnalyzingAI(true)
 
   try {
-    // REAL OpenAI API Call
+    // Calculate anonymity for all answers
+    const allAnswersText = request.questions.map((q: string, i: number) => answers[i] || "").join(" ")
+    const { score: overallAnonymityScore, warnings: allWarnings } = calculateAnonymityScore(allAnswersText)
+
+    // REAL OpenAI API Call with anonymity data
     const formattedAnswers = request.questions.map((q: string, i: number) => ({
       question: q,
       answer: answers[i] || ""
@@ -181,7 +248,9 @@ export default function FeedbackFormPage() {
       body: JSON.stringify({
         answers: formattedAnswers,
         language: request.language || 'en',
-        shareToken: shareToken
+        shareToken: shareToken,
+        anonymityScore: overallAnonymityScore,
+        anonymityWarnings: allWarnings
       })
     })
 
@@ -396,6 +465,40 @@ export default function FeedbackFormPage() {
                   </div>
                 </div>
 
+                {/* Anonymity Score Section */}
+                {aiScore.anonymity_score !== undefined && (
+                  <div className={`backdrop-blur-sm rounded-xl p-5 border-2 ${
+                    aiScore.anonymity_score >= 85 ? 'bg-green-500/20 border-green-400' :
+                    aiScore.anonymity_score >= 60 ? 'bg-yellow-500/20 border-yellow-400' :
+                    aiScore.anonymity_score >= 40 ? 'bg-orange-500/20 border-orange-400' :
+                    'bg-red-500/20 border-red-400'
+                  }`}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Shield className="h-5 w-5" />
+                      <p className="font-semibold text-sm">🔒 Anonymity Check</p>
+                    </div>
+                    <div className="text-center mb-3">
+                      <div className="text-4xl font-bold">{aiScore.anonymity_score}%</div>
+                      <p className="text-xs opacity-90 mt-1">
+                        {aiScore.anonymity_score >= 85 ? 'Excellent - Fully anonymous' :
+                         aiScore.anonymity_score >= 60 ? 'Good - Minor issues detected' :
+                         aiScore.anonymity_score >= 40 ? 'Warning - Identifying info found' :
+                         'Critical - High risk of identification'}
+                      </p>
+                    </div>
+                    {aiScore.anonymity_warnings && aiScore.anonymity_warnings.length > 0 && (
+                      <div className="bg-black/20 rounded-lg p-3">
+                        <p className="text-xs font-semibold mb-2">⚠️ Issues Detected:</p>
+                        <ul className="space-y-1 text-xs">
+                          {aiScore.anonymity_warnings.map((warning: string, i: number) => (
+                            <li key={i}>• {warning}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* General Suggestions */}
                 {aiScore.suggestions && aiScore.suggestions.length > 0 && (
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
@@ -450,9 +553,35 @@ export default function FeedbackFormPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs md:text-sm text-gray-700 whitespace-pre-wrap mb-3">
-                        {answers[i]}
-                      </p>
+                      {/* Answer text with highlighted anonymity issues */}
+                      {perAnswerFeedback?.anonymity_issues && perAnswerFeedback.anonymity_issues.length > 0 ? (
+                        <div
+                          className="text-xs md:text-sm text-gray-700 whitespace-pre-wrap mb-3"
+                          dangerouslySetInnerHTML={{
+                            __html: highlightAnonymityIssues(answers[i], perAnswerFeedback.anonymity_issues)
+                          }}
+                        />
+                      ) : (
+                        <p className="text-xs md:text-sm text-gray-700 whitespace-pre-wrap mb-3">
+                          {answers[i]}
+                        </p>
+                      )}
+
+                      {/* Anonymity warning for this answer */}
+                      {perAnswerFeedback?.anonymity_issues && perAnswerFeedback.anonymity_issues.length > 0 && (
+                        <div className="mb-3 bg-red-50 border border-red-300 rounded-lg p-2">
+                          <p className="text-xs font-semibold text-red-900 mb-1 flex items-center gap-1">
+                            🚨 Anonymity Issues Found:
+                          </p>
+                          <ul className="space-y-0.5">
+                            {perAnswerFeedback.anonymity_issues.map((issue: string, issueIndex: number) => (
+                              <li key={issueIndex} className="text-xs text-red-800">
+                                • <span className="font-bold">"{issue}"</span> - consider removing or rephrasing
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
 
                       {/* AI Feedback for this answer */}
                       {perAnswerFeedback && (
