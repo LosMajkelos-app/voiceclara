@@ -54,7 +54,7 @@ export default function HomePage() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href={user ? "/create" : "/create-auth"}>
+              <Link href={user ? "/create-auth" : "/create-auth"}>
                 <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all inline-flex items-center gap-2">
                   💬 Try VoiceClara for Free
                 </button>
@@ -207,7 +207,7 @@ export default function HomePage() {
           
           {/* CTA */}
           <div className="text-center mt-12">
-            <Link href="/create">
+            <Link href="/create-auth">
               <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700">
                 Try It Now - Free
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -244,7 +244,7 @@ export default function HomePage() {
               <p className="text-gray-600 mb-3">
                 People complete beautiful surveys. Our response rates are 3x higher than traditional tools.
               </p>
-              <Link href="/create">
+              <Link href="/create-auth">
               <div className="text-sm text-indigo-600 font-medium flex items-center">
                 Try for free
                 <ArrowUpRight className="h-4 w-4 ml-1" />
@@ -263,7 +263,7 @@ export default function HomePage() {
               <p className="text-gray-600 mb-3">
                 Not just analysis after. AI coaches during writing, detects patterns, and finds blind spots.
               </p>
-              <Link href="/create">
+              <Link href="/create-auth">
               <div className="text-sm text-purple-600 font-medium flex items-center">
                 Try for free
                 <ArrowUpRight className="h-4 w-4 ml-1" />
@@ -282,7 +282,7 @@ export default function HomePage() {
               <p className="text-gray-600 mb-3">
                 Real-time anonymity score shows safety level. People see "15 responded, you're safe."
               </p>
-              <Link href="/create">
+              <Link href="/create-auth">
               <div className="text-sm text-green-600 font-medium flex items-center">
                 Try for free
                 <ArrowUpRight className="h-4 w-4 ml-1" />
@@ -301,7 +301,7 @@ export default function HomePage() {
               <p className="text-gray-600 mb-3">
                 No training. No onboarding. Share a link and start collecting feedback immediately.
               </p>
-              <Link href="/create">
+              <Link href="/create-auth">
               <div className="text-sm text-orange-600 font-medium flex items-center">
                 Try for free
                 <ArrowUpRight className="h-4 w-4 ml-1" />
@@ -320,7 +320,7 @@ export default function HomePage() {
               <p className="text-gray-600 mb-3">
                 See how feedback evolves over time. Measure psychological safety improvements.
               </p>
-              <Link href="/create">
+              <Link href="/create-auth">
               <div className="text-sm text-pink-600 font-medium flex items-center">
                 Try for free
                 <ArrowUpRight className="h-4 w-4 ml-1" />
@@ -339,7 +339,7 @@ export default function HomePage() {
               <p className="text-gray-600 mb-3">
                 GDPR compliant, encrypted data, no tracking. Your feedback stays yours.
               </p>
-              <Link href="/create">
+              <Link href="/create-auth">
               <div className="text-sm text-blue-600 font-medium flex items-center">
                 Try for free
                 <ArrowUpRight className="h-4 w-4 ml-1" />
@@ -609,7 +609,7 @@ export default function HomePage() {
                 Shape how teams communicate honestly.
               </p>
 
-              <Link href={user ? "/create" : "/create-auth"}>
+              <Link href={user ? "/create-auth" : "/create-auth"}>
                 <button className="bg-white text-indigo-600 hover:bg-gray-100 font-bold px-8 py-4 rounded-xl shadow-2xl hover:shadow-3xl transition-all inline-flex items-center gap-2 text-lg">
                   <Sparkles className="h-5 w-5" />
                   Start Testing - It's Free
