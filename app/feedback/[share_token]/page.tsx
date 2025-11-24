@@ -18,6 +18,77 @@ export default function FeedbackFormPage() {
   const [showReview, setShowReview] = useState(false)
   const [aiScore, setAiScore] = useState<any>(null)
   const [analyzingAI, setAnalyzingAI] = useState(false)
+  const [anonymityScore, setAnonymityScore] = useState(100)
+  const [anonymityWarnings, setAnonymityWarnings] = useState<string[]>([])
+
+  // Calculate anonymity score based on answer content
+  const calculateAnonymityScore = (text: string): { score: number; warnings: string[] } => {
+    if (!text) return { score: 100, warnings: [] }
+
+    const warnings: string[] = []
+    let deductions = 0
+
+    // Check for email addresses
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g
+    if (emailRegex.test(text)) {
+      warnings.push("Email address detected")
+      deductions += 30
+    }
+
+    // Check for phone numbers
+    const phoneRegex = /(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}|\d{9,}/g
+    if (phoneRegex.test(text)) {
+      warnings.push("Phone number detected")
+      deductions += 25
+    }
+
+    // Check for common name patterns (capitalized words that might be names)
+    const namePattern = /\b[A-Z][a-z]+\s+[A-Z][a-z]+\b/g
+    const potentialNames = text.match(namePattern)
+    if (potentialNames && potentialNames.length > 0) {
+      warnings.push("Possible name detected")
+      deductions += 20
+    }
+
+    // Check for specific dates (MM/DD/YYYY, DD-MM-YYYY, etc)
+    const dateRegex = /\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b/g
+    if (dateRegex.test(text)) {
+      warnings.push("Specific date mentioned")
+      deductions += 10
+    }
+
+    // Check for "I am [name]" or "My name is"
+    const selfIdentifyRegex = /(I am |my name is |I'm )[A-Z][a-z]+/gi
+    if (selfIdentifyRegex.test(text)) {
+      warnings.push("Self-identification detected")
+      deductions += 35
+    }
+
+    // Check for personal pronouns in excess (might reveal identity)
+    const personalPronouns = (text.match(/\b(I|me|my|mine)\b/gi) || []).length
+    if (personalPronouns > 10) {
+      warnings.push("Heavy use of personal identifiers")
+      deductions += 5
+    }
+
+    // Check for specific location mentions (addresses)
+    const addressPattern = /\d+\s+[A-Z][a-z]+\s+(Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr)/gi
+    if (addressPattern.test(text)) {
+      warnings.push("Specific address mentioned")
+      deductions += 25
+    }
+
+    const finalScore = Math.max(0, 100 - deductions)
+    return { score: finalScore, warnings }
+  }
+
+  // Update anonymity score when answer changes
+  useEffect(() => {
+    const currentAnswer = answers[currentStep] || ""
+    const { score, warnings } = calculateAnonymityScore(currentAnswer)
+    setAnonymityScore(score)
+    setAnonymityWarnings(warnings)
+  }, [answers, currentStep])
 
   useEffect(() => {
     async function fetchRequest() {
@@ -517,8 +588,13 @@ export default function FeedbackFormPage() {
                 <h3 className="font-bold text-green-900 text-base md:text-lg">
                   🔒 Your Anonymity is Protected
                 </h3>
-                <span className="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                  100%
+                <span className={`text-white text-xs font-bold px-2 py-0.5 rounded-full ${
+                  anonymityScore >= 85 ? 'bg-green-500' :
+                  anonymityScore >= 60 ? 'bg-yellow-500' :
+                  anonymityScore >= 40 ? 'bg-orange-500' :
+                  'bg-red-500'
+                }`}>
+                  {anonymityScore}%
                 </span>
               </div>
 
@@ -526,14 +602,36 @@ export default function FeedbackFormPage() {
               <div className="mb-3">
                 <div className="flex items-center justify-between text-xs text-green-800 mb-1">
                   <span className="font-semibold">Anonymity Score</span>
-                  <span className="font-bold">100/100</span>
+                  <span className="font-bold">{anonymityScore}/100</span>
                 </div>
                 <div className="bg-green-200 rounded-full h-3 overflow-hidden">
-                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 h-3 rounded-full w-full flex items-center justify-end pr-1">
-                    <span className="text-white text-[10px] font-bold">✓</span>
+                  <div
+                    className={`h-3 rounded-full flex items-center justify-end pr-1 transition-all duration-300 ${
+                      anonymityScore >= 85 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
+                      anonymityScore >= 60 ? 'bg-gradient-to-r from-yellow-500 to-amber-500' :
+                      anonymityScore >= 40 ? 'bg-gradient-to-r from-orange-500 to-red-500' :
+                      'bg-gradient-to-r from-red-600 to-red-700'
+                    }`}
+                    style={{ width: `${anonymityScore}%` }}
+                  >
+                    {anonymityScore >= 40 && <span className="text-white text-[10px] font-bold">✓</span>}
                   </div>
                 </div>
               </div>
+
+              {/* Warnings if score is below 100 */}
+              {anonymityWarnings.length > 0 && (
+                <div className="mb-3 bg-amber-50 border border-amber-300 rounded-lg p-2">
+                  <p className="text-xs font-semibold text-amber-900 mb-1 flex items-center gap-1">
+                    ⚠️ Anonymity Warnings:
+                  </p>
+                  <ul className="space-y-0.5">
+                    {anonymityWarnings.map((warning, i) => (
+                      <li key={i} className="text-xs text-amber-800">• {warning}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               <p className="text-xs md:text-sm text-green-800 leading-relaxed mb-3">
                 Be honest and direct. Your identity is completely hidden—no email, no IP address, no tracking. The recipient will never know who you are.
@@ -607,27 +705,56 @@ export default function FeedbackFormPage() {
 
       {/* Floating Anonymity Score Widget */}
       <div className="fixed bottom-4 right-4 z-50 hidden lg:block">
-        <div className="bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-2xl shadow-2xl p-4 min-w-[220px] border-2 border-green-400">
+        <div className={`text-white rounded-2xl shadow-2xl p-4 min-w-[220px] border-2 transition-all duration-300 ${
+          anonymityScore >= 85 ? 'bg-gradient-to-br from-green-500 to-emerald-600 border-green-400' :
+          anonymityScore >= 60 ? 'bg-gradient-to-br from-yellow-500 to-amber-600 border-yellow-400' :
+          anonymityScore >= 40 ? 'bg-gradient-to-br from-orange-500 to-red-600 border-orange-400' :
+          'bg-gradient-to-br from-red-600 to-red-700 border-red-400'
+        }`}>
           <div className="flex items-center gap-2 mb-2">
             <Shield className="h-5 w-5" />
             <span className="font-bold text-sm">Anonymity Score</span>
-            <span className="ml-auto bg-white text-green-600 text-xs font-bold px-2 py-0.5 rounded-full">
-              100%
+            <span className={`ml-auto text-xs font-bold px-2 py-0.5 rounded-full ${
+              anonymityScore >= 85 ? 'bg-white text-green-600' :
+              anonymityScore >= 60 ? 'bg-white text-yellow-600' :
+              anonymityScore >= 40 ? 'bg-white text-orange-600' :
+              'bg-white text-red-600'
+            }`}>
+              {anonymityScore}%
             </span>
           </div>
           <div className="bg-white/20 rounded-full h-2 overflow-hidden mb-2">
-            <div className="bg-white h-2 rounded-full w-full"></div>
+            <div
+              className="bg-white h-2 rounded-full transition-all duration-300"
+              style={{ width: `${anonymityScore}%` }}
+            ></div>
           </div>
-          <div className="space-y-1 text-xs opacity-95">
-            <div className="flex items-center gap-2">
-              <span className="text-green-200">✓</span>
-              <span>No tracking</span>
+          {anonymityWarnings.length > 0 ? (
+            <div className="space-y-1 text-xs opacity-95">
+              {anonymityWarnings.slice(0, 2).map((warning, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span>⚠️</span>
+                  <span className="truncate">{warning}</span>
+                </div>
+              ))}
+              {anonymityWarnings.length > 2 && (
+                <div className="text-xs opacity-75 italic">
+                  +{anonymityWarnings.length - 2} more warning{anonymityWarnings.length > 3 ? 's' : ''}
+                </div>
+              )}
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-green-200">✓</span>
-              <span>Fully protected</span>
+          ) : (
+            <div className="space-y-1 text-xs opacity-95">
+              <div className="flex items-center gap-2">
+                <span className="text-white">✓</span>
+                <span>No tracking</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-white">✓</span>
+                <span>Fully protected</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
