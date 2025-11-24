@@ -505,20 +505,51 @@ export default function FeedbackFormPage() {
     >
       {/* Anonymity Banner - Shown on first question */}
       {currentStep === 0 && (
-        <div className="mb-4 md:mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-3 md:p-4">
-          <div className="flex items-start gap-2 md:gap-3">
+        <div className="mb-4 md:mb-6 bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 border-2 border-green-400 rounded-2xl p-4 md:p-5 shadow-lg">
+          <div className="flex items-start gap-3 md:gap-4">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-green-100 rounded-full flex items-center justify-center">
-                <Shield className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
+              <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-md">
+                <Shield className="h-6 w-6 md:h-7 md:w-7 text-white" />
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-green-900 mb-1 text-sm md:text-base">
-                🔒 Your Anonymity is Protected
-              </h3>
-              <p className="text-xs md:text-sm text-green-800 leading-relaxed">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="font-bold text-green-900 text-base md:text-lg">
+                  🔒 Your Anonymity is Protected
+                </h3>
+                <span className="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                  100%
+                </span>
+              </div>
+
+              {/* Anonymity Score Bar */}
+              <div className="mb-3">
+                <div className="flex items-center justify-between text-xs text-green-800 mb-1">
+                  <span className="font-semibold">Anonymity Score</span>
+                  <span className="font-bold">100/100</span>
+                </div>
+                <div className="bg-green-200 rounded-full h-3 overflow-hidden">
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 h-3 rounded-full w-full flex items-center justify-end pr-1">
+                    <span className="text-white text-[10px] font-bold">✓</span>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-xs md:text-sm text-green-800 leading-relaxed mb-3">
                 Be honest and direct. Your identity is completely hidden—no email, no IP address, no tracking. The recipient will never know who you are.
               </p>
+
+              {/* Quick Stats */}
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="bg-white/60 rounded-lg p-2 flex items-center gap-2">
+                  <span className="text-green-600 text-lg">✓</span>
+                  <span className="text-green-900 font-medium">No Email</span>
+                </div>
+                <div className="bg-white/60 rounded-lg p-2 flex items-center gap-2">
+                  <span className="text-green-600 text-lg">✓</span>
+                  <span className="text-green-900 font-medium">No IP Logged</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -573,6 +604,32 @@ export default function FeedbackFormPage() {
         className="w-full p-4 md:p-6 bg-white border-2 border-indigo-200 rounded-2xl text-base md:text-lg resize-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm min-h-[200px] md:min-h-[250px] mb-2"
         autoFocus
       />
+
+      {/* Floating Anonymity Score Widget */}
+      <div className="fixed bottom-4 right-4 z-50 hidden lg:block">
+        <div className="bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-2xl shadow-2xl p-4 min-w-[220px] border-2 border-green-400">
+          <div className="flex items-center gap-2 mb-2">
+            <Shield className="h-5 w-5" />
+            <span className="font-bold text-sm">Anonymity Score</span>
+            <span className="ml-auto bg-white text-green-600 text-xs font-bold px-2 py-0.5 rounded-full">
+              100%
+            </span>
+          </div>
+          <div className="bg-white/20 rounded-full h-2 overflow-hidden mb-2">
+            <div className="bg-white h-2 rounded-full w-full"></div>
+          </div>
+          <div className="space-y-1 text-xs opacity-95">
+            <div className="flex items-center gap-2">
+              <span className="text-green-200">✓</span>
+              <span>No tracking</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-green-200">✓</span>
+              <span>Fully protected</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Anonymity Reminder */}
       <div className="flex items-center gap-2 text-xs text-gray-500 mb-4 md:mb-6">
