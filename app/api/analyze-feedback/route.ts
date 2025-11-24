@@ -131,6 +131,13 @@ Return ONLY valid JSON with:
 2. General suggestions for improvement
 3. Per-answer detailed feedback with specific tips
 4. Anonymity analysis for each answer (if anonymity issues exist)
+5. Suggested improved version of each answer (or explanation why it cannot be improved)
+
+IMPORTANT FOR SUGGESTED ANSWERS:
+- If the answer is nonsensical/gibberish (like "asdasd", "dfdfdfd"), set "suggested_answer" to null and add to tips: "This answer appears to be random text and cannot be meaningfully improved"
+- If the answer is too short/vague but has some meaning, provide an improved version
+- If the answer is already good, provide a slightly enhanced version or set to null with explanation in tips
+- Always maintain the same language as the original answer
 
 {
   "overall": number,
@@ -148,6 +155,7 @@ Return ONLY valid JSON with:
       "score": number (0-100),
       "feedback": "specific feedback for this answer",
       "tips": ["tip 1", "tip 2"],
+      "suggested_answer": "improved version of the answer" | null,
       "anonymity_issues": ["exact text fragment 1 that compromises anonymity", "exact text fragment 2"] (only if issues found)
     }
   ]
