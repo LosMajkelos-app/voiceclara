@@ -7,6 +7,8 @@ import { Sparkles, Shield, TrendingUp, MessageSquare, ArrowRight, Check, CheckCi
 import Navbar from "@/app/components/navbar"
 import { Analytics } from "@/app/components/analytics"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 
 export default function HomePage() {
   const { user } = useAuth()
