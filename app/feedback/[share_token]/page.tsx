@@ -591,6 +591,19 @@ export default function FeedbackFormPage() {
                             <p className="text-sm leading-relaxed mb-3 opacity-95">
                               {perAnswerFeedback.feedback}
                             </p>
+
+                            {/* Suggested Answer */}
+                            {perAnswerFeedback.suggested_answer && (
+                              <div className="mt-3 pt-3 border-t border-white/20">
+                                <p className="text-xs font-semibold mb-2 flex items-center gap-1">
+                                  ✨ Suggested Improved Answer:
+                                </p>
+                                <div className="bg-white/10 rounded-lg p-3 text-xs leading-relaxed opacity-95 border border-white/20">
+                                  {perAnswerFeedback.suggested_answer}
+                                </div>
+                              </div>
+                            )}
+
                             {perAnswerFeedback.tips && perAnswerFeedback.tips.length > 0 && (
                               <div className="mt-3 pt-3 border-t border-white/20">
                                 <p className="text-xs font-semibold mb-2">💡 Tips:</p>
@@ -660,16 +673,6 @@ export default function FeedbackFormPage() {
                     </div>
                   )
                 })}
-              </div>
-
-              {/* Final Anonymity Reminder */}
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-3 md:p-4 mb-4">
-                <div className="flex items-center gap-2 md:gap-3">
-                  <Shield className="h-4 w-4 md:h-5 md:w-5 text-green-600 flex-shrink-0" />
-                  <p className="text-xs md:text-sm text-green-800">
-                    <strong className="font-bold">One last reminder:</strong> Your feedback is 100% anonymous. No one will ever know it came from you.
-                  </p>
-                </div>
               </div>
 
               {/* Submit Buttons */}
