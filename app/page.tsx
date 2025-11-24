@@ -244,10 +244,12 @@ export default function HomePage() {
               <p className="text-gray-600 mb-3">
                 People complete beautiful surveys. Our response rates are 3x higher than traditional tools.
               </p>
+              <Link href="/create">
               <div className="text-sm text-indigo-600 font-medium flex items-center">
-                See examples
+                Try for free
                 <ArrowUpRight className="h-4 w-4 ml-1" />
               </div>
+              </Link>
             </Card>
             
             {/* Feature 2 */}
@@ -261,10 +263,12 @@ export default function HomePage() {
               <p className="text-gray-600 mb-3">
                 Not just analysis after. AI coaches during writing, detects patterns, and finds blind spots.
               </p>
+              <Link href="/create">
               <div className="text-sm text-purple-600 font-medium flex items-center">
-                Learn more
+                Try for free
                 <ArrowUpRight className="h-4 w-4 ml-1" />
               </div>
+              </Link>
             </Card>
             
             {/* Feature 3 */}
@@ -278,10 +282,12 @@ export default function HomePage() {
               <p className="text-gray-600 mb-3">
                 Real-time anonymity score shows safety level. People see "15 responded, you're safe."
               </p>
+              <Link href="/create">
               <div className="text-sm text-green-600 font-medium flex items-center">
-                View demo
+                Try for free
                 <ArrowUpRight className="h-4 w-4 ml-1" />
               </div>
+              </Link>
             </Card>
             
             {/* Feature 4 */}
@@ -295,10 +301,12 @@ export default function HomePage() {
               <p className="text-gray-600 mb-3">
                 No training. No onboarding. Share a link and start collecting feedback immediately.
               </p>
+              <Link href="/create">
               <div className="text-sm text-orange-600 font-medium flex items-center">
-                Start now
+                Try for free
                 <ArrowUpRight className="h-4 w-4 ml-1" />
               </div>
+              </Link>
             </Card>
             
             {/* Feature 5 */}
@@ -312,10 +320,12 @@ export default function HomePage() {
               <p className="text-gray-600 mb-3">
                 See how feedback evolves over time. Measure psychological safety improvements.
               </p>
+              <Link href="/create">
               <div className="text-sm text-pink-600 font-medium flex items-center">
-                See metrics
+                Try for free
                 <ArrowUpRight className="h-4 w-4 ml-1" />
               </div>
+              </Link>
             </Card>
             
             {/* Feature 6 */}
@@ -329,10 +339,12 @@ export default function HomePage() {
               <p className="text-gray-600 mb-3">
                 GDPR compliant, encrypted data, no tracking. Your feedback stays yours.
               </p>
+              <Link href="/create">
               <div className="text-sm text-blue-600 font-medium flex items-center">
-                Security details
+                Try for free
                 <ArrowUpRight className="h-4 w-4 ml-1" />
               </div>
+              </Link>
             </Card>
           </div>
         </div>
