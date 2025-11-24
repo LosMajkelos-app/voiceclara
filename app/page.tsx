@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-context"
 import { Sparkles, Shield, TrendingUp, MessageSquare, ArrowRight, Check, Heart, Users, Zap, BarChart3 } from "lucide-react"
 import Navbar from "@/app/components/navbar"
 import { Analytics } from "@/app/components/analytics"
+import { Badge } from "@/components/ui/badge"
 
 export default function HomePage() {
   const { user } = useAuth()
