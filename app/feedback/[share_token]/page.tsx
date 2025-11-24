@@ -894,61 +894,6 @@ export default function FeedbackFormPage() {
         autoFocus
       />
 
-      {/* Floating Anonymity Score Widget */}
-      <div className="fixed bottom-4 right-4 z-50 hidden lg:block">
-        <div className={`text-white rounded-2xl shadow-2xl p-4 min-w-[220px] border-2 transition-all duration-300 ${
-          anonymityScore >= 85 ? 'bg-gradient-to-br from-green-500 to-emerald-600 border-green-400' :
-          anonymityScore >= 60 ? 'bg-gradient-to-br from-yellow-500 to-amber-600 border-yellow-400' :
-          anonymityScore >= 40 ? 'bg-gradient-to-br from-orange-500 to-red-600 border-orange-400' :
-          'bg-gradient-to-br from-red-600 to-red-700 border-red-400'
-        }`}>
-          <div className="flex items-center gap-2 mb-2">
-            <Shield className="h-5 w-5" />
-            <span className="font-bold text-sm">Anonymity Score</span>
-            <span className={`ml-auto text-xs font-bold px-2 py-0.5 rounded-full ${
-              anonymityScore >= 85 ? 'bg-white text-green-600' :
-              anonymityScore >= 60 ? 'bg-white text-yellow-600' :
-              anonymityScore >= 40 ? 'bg-white text-orange-600' :
-              'bg-white text-red-600'
-            }`}>
-              {anonymityScore}%
-            </span>
-          </div>
-          <div className="bg-white/20 rounded-full h-2 overflow-hidden mb-2">
-            <div
-              className="bg-white h-2 rounded-full transition-all duration-300"
-              style={{ width: `${anonymityScore}%` }}
-            ></div>
-          </div>
-          {anonymityWarnings.length > 0 ? (
-            <div className="space-y-1 text-xs opacity-95">
-              {anonymityWarnings.slice(0, 2).map((warning, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <span>⚠️</span>
-                  <span className="truncate">{warning}</span>
-                </div>
-              ))}
-              {anonymityWarnings.length > 2 && (
-                <div className="text-xs opacity-75 italic">
-                  +{anonymityWarnings.length - 2} more warning{anonymityWarnings.length > 3 ? 's' : ''}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-1 text-xs opacity-95">
-              <div className="flex items-center gap-2">
-                <span className="text-white">✓</span>
-                <span>No tracking</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-white">✓</span>
-                <span>Fully protected</span>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Anonymity Reminder */}
       <div className="flex items-center gap-2 text-xs text-gray-500 mb-4 md:mb-6">
         <Shield className="h-3.5 w-3.5 text-green-600" />
