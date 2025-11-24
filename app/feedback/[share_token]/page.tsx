@@ -533,91 +533,113 @@ export default function FeedbackFormPage() {
           ) : (
             <>
               {/* All Answers Review with AI Feedback */}
-              <div className="space-y-3 md:space-y-4 max-h-[50vh] overflow-y-auto pr-2">
+              <div className="space-y-4 md:space-y-5 max-h-[60vh] overflow-y-auto pr-2 pb-4">
                 {request.questions.map((q: string, i: number) => {
                   const perAnswerFeedback = aiScore?.per_answer_feedback?.[i]
                   return (
-                    <div key={i} className="bg-white border-2 border-gray-200 rounded-xl p-3 md:p-4">
-                      <div className="flex items-start justify-between mb-2 gap-2">
-                        <p className="font-semibold text-xs md:text-sm text-gray-900">
-                          {i + 1}. {q}
-                        </p>
-                        {perAnswerFeedback && (
-                          <span className={`flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-bold ${
-                            perAnswerFeedback.score >= 80 ? 'bg-green-100 text-green-700' :
-                            perAnswerFeedback.score >= 60 ? 'bg-blue-100 text-blue-700' :
-                            perAnswerFeedback.score >= 40 ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-red-100 text-red-700'
-                          }`}>
-                            {perAnswerFeedback.score}/100
-                          </span>
-                        )}
-                      </div>
-                      {/* Answer text with highlighted anonymity issues */}
-                      {perAnswerFeedback?.anonymity_issues && perAnswerFeedback.anonymity_issues.length > 0 ? (
-                        <div
-                          className="text-xs md:text-sm text-gray-700 whitespace-pre-wrap mb-3"
-                          dangerouslySetInnerHTML={{
-                            __html: highlightAnonymityIssues(answers[i], perAnswerFeedback.anonymity_issues)
-                          }}
-                        />
-                      ) : (
-                        <p className="text-xs md:text-sm text-gray-700 whitespace-pre-wrap mb-3">
-                          {answers[i]}
-                        </p>
-                      )}
-
-                      {/* Anonymity warning for this answer */}
-                      {perAnswerFeedback?.anonymity_issues && perAnswerFeedback.anonymity_issues.length > 0 && (
-                        <div className="mb-3 bg-red-50 border border-red-300 rounded-lg p-2">
-                          <p className="text-xs font-semibold text-red-900 mb-1 flex items-center gap-1">
-                            🚨 Anonymity Issues Found:
-                          </p>
-                          <ul className="space-y-0.5">
-                            {perAnswerFeedback.anonymity_issues.map((issue: string, issueIndex: number) => (
-                              <li key={issueIndex} className="text-xs text-red-800">
-                                • <span className="font-bold">"{issue}"</span> - consider removing or rephrasing
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {/* AI Feedback for this answer */}
-                      {perAnswerFeedback && (
-                        <div className="mt-3 pt-3 border-t border-gray-200 bg-indigo-50 -mx-4 -mb-4 px-4 py-3 rounded-b-xl">
-                          <p className="text-xs font-semibold text-indigo-900 mb-1.5 flex items-center gap-1">
-                            <Sparkles className="h-3 w-3" />
-                            AI Feedback
-                          </p>
-                          <p className="text-xs text-indigo-800 mb-2">
-                            {perAnswerFeedback.feedback}
-                          </p>
-                          {perAnswerFeedback.tips && perAnswerFeedback.tips.length > 0 && (
-                            <div className="mt-2">
-                              <p className="text-xs font-semibold text-indigo-900 mb-1">Tips:</p>
-                              <ul className="space-y-1">
-                                {perAnswerFeedback.tips.map((tip: string, tipIndex: number) => (
-                                  <li key={tipIndex} className="text-xs text-indigo-700">
-                                    • {tip}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
+                    <div key={i} className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                      {/* Question Header */}
+                      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 px-4 md:px-5 py-3 border-b border-gray-200">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-2 flex-1">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">
+                              {i + 1}
+                            </span>
+                            <p className="font-semibold text-sm md:text-base text-gray-900 leading-snug">
+                              {q}
+                            </p>
+                          </div>
+                          {perAnswerFeedback && (
+                            <span className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-bold ${
+                              perAnswerFeedback.score >= 80 ? 'bg-green-100 text-green-700' :
+                              perAnswerFeedback.score >= 60 ? 'bg-blue-100 text-blue-700' :
+                              perAnswerFeedback.score >= 40 ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>
+                              {perAnswerFeedback.score}/100
+                            </span>
                           )}
                         </div>
-                      )}
+                      </div>
 
-                      <button
-                        onClick={() => {
-                          setShowReview(false)
-                          setCurrentStep(i)
-                        }}
-                        className="mt-2 text-xs text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
-                      >
-                        <Edit className="h-3 w-3" />
-                        Edit Answer
-                      </button>
+                      {/* Answer Content */}
+                      <div className="px-4 md:px-5 py-4">
+                        {/* Answer text with highlighted anonymity issues */}
+                        <div className="mb-4">
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Your Answer:</p>
+                          {perAnswerFeedback?.anonymity_issues && perAnswerFeedback.anonymity_issues.length > 0 ? (
+                            <div
+                              className="text-sm md:text-base text-gray-700 whitespace-pre-wrap leading-relaxed bg-gray-50 rounded-lg p-3 border border-gray-200"
+                              dangerouslySetInnerHTML={{
+                                __html: highlightAnonymityIssues(answers[i], perAnswerFeedback.anonymity_issues)
+                              }}
+                            />
+                          ) : (
+                            <p className="text-sm md:text-base text-gray-700 whitespace-pre-wrap leading-relaxed bg-gray-50 rounded-lg p-3 border border-gray-200">
+                              {answers[i]}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Anonymity warning for this answer */}
+                        {perAnswerFeedback?.anonymity_issues && perAnswerFeedback.anonymity_issues.length > 0 && (
+                          <div className="mb-4 bg-red-50 border-2 border-red-300 rounded-lg p-3">
+                            <p className="text-sm font-bold text-red-900 mb-2 flex items-center gap-2">
+                              <span className="text-lg">🚨</span>
+                              Anonymity Issues Found
+                            </p>
+                            <ul className="space-y-1.5">
+                              {perAnswerFeedback.anonymity_issues.map((issue: string, issueIndex: number) => (
+                                <li key={issueIndex} className="text-xs md:text-sm text-red-800 flex items-start gap-2">
+                                  <span className="flex-shrink-0 mt-0.5">•</span>
+                                  <span>
+                                    <span className="font-bold bg-red-100 px-1.5 py-0.5 rounded">"{issue}"</span>
+                                    <span className="text-red-700"> - consider removing or rephrasing</span>
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* AI Feedback for this answer */}
+                        {perAnswerFeedback && (
+                          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-lg p-4 border border-indigo-200">
+                            <p className="text-sm font-bold text-indigo-900 mb-2 flex items-center gap-2">
+                              <Sparkles className="h-4 w-4" />
+                              AI Feedback
+                            </p>
+                            <p className="text-sm text-indigo-800 mb-3 leading-relaxed">
+                              {perAnswerFeedback.feedback}
+                            </p>
+                            {perAnswerFeedback.tips && perAnswerFeedback.tips.length > 0 && (
+                              <div className="mt-3 pt-3 border-t border-indigo-200">
+                                <p className="text-xs font-semibold text-indigo-900 mb-2">💡 Tips for improvement:</p>
+                                <ul className="space-y-1.5">
+                                  {perAnswerFeedback.tips.map((tip: string, tipIndex: number) => (
+                                    <li key={tipIndex} className="text-xs md:text-sm text-indigo-700 flex items-start gap-2">
+                                      <span className="flex-shrink-0 mt-0.5">•</span>
+                                      <span>{tip}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Edit Button */}
+                        <button
+                          onClick={() => {
+                            setShowReview(false)
+                            setCurrentStep(i)
+                          }}
+                          className="mt-4 w-full text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 flex items-center justify-center gap-2 py-2 rounded-lg border border-indigo-200 transition-colors"
+                        >
+                          <Edit className="h-4 w-4" />
+                          Edit This Answer
+                        </button>
+                      </div>
                     </div>
                   )
                 })}
