@@ -420,7 +420,7 @@ export default function FeedbackFormPage() {
           <div className="space-y-6">
             <div>
               <h3 className="text-xl font-bold mb-2">🤖 AI Analysis</h3>
-              <p className="text-sm opacity-90">Your feedback quality score</p>
+              <p className="text-sm opacity-90">Overall quality summary</p>
             </div>
 
             {analyzingAI ? (
@@ -428,42 +428,46 @@ export default function FeedbackFormPage() {
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
                 <p className="text-sm">Analyzing your feedback...</p>
               </div>
-            ) : aiScore && (
+            ) : aiScore ? (
               <>
                 {/* Overall Score with Quality Label */}
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 text-center">
-                  <div className="text-6xl font-bold mb-2">{aiScore.overall}</div>
-                  {aiScore.qualityLabel && (
-                    <div className="mb-2">
-                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${
-                        aiScore.overall >= 86 ? 'bg-green-500' :
-                        aiScore.overall >= 76 ? 'bg-blue-500' :
-                        aiScore.overall >= 61 ? 'bg-indigo-500' :
-                        aiScore.overall >= 41 ? 'bg-yellow-500' :
-                        'bg-red-500'
-                      }`}>
-                        {aiScore.qualityLabel}
-                      </span>
-                    </div>
-                  )}
-                  <p className="text-xs opacity-90 mb-4">
-                    {aiScore.qualityDescription || "Overall Quality Score"}
-                  </p>
-                  <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
-                    <div>
-                      <p className="font-semibold">{aiScore.specificity}</p>
-                      <p className="opacity-75">Specificity</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold">{aiScore.constructiveness}</p>
-                      <p className="opacity-75">Constructive</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold">{aiScore.clarity}</p>
-                      <p className="opacity-75">Clarity</p>
-                    </div>
+                {aiScore.overall !== undefined && (
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 text-center">
+                    <div className="text-6xl font-bold mb-2">{aiScore.overall || 0}</div>
+                    {aiScore.qualityLabel && (
+                      <div className="mb-2">
+                        <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${
+                          aiScore.overall >= 86 ? 'bg-green-500' :
+                          aiScore.overall >= 76 ? 'bg-blue-500' :
+                          aiScore.overall >= 61 ? 'bg-indigo-500' :
+                          aiScore.overall >= 41 ? 'bg-yellow-500' :
+                          'bg-red-500'
+                        }`}>
+                          {aiScore.qualityLabel}
+                        </span>
+                      </div>
+                    )}
+                    <p className="text-xs opacity-90 mb-4">
+                      {aiScore.qualityDescription || "Overall Quality Score"}
+                    </p>
+                    {(aiScore.specificity !== undefined || aiScore.constructiveness !== undefined || aiScore.clarity !== undefined) && (
+                      <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
+                        <div>
+                          <p className="font-semibold">{aiScore.specificity || 0}</p>
+                          <p className="opacity-75">Specificity</p>
+                        </div>
+                        <div>
+                          <p className="font-semibold">{aiScore.constructiveness || 0}</p>
+                          <p className="opacity-75">Constructive</p>
+                        </div>
+                        <div>
+                          <p className="font-semibold">{aiScore.clarity || 0}</p>
+                          <p className="opacity-75">Clarity</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
+                )}
 
                 {/* Anonymity Score Section */}
                 {aiScore.anonymity_score !== undefined && (
@@ -475,24 +479,27 @@ export default function FeedbackFormPage() {
                   }`}>
                     <div className="flex items-center gap-2 mb-3">
                       <Shield className="h-5 w-5" />
-                      <p className="font-semibold text-sm">🔒 Anonymity Check</p>
+                      <p className="font-semibold text-sm">🔒 Anonymity</p>
                     </div>
                     <div className="text-center mb-3">
                       <div className="text-4xl font-bold">{aiScore.anonymity_score}%</div>
                       <p className="text-xs opacity-90 mt-1">
-                        {aiScore.anonymity_score >= 85 ? 'Excellent - Fully anonymous' :
-                         aiScore.anonymity_score >= 60 ? 'Good - Minor issues detected' :
-                         aiScore.anonymity_score >= 40 ? 'Warning - Identifying info found' :
-                         'Critical - High risk of identification'}
+                        {aiScore.anonymity_score >= 85 ? 'Excellent' :
+                         aiScore.anonymity_score >= 60 ? 'Good' :
+                         aiScore.anonymity_score >= 40 ? 'Warning' :
+                         'Critical'}
                       </p>
                     </div>
                     {aiScore.anonymity_warnings && aiScore.anonymity_warnings.length > 0 && (
                       <div className="bg-black/20 rounded-lg p-3">
-                        <p className="text-xs font-semibold mb-2">⚠️ Issues Detected:</p>
+                        <p className="text-xs font-semibold mb-2">⚠️ Issues:</p>
                         <ul className="space-y-1 text-xs">
-                          {aiScore.anonymity_warnings.map((warning: string, i: number) => (
+                          {aiScore.anonymity_warnings.slice(0, 3).map((warning: string, i: number) => (
                             <li key={i}>• {warning}</li>
                           ))}
+                          {aiScore.anonymity_warnings.length > 3 && (
+                            <li className="italic opacity-75">+{aiScore.anonymity_warnings.length - 3} more</li>
+                          )}
                         </ul>
                       </div>
                     )}
@@ -502,7 +509,7 @@ export default function FeedbackFormPage() {
                 {/* General Suggestions */}
                 {aiScore.suggestions && aiScore.suggestions.length > 0 && (
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
-                    <p className="font-semibold text-sm mb-3">💡 General Suggestions</p>
+                    <p className="font-semibold text-sm mb-3">💡 Tips</p>
                     <ul className="space-y-2 text-xs">
                       {aiScore.suggestions.map((s: string, i: number) => (
                         <li key={i} className="opacity-90">• {s}</li>
@@ -511,6 +518,10 @@ export default function FeedbackFormPage() {
                   </div>
                 )}
               </>
+            ) : (
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 text-center">
+                <p className="text-sm opacity-75">No AI data available</p>
+              </div>
             )}
           </div>
         }
@@ -549,21 +560,53 @@ export default function FeedbackFormPage() {
                               {q}
                             </p>
                           </div>
-                          {perAnswerFeedback && (
-                            <span className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-bold ${
-                              perAnswerFeedback.score >= 80 ? 'bg-green-100 text-green-700' :
-                              perAnswerFeedback.score >= 60 ? 'bg-blue-100 text-blue-700' :
-                              perAnswerFeedback.score >= 40 ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-red-100 text-red-700'
-                            }`}>
-                              {perAnswerFeedback.score}/100
-                            </span>
+                          {perAnswerFeedback && perAnswerFeedback.score !== undefined && (
+                            <div className="flex items-center gap-2">
+                              <Sparkles className="h-4 w-4 text-indigo-600" />
+                              <span className={`flex-shrink-0 px-3 py-1 rounded-full text-sm font-bold ${
+                                perAnswerFeedback.score >= 80 ? 'bg-green-500 text-white' :
+                                perAnswerFeedback.score >= 60 ? 'bg-blue-500 text-white' :
+                                perAnswerFeedback.score >= 40 ? 'bg-yellow-500 text-white' :
+                                'bg-red-500 text-white'
+                              }`}>
+                                {perAnswerFeedback.score}
+                              </span>
+                            </div>
                           )}
                         </div>
                       </div>
 
                       {/* Answer Content */}
                       <div className="px-4 md:px-5 py-4">
+                        {/* AI Feedback FIRST - most important */}
+                        {perAnswerFeedback && perAnswerFeedback.feedback && (
+                          <div className="mb-4 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-lg p-4 shadow-md">
+                            <div className="flex items-center gap-2 mb-3">
+                              <Sparkles className="h-5 w-5" />
+                              <p className="font-bold text-base">AI Feedback</p>
+                              <span className="ml-auto bg-white/20 px-2 py-0.5 rounded-full text-xs font-bold">
+                                Score: {perAnswerFeedback.score}/100
+                              </span>
+                            </div>
+                            <p className="text-sm leading-relaxed mb-3 opacity-95">
+                              {perAnswerFeedback.feedback}
+                            </p>
+                            {perAnswerFeedback.tips && perAnswerFeedback.tips.length > 0 && (
+                              <div className="mt-3 pt-3 border-t border-white/20">
+                                <p className="text-xs font-semibold mb-2">💡 Tips:</p>
+                                <ul className="space-y-1.5">
+                                  {perAnswerFeedback.tips.map((tip: string, tipIndex: number) => (
+                                    <li key={tipIndex} className="text-xs flex items-start gap-2 opacity-90">
+                                      <span className="flex-shrink-0 mt-0.5">•</span>
+                                      <span>{tip}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
                         {/* Answer text with highlighted anonymity issues */}
                         <div className="mb-4">
                           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Your Answer:</p>
@@ -599,32 +642,6 @@ export default function FeedbackFormPage() {
                                 </li>
                               ))}
                             </ul>
-                          </div>
-                        )}
-
-                        {/* AI Feedback for this answer */}
-                        {perAnswerFeedback && (
-                          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-lg p-4 border border-indigo-200">
-                            <p className="text-sm font-bold text-indigo-900 mb-2 flex items-center gap-2">
-                              <Sparkles className="h-4 w-4" />
-                              AI Feedback
-                            </p>
-                            <p className="text-sm text-indigo-800 mb-3 leading-relaxed">
-                              {perAnswerFeedback.feedback}
-                            </p>
-                            {perAnswerFeedback.tips && perAnswerFeedback.tips.length > 0 && (
-                              <div className="mt-3 pt-3 border-t border-indigo-200">
-                                <p className="text-xs font-semibold text-indigo-900 mb-2">💡 Tips for improvement:</p>
-                                <ul className="space-y-1.5">
-                                  {perAnswerFeedback.tips.map((tip: string, tipIndex: number) => (
-                                    <li key={tipIndex} className="text-xs md:text-sm text-indigo-700 flex items-start gap-2">
-                                      <span className="flex-shrink-0 mt-0.5">•</span>
-                                      <span>{tip}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
                           </div>
                         )}
 
