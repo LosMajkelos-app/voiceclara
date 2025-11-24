@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
-import { supabase } from "@/lib/supabase"
 import { ArrowLeft, ArrowRight, Sparkles, Shield, Activity, Edit } from "lucide-react"
 import { FeedbackLayout } from "@/components/feedback-layout"
 
@@ -92,16 +91,25 @@ export default function FeedbackFormPage() {
 
   useEffect(() => {
     async function fetchRequest() {
-      const { data } = await supabase
-        .from("feedback_requests")
-        .select("*")
-        .eq("share_token", shareToken)
-        .single()
+      try {
+        // Use API route to avoid CORS issues with Supabase
+        const response = await fetch(`/api/feedback-request/${shareToken}`)
 
-      if (data) {
-        setRequest(data)
-        const saved = localStorage.getItem(`feedback_${shareToken}`)
-        if (saved) setAnswers(JSON.parse(saved))
+        if (!response.ok) {
+          console.error('Failed to fetch feedback request:', response.statusText)
+          setLoading(false)
+          return
+        }
+
+        const data = await response.json()
+
+        if (data && !data.error) {
+          setRequest(data)
+          const saved = localStorage.getItem(`feedback_${shareToken}`)
+          if (saved) setAnswers(JSON.parse(saved))
+        }
+      } catch (error) {
+        console.error('Error fetching feedback request:', error)
       }
       setLoading(false)
     }
@@ -286,26 +294,38 @@ export default function FeedbackFormPage() {
     if (!request) return
     setSubmitting(true)
 
-    const formattedAnswers = request.questions.map((q: string, i: number) => ({
-      question: q,
-      answer: answers[i] || ""
-    }))
+    try {
+      const formattedAnswers = request.questions.map((q: string, i: number) => ({
+        question: q,
+        answer: answers[i] || ""
+      }))
 
-    const { error } = await supabase
-      .from("responses")
-      .insert({
-        feedback_request_id: request.id,
-        answers: formattedAnswers,
-        anonymity_score: 85
+      // Use API route to avoid CORS issues with Supabase
+      const response = await fetch('/api/submit-feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          feedback_request_id: request.id,
+          answers: formattedAnswers,
+          anonymity_score: anonymityScore
+        })
       })
 
-    if (!error) {
-      localStorage.removeItem(`feedback_${shareToken}`)
-      alert("Feedback submitted! 🎉")
-      window.location.href = "/feedback/thank-you"
-    } else {
+      const result = await response.json()
+
+      if (response.ok && result.success) {
+        localStorage.removeItem(`feedback_${shareToken}`)
+        alert("Feedback submitted! 🎉")
+        window.location.href = "/feedback/thank-you"
+      } else {
+        console.error("Submit error:", result.error)
+        alert("Failed to submit. Error: " + (result.error || 'Unknown error'))
+      }
+    } catch (error) {
       console.error("Submit error:", error)
-      alert("Failed to submit. Error: " + error.message)
+      alert("Failed to submit. Please try again.")
     }
     setSubmitting(false)
   }
